@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
-import Map, { Source, Layer, Popup, NavigationControl, ScaleControl } from 'react-map-gl'
-import type { MapMouseEvent } from 'mapbox-gl'
+import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent } from 'react-map-gl'
 import { MAURITANIA_REGIONS, type Region, getScoreColor } from '../data/mauritania-regions'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
@@ -60,26 +59,24 @@ export default function MapView({ onRegionClick }: Props) {
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={['region-circles']}
       cursor={hovered ? 'pointer' : 'grab'}
-      onClick={(e: MapMouseEvent) => {
-        // @ts-expect-error react-map-gl ajoute features sur l'event
+      onClick={(e: MapLayerMouseEvent) => {
         const feature = e.features?.[0]
-        if (feature) {
-          const region = MAURITANIA_REGIONS.find((r) => r.id === feature.properties.id)
+        if (feature?.properties) {
+          const region = MAURITANIA_REGIONS.find((r) => r.id === feature.properties!.id)
           if (region) onRegionClick(region)
         } else {
           onRegionClick(null)
         }
       }}
-      onMouseMove={(e: MapMouseEvent) => {
-        // @ts-expect-error react-map-gl ajoute features sur l'event
+      onMouseMove={(e: MapLayerMouseEvent) => {
         const feature = e.features?.[0]
-        if (feature) {
+        if (feature?.properties) {
           const coords = (feature.geometry as GeoJSON.Point).coordinates
           setHovered({
             lng: coords[0],
             lat: coords[1],
-            name: feature.properties.name,
-            score: feature.properties.score,
+            name: feature.properties.name as string,
+            score: feature.properties.score as number,
           })
         } else if (hovered) {
           setHovered(null)
