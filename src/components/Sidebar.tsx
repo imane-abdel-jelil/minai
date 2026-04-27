@@ -2,9 +2,11 @@ import { MAURITANIA_REGIONS, type Region, getScoreColor, getScoreLabel } from '.
 
 interface Props {
   selectedRegion: Region | null
+  showWaterPoints: boolean
+  onToggleWaterPoints: (v: boolean) => void
 }
 
-export default function Sidebar({ selectedRegion }: Props) {
+export default function Sidebar({ selectedRegion, showWaterPoints, onToggleWaterPoints }: Props) {
   const totalRural = MAURITANIA_REGIONS.reduce((s, r) => s + r.ruralPopulation, 0)
   const avgScore = Math.round(
     MAURITANIA_REGIONS.reduce((s, r) => s + r.waterAccessScore, 0) / MAURITANIA_REGIONS.length
@@ -32,6 +34,20 @@ export default function Sidebar({ selectedRegion }: Props) {
           <Stat label="En zone critique" value={criticalPeople.toLocaleString('fr-FR')} accent="bg-red-500/30" />
           <Stat label="Villages prioritaires" value={totalPriority.toString()} accent="bg-orange-500/30" />
         </div>
+      </section>
+
+      {/* Toggle points d'eau réels */}
+      <section className="rounded-lg bg-water-700/40 p-3">
+        <label className="flex items-center justify-between cursor-pointer">
+          <div className="flex-1">
+            <div className="text-sm font-semibold">Points d'eau réels</div>
+            <div className="text-[11px] opacity-70 leading-tight">
+              2 770 points (puits, forages, fontaines, sources)<br/>
+              Source : OpenStreetMap
+            </div>
+          </div>
+          <Switch checked={showWaterPoints} onChange={onToggleWaterPoints} />
+        </label>
       </section>
 
       {selectedRegion ? (
@@ -62,7 +78,7 @@ export default function Sidebar({ selectedRegion }: Props) {
       )}
 
       <section>
-        <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Légende</h2>
+        <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Score d'accès</h2>
         <div className="space-y-1 text-sm">
           <LegendItem color="#ef4444" label="Critique (&lt; 35)" />
           <LegendItem color="#f97316" label="Préoccupant (35–55)" />
@@ -71,8 +87,23 @@ export default function Sidebar({ selectedRegion }: Props) {
         </div>
       </section>
 
+      {showWaterPoints && (
+        <section>
+          <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Points d'eau (type)</h2>
+          <div className="space-y-1 text-sm">
+            <LegendItem color="#06b6d4" label="Eau potable / fontaine" />
+            <LegendItem color="#f59e0b" label="Puits" />
+            <LegendItem color="#10b981" label="Forage" />
+            <LegendItem color="#14b8a6" label="Source" />
+            <LegendItem color="#3b82f6" label="Robinet" />
+            <LegendItem color="#8b5cf6" label="Station de pompage" />
+          </div>
+        </section>
+      )}
+
       <footer className="mt-auto text-xs opacity-50">
-        Démo v0.1 — données estimatives. Sources réelles : WPDx, INSAE, OMS.
+        Démo v0.2 — points d'eau réels via OSM (Overpass).<br/>
+        Sources estimées : INSAE, OMS, WPDx (à venir).
       </footer>
     </aside>
   )
@@ -102,5 +133,25 @@ function LegendItem({ color, label }: { color: string; label: string }) {
       <span className="inline-block w-3 h-3 rounded-full" style={{ background: color }} />
       <span dangerouslySetInnerHTML={{ __html: label }} />
     </div>
+  )
+}
+
+function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ml-3 ${
+        checked ? 'bg-cyan-500' : 'bg-water-300/30'
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+          checked ? 'translate-x-5' : 'translate-x-0'
+        }`}
+      />
+    </button>
   )
 }

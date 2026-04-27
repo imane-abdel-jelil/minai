@@ -5,12 +5,20 @@ import type { Region } from './data/mauritania-regions'
 
 export default function App() {
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null)
+  const [showWaterPoints, setShowWaterPoints] = useState(true)
 
   return (
     <div className="flex h-screen w-screen">
-      <Sidebar selectedRegion={selectedRegion} />
+      <Sidebar
+        selectedRegion={selectedRegion}
+        showWaterPoints={showWaterPoints}
+        onToggleWaterPoints={setShowWaterPoints}
+      />
       <main className="flex-1 relative">
-        <MapView onRegionClick={setSelectedRegion} />
+        <MapView
+          onRegionClick={setSelectedRegion}
+          showWaterPoints={showWaterPoints}
+        />
       </main>
     </div>
   )

@@ -4,3 +4,6 @@ dist
 .env
 .DS_Store
 *.log
+
+# Local helper scripts (Mac-only, not part of source)
+*.command
