@@ -1,4 +1,5 @@
 import { MAURITANIA_REGIONS, type Region, getScoreColor, getScoreLabel } from '../data/mauritania-regions'
+import type { WilayaStats } from '../lib/geo'
 
 interface Props {
   selectedRegion: Region | null
@@ -6,7 +7,47 @@ interface Props {
   onToggleWaterPoints: (v: boolean) => void
   showWilayas: boolean
   onToggleWilayas: (v: boolean) => void
+  wilayaStats: Record<string, WilayaStats>
+  kindFilters: Record<string, boolean>
+  onToggleKind: (kind: string) => void
+  onSetAllKinds: (value: boolean) => void
+  kindCounts: Record<string, number>
 }
+
+const KIND_LABELS: Record<string, string> = {
+  drinking_water: 'Eau potable / fontaines',
+  water_point: 'Points d’eau',
+  well: 'Puits',
+  borehole: 'Forages',
+  spring: 'Sources',
+  tap: 'Robinets',
+  water_works: 'Stations de pompage',
+  other: 'Autres',
+}
+
+// Couleurs alignées sur la couche Mapbox 'water-unclustered'
+const KIND_COLORS: Record<string, string> = {
+  drinking_water: '#06b6d4',
+  water_point: '#06b6d4',
+  well: '#f59e0b',
+  borehole: '#10b981',
+  spring: '#14b8a6',
+  tap: '#3b82f6',
+  water_works: '#8b5cf6',
+  other: '#9ca3af',
+}
+
+// Ordre d'affichage des filtres
+const KIND_ORDER = [
+  'drinking_water',
+  'water_point',
+  'well',
+  'borehole',
+  'spring',
+  'tap',
+  'water_works',
+  'other',
+]
 
 export default function Sidebar({
   selectedRegion,
@@ -14,7 +55,21 @@ export default function Sidebar({
   onToggleWaterPoints,
   showWilayas,
   onToggleWilayas,
+  wilayaStats,
+  kindFilters,
+  onToggleKind,
+  onSetAllKinds,
+  kindCounts,
 }: Props) {
+  const visibleKinds = KIND_ORDER.filter((k) => (kindCounts[k] ?? 0) > 0)
+  const totalShown = visibleKinds.reduce(
+    (s, k) => s + (kindFilters[k] !== false ? kindCounts[k] || 0 : 0),
+    0
+  )
+  const totalAll = visibleKinds.reduce((s, k) => s + (kindCounts[k] || 0), 0)
+  const allEnabled = visibleKinds.every((k) => kindFilters[k] !== false)
+  const noneEnabled = visibleKinds.every((k) => kindFilters[k] === false)
+  const totalCounted = Object.values(wilayaStats).reduce((s, v) => s + v.total, 0)
   const totalRural = MAURITANIA_REGIONS.reduce((s, r) => s + r.ruralPopulation, 0)
   const avgScore = Math.round(
     MAURITANIA_REGIONS.reduce((s, r) => s + r.waterAccessScore, 0) / MAURITANIA_REGIONS.length
@@ -90,10 +145,52 @@ export default function Sidebar({
             <Row label="Distance moyenne au pt d'eau" value={`${selectedRegion.avgDistanceToWater} km`} />
             <Row label="Villages prioritaires" value={selectedRegion.priorityVillages.toString()} />
           </dl>
+
+          {wilayaStats[selectedRegion.id] && (
+            <div className="mt-4 pt-3 border-t border-white/10">
+              <div className="text-xs uppercase tracking-wide opacity-60 mb-2">
+                Points d'eau dans cette wilaya
+              </div>
+              <div className="text-2xl font-bold leading-tight">
+                {wilayaStats[selectedRegion.id].total.toLocaleString('fr-FR')}
+              </div>
+              <div className="text-[11px] opacity-70 mb-2">
+                points référencés (OpenStreetMap)
+              </div>
+              {Object.keys(wilayaStats[selectedRegion.id].byKind).length > 0 && (
+                <ul className="text-xs space-y-0.5 opacity-90">
+                  {Object.entries(wilayaStats[selectedRegion.id].byKind)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([kind, n]) => (
+                      <li key={kind} className="flex justify-between">
+                        <span className="opacity-80">
+                          {KIND_LABELS[kind] || kind}
+                        </span>
+                        <span className="font-medium">{n}</span>
+                      </li>
+                    ))}
+                </ul>
+              )}
+              {selectedRegion.ruralPopulation > 0 && wilayaStats[selectedRegion.id].total > 0 && (
+                <div className="text-[11px] opacity-60 mt-2">
+                  ≈ 1 point d'eau pour{' '}
+                  {Math.round(
+                    selectedRegion.ruralPopulation / wilayaStats[selectedRegion.id].total
+                  ).toLocaleString('fr-FR')}{' '}
+                  habitants ruraux
+                </div>
+              )}
+            </div>
+          )}
         </section>
       ) : (
         <section className="text-sm opacity-70 italic">
           Clique sur une région pour voir ses détails.
+          {totalCounted > 0 && (
+            <div className="not-italic opacity-100 text-xs mt-2 opacity-70">
+              {totalCounted.toLocaleString('fr-FR')} points d'eau localisés dans les 13 wilayas.
+            </div>
+          )}
         </section>
       )}
 
@@ -107,17 +204,70 @@ export default function Sidebar({
         </div>
       </section>
 
-      {showWaterPoints && (
+      {showWaterPoints && visibleKinds.length > 0 && (
         <section>
-          <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Points d'eau (type)</h2>
-          <div className="space-y-1 text-sm">
-            <LegendItem color="#06b6d4" label="Eau potable / fontaine" />
-            <LegendItem color="#f59e0b" label="Puits" />
-            <LegendItem color="#10b981" label="Forage" />
-            <LegendItem color="#14b8a6" label="Source" />
-            <LegendItem color="#3b82f6" label="Robinet" />
-            <LegendItem color="#8b5cf6" label="Station de pompage" />
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm uppercase tracking-wide opacity-60">
+              Filtres par type
+            </h2>
+            <div className="text-[10px] opacity-60 tabular-nums">
+              {totalShown.toLocaleString('fr-FR')} / {totalAll.toLocaleString('fr-FR')}
+            </div>
           </div>
+
+          <div className="flex gap-1.5 mb-2">
+            <button
+              type="button"
+              onClick={() => onSetAllKinds(true)}
+              disabled={allEnabled}
+              className="text-[11px] px-2 py-0.5 rounded bg-water-700/40 hover:bg-water-700/70 disabled:opacity-40 disabled:hover:bg-water-700/40 transition-colors"
+            >
+              Tout
+            </button>
+            <button
+              type="button"
+              onClick={() => onSetAllKinds(false)}
+              disabled={noneEnabled}
+              className="text-[11px] px-2 py-0.5 rounded bg-water-700/40 hover:bg-water-700/70 disabled:opacity-40 disabled:hover:bg-water-700/40 transition-colors"
+            >
+              Aucun
+            </button>
+          </div>
+
+          <ul className="space-y-1 text-sm">
+            {visibleKinds.map((kind) => {
+              const enabled = kindFilters[kind] !== false
+              const count = kindCounts[kind] || 0
+              return (
+                <li key={kind}>
+                  <button
+                    type="button"
+                    onClick={() => onToggleKind(kind)}
+                    aria-pressed={enabled}
+                    className={`w-full flex items-center gap-2 px-2 py-1 rounded transition-colors text-left ${
+                      enabled
+                        ? 'bg-water-700/40 hover:bg-water-700/70'
+                        : 'bg-transparent opacity-40 hover:opacity-70'
+                    }`}
+                  >
+                    <span
+                      className="inline-block w-3 h-3 rounded-full flex-shrink-0 border border-white/30"
+                      style={{
+                        background: enabled ? KIND_COLORS[kind] : 'transparent',
+                        borderColor: KIND_COLORS[kind],
+                      }}
+                    />
+                    <span className="flex-1 truncate">
+                      {KIND_LABELS[kind] || kind}
+                    </span>
+                    <span className="text-xs opacity-70 tabular-nums">
+                      {count.toLocaleString('fr-FR')}
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
         </section>
       )}
 

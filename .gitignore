@@ -4,6 +4,7 @@ dist
 .env
 .DS_Store
 *.log
+tsconfig.tsbuildinfo
 
 # Local helper scripts (Mac-only, not part of source)
 *.command

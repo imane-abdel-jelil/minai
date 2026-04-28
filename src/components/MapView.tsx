@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent } from 'react-map-gl'
 import { MAURITANIA_REGIONS, type Region, getScoreColor } from '../data/mauritania-regions'
+import { countPointsByWilaya, type WilayaStats } from '../lib/geo'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 
@@ -8,6 +9,8 @@ interface Props {
   onRegionClick: (region: Region | null) => void
   showWaterPoints: boolean
   showWilayas: boolean
+  onStatsReady?: (stats: Record<string, WilayaStats>) => void
+  kindFilters: Record<string, boolean>
 }
 
 interface HoveredRegion {
@@ -57,7 +60,7 @@ function findRegion(name: string): Region | undefined {
   )
 }
 
-export default function MapView({ onRegionClick, showWaterPoints, showWilayas }: Props) {
+export default function MapView({ onRegionClick, showWaterPoints, showWilayas, onStatsReady, kindFilters }: Props) {
   const [hovered, setHovered] = useState<HoveredRegion | null>(null)
   const [waterPopup, setWaterPopup] = useState<WaterPointPopup | null>(null)
   const [waterPoints, setWaterPoints] = useState<GeoJSON.FeatureCollection | null>(null)
@@ -102,6 +105,25 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas }:
       .catch((e) => console.warn('Pas de polygones wilayas :', e))
   }, [])
 
+  // Une fois que les 2 datasets sont chargés, compte les points par wilaya
+  useEffect(() => {
+    if (!waterPoints || !wilayasGeo || !onStatsReady) return
+    const stats = countPointsByWilaya(wilayasGeo, waterPoints, 'regionId')
+    onStatsReady(stats)
+  }, [waterPoints, wilayasGeo, onStatsReady])
+
+  // Filtrage par type — recalculé seulement quand les données ou les filtres changent
+  const filteredWaterPoints = useMemo<GeoJSON.FeatureCollection | null>(() => {
+    if (!waterPoints) return null
+    return {
+      ...waterPoints,
+      features: waterPoints.features.filter((f) => {
+        const kind = (f.properties?.kind as string) || 'other'
+        return kindFilters[kind] !== false
+      }),
+    }
+  }, [waterPoints, kindFilters])
+
   // GeoJSON des wilayas (centroïdes pour les markers de score)
   const regionsGeoJSON = useMemo(
     () => ({
@@ -144,7 +166,7 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas }:
       interactiveLayerIds={[
         'region-circles',
         ...(showWilayas && wilayasGeo ? ['wilaya-fill'] : []),
-        ...(showWaterPoints && waterPoints ? ['water-unclustered'] : []),
+        ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
       ]}
       cursor={hovered || waterPopup ? 'pointer' : 'grab'}
       onClick={(e: MapLayerMouseEvent) => {
@@ -234,12 +256,12 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas }:
         </Source>
       )}
 
-      {/* ---------- Points d'eau réels (clusterisés) ---------- */}
-      {showWaterPoints && waterPoints && (
+      {/* ---------- Points d'eau réels (clusterisés, filtrés par type) ---------- */}
+      {showWaterPoints && filteredWaterPoints && (
         <Source
           id="water-points"
           type="geojson"
-          data={waterPoints}
+          data={filteredWaterPoints}
           cluster={true}
           clusterRadius={45}
           clusterMaxZoom={12}
