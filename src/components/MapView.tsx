@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent } from 'react-map-gl'
 import { MAURITANIA_REGIONS, type Region, getScoreColor } from '../data/mauritania-regions'
 import { countPointsByWilaya, type WilayaStats } from '../lib/geo'
+import type { ComputedScore } from '../lib/score'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 
@@ -11,6 +12,7 @@ interface Props {
   showWilayas: boolean
   onStatsReady?: (stats: Record<string, WilayaStats>) => void
   kindFilters: Record<string, boolean>
+  computedScores: Record<string, ComputedScore>
 }
 
 interface HoveredRegion {
@@ -60,7 +62,7 @@ function findRegion(name: string): Region | undefined {
   )
 }
 
-export default function MapView({ onRegionClick, showWaterPoints, showWilayas, onStatsReady, kindFilters }: Props) {
+export default function MapView({ onRegionClick, showWaterPoints, showWilayas, onStatsReady, kindFilters, computedScores }: Props) {
   const [hovered, setHovered] = useState<HoveredRegion | null>(null)
   const [waterPopup, setWaterPopup] = useState<WaterPointPopup | null>(null)
   const [waterPoints, setWaterPoints] = useState<GeoJSON.FeatureCollection | null>(null)
@@ -76,34 +78,41 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
       .catch((e) => console.warn('Pas de données points d’eau :', e))
   }, [])
 
-  // Charger les polygones des wilayas + enrichir avec score/couleur
+  // Charger les polygones bruts des wilayas — l'enrichissement (score/couleur live)
+  // est fait dans un useMemo en aval pour réagir aux changements de scores.
   useEffect(() => {
     fetch('/data/wilayas.geojson')
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (!data || !data.features) return
-        const enriched = {
-          ...data,
-          features: data.features.map((f: GeoJSON.Feature) => {
-            const props = f.properties || {}
-            const rawName = (props.shapeName as string) || (props.name as string) || 'Wilaya'
-            const matched = findRegion(rawName)
-            return {
-              ...f,
-              properties: {
-                ...props,
-                regionId: matched?.id || null,
-                regionName: matched?.name || rawName,
-                score: matched?.waterAccessScore ?? null,
-                color: matched ? getScoreColor(matched.waterAccessScore) : '#9ca3af',
-              },
-            }
-          }),
-        }
-        setWilayasGeo(enriched)
+        if (data && data.features) setWilayasGeo(data)
       })
       .catch((e) => console.warn('Pas de polygones wilayas :', e))
   }, [])
+
+  // Wilayas enrichies = polygones bruts + score live + couleur dérivée + regionId.
+  // Recalculé à chaque changement de scores (donc dès que les stats arrivent).
+  const enrichedWilayas = useMemo<GeoJSON.FeatureCollection | null>(() => {
+    if (!wilayasGeo) return null
+    return {
+      ...wilayasGeo,
+      features: wilayasGeo.features.map((f) => {
+        const props = f.properties || {}
+        const rawName = (props.shapeName as string) || (props.name as string) || 'Wilaya'
+        const matched = findRegion(rawName)
+        const live = matched ? computedScores[matched.id] : undefined
+        return {
+          ...f,
+          properties: {
+            ...props,
+            regionId: matched?.id ?? null,
+            regionName: matched?.name ?? rawName,
+            score: live?.score ?? null,
+            color: live?.color ?? '#9ca3af',
+          },
+        }
+      }),
+    }
+  }, [wilayasGeo, computedScores])
 
   // Une fois que les 2 datasets sont chargés, compte les points par wilaya
   useEffect(() => {
@@ -124,24 +133,28 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
     }
   }, [waterPoints, kindFilters])
 
-  // GeoJSON des wilayas (centroïdes pour les markers de score)
+  // GeoJSON des wilayas (centroïdes) — utilise les scores live
   const regionsGeoJSON = useMemo(
     () => ({
       type: 'FeatureCollection' as const,
-      features: MAURITANIA_REGIONS.map((r) => ({
-        type: 'Feature' as const,
-        geometry: { type: 'Point' as const, coordinates: r.center },
-        properties: {
-          id: r.id,
-          name: r.name,
-          score: r.waterAccessScore,
-          color: getScoreColor(r.waterAccessScore),
-          rural: r.ruralPopulation,
-          radius: 14 + Math.sqrt(r.ruralPopulation) / 50,
-        },
-      })),
+      features: MAURITANIA_REGIONS.map((r) => {
+        const live = computedScores[r.id]
+        const score = live?.score ?? r.waterAccessScore
+        return {
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: r.center },
+          properties: {
+            id: r.id,
+            name: r.name,
+            score,
+            color: live?.color ?? getScoreColor(score),
+            rural: r.ruralPopulation,
+            radius: 14 + Math.sqrt(r.ruralPopulation) / 50,
+          },
+        }
+      }),
     }),
-    []
+    [computedScores]
   )
 
   if (!MAPBOX_TOKEN || MAPBOX_TOKEN.startsWith('pk.PASTE')) {
@@ -165,7 +178,7 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
         'region-circles',
-        ...(showWilayas && wilayasGeo ? ['wilaya-fill'] : []),
+        ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
       ]}
       cursor={hovered || waterPopup ? 'pointer' : 'grab'}
@@ -217,8 +230,8 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
       <ScaleControl position="bottom-right" />
 
       {/* ---------- Polygones des wilayas (couche du fond) ---------- */}
-      {showWilayas && wilayasGeo && (
-        <Source id="wilayas" type="geojson" data={wilayasGeo}>
+      {showWilayas && enrichedWilayas && (
+        <Source id="wilayas" type="geojson" data={enrichedWilayas}>
           <Layer
             id="wilaya-fill"
             type="fill"

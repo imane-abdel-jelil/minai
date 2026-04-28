@@ -1,5 +1,6 @@
 import { MAURITANIA_REGIONS, type Region, getScoreColor, getScoreLabel } from '../data/mauritania-regions'
 import type { WilayaStats } from '../lib/geo'
+import { computeNationalScore, type ComputedScore } from '../lib/score'
 
 interface Props {
   selectedRegion: Region | null
@@ -12,6 +13,7 @@ interface Props {
   onToggleKind: (kind: string) => void
   onSetAllKinds: (value: boolean) => void
   kindCounts: Record<string, number>
+  computedScores: Record<string, ComputedScore>
 }
 
 const KIND_LABELS: Record<string, string> = {
@@ -60,6 +62,7 @@ export default function Sidebar({
   onToggleKind,
   onSetAllKinds,
   kindCounts,
+  computedScores,
 }: Props) {
   const visibleKinds = KIND_ORDER.filter((k) => (kindCounts[k] ?? 0) > 0)
   const totalShown = visibleKinds.reduce(
@@ -71,13 +74,15 @@ export default function Sidebar({
   const noneEnabled = visibleKinds.every((k) => kindFilters[k] === false)
   const totalCounted = Object.values(wilayaStats).reduce((s, v) => s + v.total, 0)
   const totalRural = MAURITANIA_REGIONS.reduce((s, r) => s + r.ruralPopulation, 0)
-  const avgScore = Math.round(
-    MAURITANIA_REGIONS.reduce((s, r) => s + r.waterAccessScore, 0) / MAURITANIA_REGIONS.length
-  )
+
+  // Score national pondéré + comptes critiques basés sur les scores LIVE
+  const avgScore = computeNationalScore(computedScores)
   const criticalPeople = MAURITANIA_REGIONS
-    .filter((r) => r.waterAccessScore < 35)
+    .filter((r) => (computedScores[r.id]?.score ?? r.waterAccessScore) < 35)
     .reduce((s, r) => s + r.ruralPopulation, 0)
   const totalPriority = MAURITANIA_REGIONS.reduce((s, r) => s + r.priorityVillages, 0)
+
+  const selectedScore = selectedRegion ? computedScores[selectedRegion.id] : null
 
   return (
     <aside className="w-96 bg-water-900 text-white overflow-y-auto p-6 flex flex-col gap-6">
@@ -133,10 +138,19 @@ export default function Sidebar({
           <div className="flex items-center gap-2 mb-3">
             <span
               className="inline-block w-3 h-3 rounded-full"
-              style={{ background: getScoreColor(selectedRegion.waterAccessScore) }}
+              style={{
+                background: selectedScore?.color ?? getScoreColor(selectedRegion.waterAccessScore),
+              }}
             />
-            <span className="font-semibold">{selectedRegion.waterAccessScore}/100</span>
-            <span className="text-xs opacity-70">— {getScoreLabel(selectedRegion.waterAccessScore)}</span>
+            <span className="font-semibold">
+              {(selectedScore?.score ?? selectedRegion.waterAccessScore)}/100
+            </span>
+            <span className="text-xs opacity-70">
+              — {selectedScore?.label ?? getScoreLabel(selectedRegion.waterAccessScore)}
+            </span>
+            {selectedScore?.fromData === false && (
+              <span className="text-[10px] opacity-50 italic ml-auto">estimation</span>
+            )}
           </div>
 
           <dl className="text-sm space-y-1">
@@ -171,13 +185,17 @@ export default function Sidebar({
                     ))}
                 </ul>
               )}
-              {selectedRegion.ruralPopulation > 0 && wilayaStats[selectedRegion.id].total > 0 && (
-                <div className="text-[11px] opacity-60 mt-2">
-                  ≈ 1 point d'eau pour{' '}
-                  {Math.round(
-                    selectedRegion.ruralPopulation / wilayaStats[selectedRegion.id].total
-                  ).toLocaleString('fr-FR')}{' '}
+              {selectedScore?.peoplePerPoint != null && (
+                <div className="text-[11px] opacity-70 mt-2 leading-snug">
+                  ≈ <span className="font-medium">1 point d'eau</span> pour{' '}
+                  <span className="font-medium">
+                    {selectedScore.peoplePerPoint.toLocaleString('fr-FR')}
+                  </span>{' '}
                   habitants ruraux
+                  <br />
+                  <span className="opacity-70">
+                    (cible Sphere : 1 pour 500)
+                  </span>
                 </div>
               )}
             </div>
@@ -202,6 +220,21 @@ export default function Sidebar({
           <LegendItem color="#eab308" label="Acceptable (55–75)" />
           <LegendItem color="#22c55e" label="Bon (≥ 75)" />
         </div>
+        <details className="mt-2 text-[11px] opacity-60">
+          <summary className="cursor-pointer hover:opacity-100">
+            Comment le score est calculé
+          </summary>
+          <p className="mt-2 leading-snug">
+            Densité de points d'eau OSM par habitant rural, comparée à la cible
+            humanitaire <span className="italic">Sphere</span> : 1 point pour
+            500 personnes. Score = 100 quand la cible est atteinte.
+          </p>
+          <p className="mt-1 leading-snug">
+            Limite : OSM mesure la <span className="italic">couverture
+            cartographique</span>, pas la couverture réelle. WPDx (statut
+            fonctionnel) viendra affiner ça.
+          </p>
+        </details>
       </section>
 
       {showWaterPoints && visibleKinds.length > 0 && (

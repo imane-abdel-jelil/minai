@@ -3,6 +3,7 @@ import MapView from './components/MapView'
 import Sidebar from './components/Sidebar'
 import type { Region } from './data/mauritania-regions'
 import type { WilayaStats } from './lib/geo'
+import { computeAllScores } from './lib/score'
 
 const ALL_KINDS = [
   'drinking_water',
@@ -48,6 +49,9 @@ export default function App() {
     return counts
   }, [wilayaStats])
 
+  // Scores calculés depuis les vraies données (densité OSM / cible Sphere)
+  const computedScores = useMemo(() => computeAllScores(wilayaStats), [wilayaStats])
+
   return (
     <div className="flex h-screen w-screen">
       <Sidebar
@@ -61,6 +65,7 @@ export default function App() {
         onToggleKind={toggleKind}
         onSetAllKinds={setAllKinds}
         kindCounts={kindCounts}
+        computedScores={computedScores}
       />
       <main className="flex-1 relative">
         <MapView
@@ -69,6 +74,7 @@ export default function App() {
           showWilayas={showWilayas}
           onStatsReady={handleStatsReady}
           kindFilters={kindFilters}
+          computedScores={computedScores}
         />
       </main>
     </div>
