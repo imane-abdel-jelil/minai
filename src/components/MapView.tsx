@@ -7,6 +7,7 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 interface Props {
   onRegionClick: (region: Region | null) => void
   showWaterPoints: boolean
+  showWilayas: boolean
 }
 
 interface HoveredRegion {
@@ -37,10 +38,30 @@ const KIND_LABELS: Record<string, string> = {
   other: 'Autre',
 }
 
-export default function MapView({ onRegionClick, showWaterPoints }: Props) {
+// Normalisation pour matcher les noms entre geoBoundaries et nos régions
+function normName(s: string): string {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // retire les accents
+    .replace(/[^a-z]/g, '')
+}
+
+function findRegion(name: string): Region | undefined {
+  const target = normName(name)
+  // match direct, puis match partiel (Nouakchott Nord/Sud/Ouest → Nouakchott)
+  return (
+    MAURITANIA_REGIONS.find((r) => normName(r.name) === target) ||
+    MAURITANIA_REGIONS.find((r) => target.includes(normName(r.name))) ||
+    MAURITANIA_REGIONS.find((r) => normName(r.name).includes(target))
+  )
+}
+
+export default function MapView({ onRegionClick, showWaterPoints, showWilayas }: Props) {
   const [hovered, setHovered] = useState<HoveredRegion | null>(null)
   const [waterPopup, setWaterPopup] = useState<WaterPointPopup | null>(null)
   const [waterPoints, setWaterPoints] = useState<GeoJSON.FeatureCollection | null>(null)
+  const [wilayasGeo, setWilayasGeo] = useState<GeoJSON.FeatureCollection | null>(null)
 
   // Charger les points d'eau réels depuis public/data/water-points.geojson
   useEffect(() => {
@@ -52,7 +73,36 @@ export default function MapView({ onRegionClick, showWaterPoints }: Props) {
       .catch((e) => console.warn('Pas de données points d’eau :', e))
   }, [])
 
-  // GeoJSON des wilayas (centroïdes)
+  // Charger les polygones des wilayas + enrichir avec score/couleur
+  useEffect(() => {
+    fetch('/data/wilayas.geojson')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data || !data.features) return
+        const enriched = {
+          ...data,
+          features: data.features.map((f: GeoJSON.Feature) => {
+            const props = f.properties || {}
+            const rawName = (props.shapeName as string) || (props.name as string) || 'Wilaya'
+            const matched = findRegion(rawName)
+            return {
+              ...f,
+              properties: {
+                ...props,
+                regionId: matched?.id || null,
+                regionName: matched?.name || rawName,
+                score: matched?.waterAccessScore ?? null,
+                color: matched ? getScoreColor(matched.waterAccessScore) : '#9ca3af',
+              },
+            }
+          }),
+        }
+        setWilayasGeo(enriched)
+      })
+      .catch((e) => console.warn('Pas de polygones wilayas :', e))
+  }, [])
+
+  // GeoJSON des wilayas (centroïdes pour les markers de score)
   const regionsGeoJSON = useMemo(
     () => ({
       type: 'FeatureCollection' as const,
@@ -93,6 +143,7 @@ export default function MapView({ onRegionClick, showWaterPoints }: Props) {
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
         'region-circles',
+        ...(showWilayas && wilayasGeo ? ['wilaya-fill'] : []),
         ...(showWaterPoints && waterPoints ? ['water-unclustered'] : []),
       ]}
       cursor={hovered || waterPopup ? 'pointer' : 'grab'}
@@ -106,6 +157,12 @@ export default function MapView({ onRegionClick, showWaterPoints }: Props) {
         if (feature.layer && feature.layer.id === 'region-circles') {
           const region = MAURITANIA_REGIONS.find((r) => r.id === feature.properties!.id)
           if (region) onRegionClick(region)
+        } else if (feature.layer && feature.layer.id === 'wilaya-fill') {
+          const id = feature.properties.regionId as string | null
+          if (id) {
+            const region = MAURITANIA_REGIONS.find((r) => r.id === id)
+            if (region) onRegionClick(region)
+          }
         } else if (feature.layer && feature.layer.id === 'water-unclustered') {
           const coords = (feature.geometry as GeoJSON.Point).coordinates
           setWaterPopup({
@@ -136,6 +193,46 @@ export default function MapView({ onRegionClick, showWaterPoints }: Props) {
     >
       <NavigationControl position="top-right" />
       <ScaleControl position="bottom-right" />
+
+      {/* ---------- Polygones des wilayas (couche du fond) ---------- */}
+      {showWilayas && wilayasGeo && (
+        <Source id="wilayas" type="geojson" data={wilayasGeo}>
+          <Layer
+            id="wilaya-fill"
+            type="fill"
+            paint={{
+              'fill-color': ['get', 'color'],
+              'fill-opacity': 0.45,
+            }}
+          />
+          <Layer
+            id="wilaya-outline"
+            type="line"
+            paint={{
+              'line-color': '#ffffff',
+              'line-width': 2,
+              'line-opacity': 0.9,
+            }}
+          />
+          <Layer
+            id="wilaya-name"
+            type="symbol"
+            layout={{
+              'text-field': ['get', 'regionName'],
+              'text-size': 11,
+              'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+              'text-allow-overlap': false,
+              'symbol-placement': 'point',
+            }}
+            paint={{
+              'text-color': '#ffffff',
+              'text-halo-color': '#0f172a',
+              'text-halo-width': 1.5,
+              'text-opacity': 0.7,
+            }}
+          />
+        </Source>
+      )}
 
       {/* ---------- Points d'eau réels (clusterisés) ---------- */}
       {showWaterPoints && waterPoints && (
@@ -210,7 +307,7 @@ export default function MapView({ onRegionClick, showWaterPoints }: Props) {
         </Source>
       )}
 
-      {/* ---------- Wilayas (au-dessus des points d'eau) ---------- */}
+      {/* ---------- Wilayas (centroïdes — toujours au-dessus) ---------- */}
       <Source id="regions" type="geojson" data={regionsGeoJSON}>
         <Layer
           id="region-circles"

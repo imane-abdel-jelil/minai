@@ -4,9 +4,17 @@ interface Props {
   selectedRegion: Region | null
   showWaterPoints: boolean
   onToggleWaterPoints: (v: boolean) => void
+  showWilayas: boolean
+  onToggleWilayas: (v: boolean) => void
 }
 
-export default function Sidebar({ selectedRegion, showWaterPoints, onToggleWaterPoints }: Props) {
+export default function Sidebar({
+  selectedRegion,
+  showWaterPoints,
+  onToggleWaterPoints,
+  showWilayas,
+  onToggleWilayas,
+}: Props) {
   const totalRural = MAURITANIA_REGIONS.reduce((s, r) => s + r.ruralPopulation, 0)
   const avgScore = Math.round(
     MAURITANIA_REGIONS.reduce((s, r) => s + r.waterAccessScore, 0) / MAURITANIA_REGIONS.length
@@ -36,8 +44,20 @@ export default function Sidebar({ selectedRegion, showWaterPoints, onToggleWater
         </div>
       </section>
 
-      {/* Toggle points d'eau réels */}
-      <section className="rounded-lg bg-water-700/40 p-3">
+      {/* Toggles couches carto */}
+      <section className="rounded-lg bg-water-700/40 p-3 space-y-3">
+        <label className="flex items-center justify-between cursor-pointer">
+          <div className="flex-1">
+            <div className="text-sm font-semibold">Frontières des wilayas</div>
+            <div className="text-[11px] opacity-70 leading-tight">
+              13 régions administratives, colorées par score
+            </div>
+          </div>
+          <Switch checked={showWilayas} onChange={onToggleWilayas} />
+        </label>
+
+        <div className="border-t border-white/10" />
+
         <label className="flex items-center justify-between cursor-pointer">
           <div className="flex-1">
             <div className="text-sm font-semibold">Points d'eau réels</div>
