@@ -11,3 +11,20 @@ html, body, #root {
   background: #0c4a6e;
   color: #fff;
 }
+
+/* Scroll fluide pour les ancres de la nav (#problem, #solution, #impact, #partner) */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem; /* compense la nav fixe en haut */
+}
+
+/* Respecte les préférences système : pas d'animation si l'utilisateur l'a désactivée */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

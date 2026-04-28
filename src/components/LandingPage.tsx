@@ -5,31 +5,25 @@ interface Props {
 }
 
 /**
- * Landing page MINAI — version blanche, copy stratégique v4.
+ * Landing page MINAI — version blanche v5.
  * Apple ⨯ Charity:Water ⨯ Our World in Data.
  *
  * Photos : Pexels — free for commercial use, attribution non requise.
- *   ‣ 30441483  Şeyhmus Kino     — woman carrying jerrycan
- *   ‣ 30629420  Jonathan John    — smiling woman fetching water
- *   ‣ 35328689  ?                — Sahara aerial
- *   ‣ 4511301   ?                — women carrying water on heads
- *   ‣ 30441497  Şeyhmus Kino     — rural African woman carrying water jugs
+ *   ‣ 30441483  Şeyhmus Kino     — woman carrying jerrycan (hero)
+ *   ‣ 30629420  Jonathan John    — smiling woman fetching water (human impact)
+ *   ‣ 4511301   ?                — women carrying water on heads (partner)
+ *   ‣ 30441497  Şeyhmus Kino     — rural African woman with water jugs
  *   ‣ 7165327   Jep Gambardella  — close-up boy drinking water
  *   ‣ 11759837  Swastik Arora    — boy using manual water pump
- *   ‣ 17844227  Tope A. Asokere  — group of children in African village
- *   ‣ 32422620  Thato Moiketsi   — traditional water gathering
  */
 
 const IMG = {
   woman_jerrycan:    'https://images.pexels.com/photos/30441483/pexels-photo-30441483.jpeg?auto=compress&cs=tinysrgb&w=2000',
   smiling_water:     'https://images.pexels.com/photos/30629420/pexels-photo-30629420.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  sahara_aerial:     'https://images.pexels.com/photos/35328689/pexels-photo-35328689.jpeg?auto=compress&cs=tinysrgb&w=2000',
   women_carrying:    'https://images.pexels.com/photos/4511301/pexels-photo-4511301.jpeg?auto=compress&cs=tinysrgb&w=2000',
   woman_water_jugs:  'https://images.pexels.com/photos/30441497/pexels-photo-30441497.jpeg?auto=compress&cs=tinysrgb&w=1400',
   child_drinking:    'https://images.pexels.com/photos/7165327/pexels-photo-7165327.jpeg?auto=compress&cs=tinysrgb&w=1400',
   boy_pump:          'https://images.pexels.com/photos/11759837/pexels-photo-11759837.jpeg?auto=compress&cs=tinysrgb&w=1400',
-  children_village:  'https://images.pexels.com/photos/17844227/pexels-photo-17844227.jpeg?auto=compress&cs=tinysrgb&w=1400',
-  traditional_water: 'https://images.pexels.com/photos/32422620/pexels-photo-32422620.jpeg?auto=compress&cs=tinysrgb&w=1400',
 }
 
 export default function LandingPage({ onEnter }: Props) {
@@ -38,13 +32,13 @@ export default function LandingPage({ onEnter }: Props) {
       <Nav onEnter={onEnter} />
       <Hero onEnter={onEnter} />
       <HeroImage />
-      <TransitionStatement />
       <ProblemSection />
       <PainPointGallery />
       <HumanImpactSection />
       <SolutionSection />
-      <ImpactSection />
-      <InstitutionsSection />
+      <SDG6Section />
+      <ByTheNumbersSection />
+      <FounderSection />
       <PartnerSection onEnter={onEnter} />
       <Signature />
     </div>
@@ -122,7 +116,7 @@ function Nav({ onEnter }: { onEnter: () => void }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HERO — texte sur blanc
+// HERO — court, clair, lisible en 5 secondes
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Hero({ onEnter }: { onEnter: () => void }) {
@@ -131,7 +125,7 @@ function Hero({ onEnter }: { onEnter: () => void }) {
       <div className="max-w-5xl mx-auto text-center">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-7">
-            MINAI · Mauritanie
+            Geospatial intelligence · Mauritanie
           </p>
         </Reveal>
 
@@ -146,19 +140,23 @@ function Hero({ onEnter }: { onEnter: () => void }) {
         </Reveal>
 
         <Reveal delay={300}>
-          <p className="mt-9 text-lg md:text-2xl text-[#1d1d1f] max-w-3xl mx-auto leading-snug font-medium">
-            Plus de 600 000 personnes en Mauritanie vivent dans des zones où l’accès
-            à l’eau potable est insuffisant.
+          <p className="mt-9 text-lg md:text-2xl text-[#1d1d1f] max-w-3xl mx-auto leading-snug">
+            MINAI aide les ONG et les institutions à identifier où l’accès à l’eau
+            est le plus critique en Mauritanie — et à prioriser leurs interventions.
           </p>
         </Reveal>
 
+        {/* Chip discret avec les chiffres clés et leurs sources */}
         <Reveal delay={450}>
-          <p className="mt-6 text-base md:text-lg text-[#6e6e73] max-w-3xl mx-auto leading-relaxed">
-            MINAI est une intelligence géospatiale appliquée à l’accès à l’eau,
-            conçue pour révéler les communautés aujourd’hui invisibles dans les
-            systèmes de décision et aider à prioriser les interventions là où
-            elles sont réellement urgentes.
-          </p>
+          <a
+            href="#impact"
+            className="mt-7 inline-flex items-center gap-2 text-xs md:text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition px-3 py-1.5 rounded-full bg-[#fafafa] border border-black/5"
+          >
+            <span className="text-cyan-700">↳</span>
+            <span className="font-medium text-[#1d1d1f]">600K+</span>
+            <span>personnes en zones critiques</span>
+            <span className="text-[#86868b]">· ANSADE · UNICEF · World Bank</span>
+          </a>
         </Reveal>
 
         <Reveal delay={600}>
@@ -201,25 +199,7 @@ function HeroImage() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TRANSITION — phrase punchy entre hero et problème
-// ─────────────────────────────────────────────────────────────────────────────
-
-function TransitionStatement() {
-  return (
-    <section className="px-6 py-32 md:py-44">
-      <Reveal>
-        <p className="max-w-4xl mx-auto text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] text-center text-[#1d1d1f]">
-          Ce n’est pas un manque de ressources.
-          <br />
-          <span className="text-[#86868b]">C’est un manque de visibilité.</span>
-        </p>
-      </Reveal>
-    </section>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PROBLEM
+// PROBLEM — ouvre par une histoire ancrée, conclut par les 3 piliers
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ProblemSection() {
@@ -231,12 +211,26 @@ function ProblemSection() {
             Le problème
           </p>
         </Reveal>
+
+        {/* Phrase de transition (ex-TransitionStatement) intégrée ici */}
         <Reveal delay={100}>
           <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] max-w-3xl">
-            L’accès à l’eau n’est pas seulement une question d’infrastructure.
+            Ce n’est pas un manque de ressources.
             <br />
-            <span className="text-[#86868b]">C’est une question de décision.</span>
+            <span className="text-[#86868b]">C’est un manque de visibilité.</span>
           </h2>
+        </Reveal>
+
+        {/* Anchor humain — conservateur sur les chiffres pour rester défendable */}
+        <Reveal delay={250}>
+          <p className="mt-12 max-w-3xl text-lg md:text-xl text-[#1d1d1f] leading-relaxed border-l-2 border-cyan-700 pl-6">
+            Dans le sud rural mauritanien, certains villages sont à plus de cinq
+            kilomètres du point d’eau le plus proche. Sur les cartes officielles,
+            ils n’apparaissent pas toujours comme prioritaires.{' '}
+            <span className="text-[#86868b]">
+              Ce que les systèmes de décision ne voient pas, ils ne peuvent pas servir.
+            </span>
+          </p>
         </Reveal>
 
         <div className="mt-20 grid md:grid-cols-3 gap-12">
@@ -244,7 +238,7 @@ function ProblemSection() {
             <Pillar
               n="01"
               title="Données fragmentées"
-              body="Les informations existent — UNICEF, ONS, OpenStreetMap, ONG — mais restent dispersées et difficilement exploitables."
+              body="Les informations existent — UNICEF, ANSADE, OpenStreetMap, ONG — mais restent dispersées et difficilement exploitables."
             />
           </Reveal>
           <Reveal delay={250}>
@@ -285,7 +279,7 @@ function Pillar({ n, title, body }: { n: string; title: string; body: string }) 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PAIN POINT GALLERY — galerie 4 photos juste avant la section humaine
+// PAIN POINT GALLERY — 3 photos (réduit de 4 à 3 pour plus d'impact)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function PainPointGallery() {
@@ -293,11 +287,9 @@ function PainPointGallery() {
     { src: IMG.woman_water_jugs, alt: "Femme rurale transportant des bidons d'eau",
       caption: 'Marche quotidienne pour l’eau' },
     { src: IMG.boy_pump,          alt: 'Enfant utilisant une pompe à eau manuelle',
-      caption: 'Enfant à la pompe' },
+      caption: 'L’enfance face à la pompe' },
     { src: IMG.child_drinking,    alt: "Enfant buvant un verre d'eau",
       caption: 'Le geste qu’on tient pour acquis' },
-    { src: IMG.children_village,  alt: 'Groupe d’enfants dans un village africain',
-      caption: 'Une génération en attente' },
   ]
   return (
     <section className="bg-white px-4 sm:px-6 py-24 md:py-32">
@@ -312,10 +304,10 @@ function PainPointGallery() {
             Voici ce que les chiffres ne disent pas.
           </h3>
         </Reveal>
-        <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
           {items.map((it, i) => (
-            <Reveal key={i} delay={100 + i * 80}>
-              <figure className="group relative rounded-2xl overflow-hidden aspect-[3/4] bg-slate-100">
+            <Reveal key={i} delay={100 + i * 100}>
+              <figure className="group relative rounded-2xl overflow-hidden aspect-[4/5] bg-slate-100">
                 <img
                   src={it.src}
                   alt={it.alt}
@@ -323,7 +315,7 @@ function PainPointGallery() {
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0" />
-                <figcaption className="absolute bottom-3 left-3 right-3 text-white text-[12px] md:text-sm font-medium tracking-tight">
+                <figcaption className="absolute bottom-4 left-4 right-4 text-white text-sm md:text-base font-medium tracking-tight">
                   {it.caption}
                 </figcaption>
               </figure>
@@ -336,7 +328,7 @@ function PainPointGallery() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HUMAN IMPACT — full-bleed photo + texte en overlay
+// HUMAN IMPACT
 // ─────────────────────────────────────────────────────────────────────────────
 
 function HumanImpactSection() {
@@ -390,7 +382,7 @@ function HumanImpactSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SOLUTION
+// SOLUTION — How it works (3 étapes concrètes) + closing
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SolutionSection() {
@@ -419,28 +411,36 @@ function SolutionSection() {
           </p>
         </Reveal>
 
-        <div className="mt-20 grid md:grid-cols-3 gap-px bg-black/[0.06] rounded-3xl overflow-hidden border border-black/5">
-          <Reveal delay={150}>
-            <Feature
-              icon={<TargetIcon />}
-              title="Identifier les zones à risque"
-              body="Croisement des données démographiques et des infrastructures existantes pour révéler les zones sous-desservies."
-            />
+        {/* How it works — 3 étapes concrètes pour ONG / institutions */}
+        <div className="mt-24">
+          <Reveal>
+            <p className="text-[11px] tracking-[0.18em] uppercase text-[#86868b] mb-12">
+              Comment ça marche
+            </p>
           </Reveal>
-          <Reveal delay={250}>
-            <Feature
-              icon={<PinIcon />}
-              title="Prioriser les interventions"
-              body="Un score d’accès basé sur les standards humanitaires (Sphere) pour identifier où agir en priorité."
-            />
-          </Reveal>
-          <Reveal delay={350}>
-            <Feature
-              icon={<HandshakeIcon />}
-              title="Mieux allouer les ressources"
-              body="Une vision commune pour les ONG, institutions et décideurs."
-            />
-          </Reveal>
+          <div className="grid md:grid-cols-3 gap-12 md:gap-8">
+            <Reveal delay={150}>
+              <Step
+                n="01"
+                title="Vous nous donnez votre périmètre"
+                body="Région, type d'intervention, contraintes budgétaires. Une réunion de cadrage suffit."
+              />
+            </Reveal>
+            <Reveal delay={300}>
+              <Step
+                n="02"
+                title="Nous calculons les priorités"
+                body="Score d'accès par village croisé avec votre périmètre, basé sur la norme humanitaire Sphere."
+              />
+            </Reveal>
+            <Reveal delay={450}>
+              <Step
+                n="03"
+                title="Vous recevez une carte décisionnelle"
+                body="Top villages classés, justification chiffrée, format partageable avec vos équipes terrain."
+              />
+            </Reveal>
+          </div>
         </div>
 
         <Reveal delay={500}>
@@ -453,184 +453,144 @@ function SolutionSection() {
   )
 }
 
-function Feature({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
+function Step({ n, title, body }: { n: string; title: string; body: string }) {
   return (
-    <div className="bg-white p-10 h-full">
-      <div className="text-cyan-700 mb-5">{icon}</div>
-      <h3 className="text-xl font-semibold tracking-tight text-[#1d1d1f]">{title}</h3>
-      <p className="mt-3 text-[#6e6e73] leading-relaxed text-[15px]">{body}</p>
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-cyan-700 font-mono text-sm">{n}</span>
+        <span className="h-px flex-1 bg-cyan-700/30" />
+      </div>
+      <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-[#1d1d1f] leading-tight">
+        {title}
+      </h3>
+      <p className="mt-4 text-[#6e6e73] leading-relaxed text-[15px]">{body}</p>
     </div>
   )
 }
 
-function TargetIcon() {
+// ─────────────────────────────────────────────────────────────────────────────
+// SDG 6 — alignement court avec l'ODD 6 des Nations Unies
+// ─────────────────────────────────────────────────────────────────────────────
+
+function SDG6Section() {
   return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="5" />
-      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-    </svg>
-  )
-}
-function PinIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
-      <path d="M12 21s7-7.5 7-12a7 7 0 0 0-14 0c0 4.5 7 12 7 12z" />
-      <circle cx="12" cy="9" r="2.5" />
-    </svg>
-  )
-}
-function HandshakeIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 12l4 4 5-5 3 3 6-6" />
-      <path d="M14 6h6v6" />
-    </svg>
+    <section className="bg-white px-6 py-24 md:py-32 border-t border-black/5">
+      <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-10 md:gap-14">
+        {/* Badge inspiré de l'ODD 6 — couleur officielle #26BDE2 */}
+        <div className="shrink-0">
+          <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-[#26BDE2] flex items-center justify-center shadow-[0_8px_30px_rgba(38,189,226,0.25)]">
+            <div className="text-white text-center">
+              <p className="text-[10px] uppercase tracking-[0.18em] opacity-80">SDG</p>
+              <p className="text-4xl md:text-5xl font-bold leading-none mt-1">06</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <Reveal>
+            <p className="text-[11px] tracking-[0.35em] uppercase text-[#26BDE2] mb-3">
+              United Nations · Goal 6
+            </p>
+          </Reveal>
+          <Reveal delay={100}>
+            <h2 className="text-2xl md:text-4xl font-semibold tracking-tight text-[#1d1d1f] leading-tight">
+              Clean Water &amp; Sanitation pour tous d’ici 2030.
+            </h2>
+          </Reveal>
+          <Reveal delay={200}>
+            <p className="mt-5 text-base md:text-lg text-[#6e6e73] leading-relaxed max-w-xl">
+              L’objectif 6.1 des Nations Unies vise un accès universel et équitable à
+              l’eau potable d’ici 2030. En Mauritanie, le rythme actuel ne suffit
+              pas. <span className="text-[#1d1d1f] font-medium">MINAI accélère la priorisation</span> pour
+              que les interventions atteignent les zones qui en ont le plus besoin.
+            </p>
+          </Reveal>
+        </div>
+      </div>
+    </section>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// IMPACT — chiffres compacts
+// BY THE NUMBERS — fusion Impact + Institutions, 3 cards cliquables
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ImpactSection() {
+function ByTheNumbersSection() {
   return (
-    <section id="impact" className="bg-white px-6 py-32 md:py-40">
+    <section id="impact" className="bg-[#fafafa] px-6 py-32 md:py-40">
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6 text-center">
             Aujourd’hui en Mauritanie
           </p>
         </Reveal>
-        <div className="mt-12 grid md:grid-cols-3 gap-16 md:gap-8">
-          <Reveal delay={100}>
-            <Stat n="600K+" label="personnes en zone à risque" sub="Wilayas critiques au sud" />
-          </Reveal>
-          <Reveal delay={250}>
-            <Stat n="200+" label="villages prioritaires identifiés" sub="Densité OSM < cible Sphere" />
-          </Reveal>
-          <Reveal delay={400}>
-            <Stat n="3" label="régions pilotes" sub="Gorgol · Brakna · Guidimakha" />
-          </Reveal>
-        </div>
-
-        <Reveal delay={550}>
-          <p className="mt-24 max-w-3xl mx-auto text-center text-2xl md:text-4xl font-light tracking-tight leading-snug text-[#1d1d1f]">
-            Ces zones peuvent être identifiées.
-            <br />
-            <span className="text-[#86868b]">
-              Aujourd’hui, elles ne le sont pas systématiquement.
-            </span>
-          </p>
-        </Reveal>
-
-        <Reveal delay={700}>
-          <p className="mt-16 text-center text-[#86868b] text-xs">
-            Sources : Office National de la Statistique (RGPH 2013) · UNICEF · World Bank · OpenStreetMap.
-          </p>
-        </Reveal>
-
-        <Reveal delay={300}>
-          <div className="mt-24 relative rounded-3xl overflow-hidden aspect-[21/9] bg-slate-100">
-            <img
-              src={IMG.sahara_aerial}
-              alt="Vue aérienne du désert du Sahara"
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  )
-}
-
-function Stat({ n, label, sub }: { n: string; label: string; sub: string }) {
-  return (
-    <div className="text-center">
-      <div className="text-7xl md:text-9xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
-        {n}
-      </div>
-      <p className="mt-4 text-[#1d1d1f] text-base font-medium">{label}</p>
-      <p className="mt-1 text-[#86868b] text-xs tracking-wide">{sub}</p>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// INSTITUTIONS — 3 cards cliquables vers les vraies pages des institutions
-// ─────────────────────────────────────────────────────────────────────────────
-
-function InstitutionsSection() {
-  return (
-    <section className="bg-white px-6 py-32 md:py-40 border-t border-black/5">
-      <div className="max-w-6xl mx-auto">
-        <Reveal>
-          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-4 text-center">
-            Sources institutionnelles
-          </p>
-        </Reveal>
         <Reveal delay={100}>
           <h2 className="text-center text-3xl md:text-5xl font-semibold tracking-tight text-[#1d1d1f] max-w-3xl mx-auto leading-tight">
-            Des chiffres adossés aux institutions de référence.
+            Trois chiffres. Trois institutions.
+            <br />
+            <span className="text-[#86868b]">Une seule réalité.</span>
           </h2>
-        </Reveal>
-        <Reveal delay={200}>
-          <p className="mt-6 text-center text-[#6e6e73] max-w-2xl mx-auto leading-relaxed">
-            MINAI ne crée pas de données — il les croise et les rend lisibles.
-            Cliquez sur une carte pour accéder aux données originales.
-          </p>
         </Reveal>
 
         <div className="mt-16 grid md:grid-cols-3 gap-5">
           <Reveal delay={150}>
-            <InstitutionCard
-              eyebrow="ANSADE"
-              tag="Recensement RGPH 2013"
-              stat="3,5 M"
-              statLabel="habitants recensés"
-              body="Office national de la statistique mauritanien : population, urbanisation et milieu rural par wilaya."
+            <NumberCard
+              stat="600K+"
+              label="personnes en zones critiques"
+              source="ANSADE"
+              sourceTag="Recensement RGPH 2013"
+              body="Office national de la statistique mauritanien : population totale et milieu rural par wilaya."
               href="https://ansade.mr/fr/"
             />
           </Reveal>
           <Reveal delay={250}>
-            <InstitutionCard
-              eyebrow="UNICEF"
-              tag="WHO/UNICEF JMP"
-              stat="1 / 4"
-              statLabel="enfant sans eau de base au Sahel"
-              body="Joint Monitoring Programme : suivi mondial de l'accès à l'eau, l'assainissement et l'hygiène."
-              href="https://washdata.org/data/country/MRT/water/overview"
-            />
-          </Reveal>
-          <Reveal delay={350}>
-            <InstitutionCard
-              eyebrow="World Bank"
-              tag="Indicator SH.H2O.BASW.ZS"
+            <NumberCard
               stat="57%"
-              statLabel="population rurale avec eau améliorée"
-              body="Open Data Bank : indicateurs de développement, accès à l'eau, sanitation, par pays."
+              label="population rurale avec eau améliorée"
+              source="World Bank"
+              sourceTag="Indicator SH.H2O.BASW.ZS"
+              body="Open Data Bank : indicateurs de développement, accès à l'eau et sanitation, par pays."
               href="https://data.worldbank.org/indicator/SH.H2O.BASW.ZS?locations=MR"
             />
           </Reveal>
+          <Reveal delay={350}>
+            <NumberCard
+              stat="1 / 4"
+              label="enfant sans eau de base au Sahel"
+              source="UNICEF · WHO"
+              sourceTag="Joint Monitoring Programme"
+              body="JMP : suivi mondial de l'accès à l'eau, l'assainissement et l'hygiène — profil Mauritanie."
+              href="https://washdata.org/data/country/MRT/water/overview"
+            />
+          </Reveal>
         </div>
+
+        <Reveal delay={550}>
+          <p className="mt-20 max-w-3xl mx-auto text-center text-2xl md:text-3xl font-light tracking-tight leading-snug text-[#1d1d1f]">
+            Ces chiffres sont publics.
+            <br />
+            <span className="text-[#86868b]">
+              Aujourd’hui, ils ne sont pas systématiquement croisés avec le terrain.
+            </span>
+          </p>
+        </Reveal>
       </div>
     </section>
   )
 }
 
-function InstitutionCard({
-  eyebrow,
-  tag,
+function NumberCard({
   stat,
-  statLabel,
+  label,
+  source,
+  sourceTag,
   body,
   href,
 }: {
-  eyebrow: string
-  tag: string
   stat: string
-  statLabel: string
+  label: string
+  source: string
+  sourceTag: string
   body: string
   href: string
 }) {
@@ -639,24 +599,24 @@ function InstitutionCard({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block bg-[#fafafa] rounded-3xl p-8 md:p-10 border border-black/[0.06] hover:border-black/15 hover:bg-white transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
+      className="group block bg-white rounded-3xl p-8 md:p-10 border border-black/[0.06] hover:border-black/15 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
     >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs tracking-[0.18em] uppercase text-[#1d1d1f] font-semibold">
-            {eyebrow}
+            {source}
           </p>
-          <p className="mt-1 text-[11px] text-[#86868b] tracking-wide">{tag}</p>
+          <p className="mt-1 text-[11px] text-[#86868b] tracking-wide">{sourceTag}</p>
         </div>
         <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">
           ↗
         </span>
       </div>
 
-      <p className="mt-10 text-5xl md:text-6xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
+      <p className="mt-10 text-6xl md:text-7xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
         {stat}
       </p>
-      <p className="mt-3 text-[#1d1d1f] text-base font-medium">{statLabel}</p>
+      <p className="mt-3 text-[#1d1d1f] text-base font-medium">{label}</p>
 
       <p className="mt-6 text-[#6e6e73] text-[14px] leading-relaxed">{body}</p>
 
@@ -664,6 +624,60 @@ function InstitutionCard({
         Voir les données <span aria-hidden>→</span>
       </p>
     </a>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FOUNDER — courte, humaine, crédibilité projet
+// ─────────────────────────────────────────────────────────────────────────────
+
+function FounderSection() {
+  return (
+    <section className="bg-white px-6 py-32 md:py-40 border-t border-black/5">
+      <div className="max-w-4xl mx-auto">
+        <Reveal>
+          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
+            À propos
+          </p>
+        </Reveal>
+        <Reveal delay={100}>
+          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05]">
+            Une initiative née à Nouakchott.
+          </h2>
+        </Reveal>
+        <Reveal delay={200}>
+          <p className="mt-10 text-lg md:text-xl text-[#1d1d1f] max-w-3xl leading-relaxed">
+            MINAI est portée par <span className="font-semibold">Imane Ahmedou</span>,
+            avec la conviction que la donnée doit servir le terrain — pas l’inverse.
+          </p>
+        </Reveal>
+        <Reveal delay={300}>
+          <p className="mt-5 text-base md:text-lg text-[#6e6e73] max-w-3xl leading-relaxed">
+            Le projet collabore avec des ONG, des institutions publiques et des
+            chercheurs. Les outils, les données et les méthodes sont documentés
+            ouvertement pour que chaque décideur puisse vérifier, contester, améliorer.
+          </p>
+        </Reveal>
+
+        {/* Trois micro-chips : valeurs / posture du projet */}
+        <Reveal delay={400}>
+          <div className="mt-10 flex flex-wrap gap-2">
+            <Chip>Open data</Chip>
+            <Chip>Méthode Sphere</Chip>
+            <Chip>Partenariat ONG</Chip>
+            <Chip>Souveraineté locale</Chip>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
+function Chip({ children }: { children: ReactNode }) {
+  return (
+    <span className="text-xs px-3 py-1.5 rounded-full bg-[#fafafa] border border-black/5 text-[#1d1d1f]">
+      {children}
+    </span>
   )
 }
 
@@ -765,7 +779,7 @@ function Signature() {
       </Reveal>
       <div className="mt-12 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-7xl mx-auto text-[11px] text-[#86868b]">
         <span>Nouakchott, Mauritanie · © 2026 MINAI</span>
-        <span>Sources : ONS · UNICEF · World Bank · OpenStreetMap</span>
+        <span>Aligned with UN SDG 6 · Sources : ANSADE · UNICEF · World Bank · OpenStreetMap</span>
       </div>
     </footer>
   )
