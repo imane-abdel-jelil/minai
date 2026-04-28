@@ -43,6 +43,76 @@ const KIND_LABELS: Record<string, string> = {
   other: 'Autre',
 }
 
+// Couleurs par type — alignées avec la sidebar
+const KIND_COLORS: Record<string, string> = {
+  drinking_water: '#06b6d4',
+  water_point: '#06b6d4',
+  well: '#f59e0b',
+  borehole: '#10b981',
+  spring: '#14b8a6',
+  tap: '#3b82f6',
+  water_works: '#8b5cf6',
+  other: '#9ca3af',
+}
+
+// Éclaircit une couleur hex pour faire le sommet du dégradé radial
+function lighten(hex: string, amount = 0.45): string {
+  const m = hex.replace('#', '').match(/.{2}/g)
+  if (!m) return hex
+  const [r, g, b] = m.map((c) => parseInt(c, 16))
+  const mix = (c: number) => Math.round(c + (255 - c) * amount)
+  return `#${[mix(r), mix(g), mix(b)].map((c) => c.toString(16).padStart(2, '0')).join('')}`
+}
+
+/** SVG d'une jolie goutte d'eau colorée (avec dégradé + reflet blanc). */
+function dropletSvg(color: string, gradientId: string): string {
+  const top = lighten(color, 0.55)
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="72" viewBox="0 0 56 72">
+  <defs>
+    <radialGradient id="${gradientId}" cx="38%" cy="35%" r="68%">
+      <stop offset="0%" stop-color="${top}"/>
+      <stop offset="100%" stop-color="${color}"/>
+    </radialGradient>
+  </defs>
+  <path d="M28 3 C18 22 8 38 8 50 a20 20 0 0 0 40 0 c0 -12 -10 -28 -20 -47 z"
+        fill="url(#${gradientId})"
+        stroke="#ffffff"
+        stroke-width="3"
+        stroke-linejoin="round"/>
+  <ellipse cx="20" cy="36" rx="3.5" ry="7" fill="#ffffff" opacity="0.6" transform="rotate(-22 20 36)"/>
+</svg>`
+}
+
+/** Convertit un SVG en data-URL utilisable par Image() puis Mapbox addImage(). */
+function svgToDataUrl(svg: string): string {
+  // encodeURIComponent gère mieux l'unicode que btoa
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+}
+
+/** Charge un SVG comme image bitmap puis l'enregistre sous ce nom dans la carte. */
+async function registerDropletIcon(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: any,
+  name: string,
+  color: string
+): Promise<void> {
+  if (map.hasImage(name)) return
+  const svg = dropletSvg(color, `g-${name}`)
+  return new Promise((resolve) => {
+    const img = new Image(56, 72)
+    img.onload = () => {
+      try {
+        if (!map.hasImage(name)) map.addImage(name, img)
+      } catch (e) {
+        console.warn('addImage', name, e)
+      }
+      resolve()
+    }
+    img.onerror = () => resolve()
+    img.src = svgToDataUrl(svg)
+  })
+}
+
 // Normalisation pour matcher les noms entre geoBoundaries et nos régions
 function normName(s: string): string {
   return (s || '')
@@ -182,6 +252,14 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
       ]}
       cursor={hovered || waterPopup ? 'pointer' : 'grab'}
+      onLoad={(e) => {
+        // Enregistre toutes les icônes goutte d'eau (1 par type) dans le sprite Mapbox.
+        // À faire dans onLoad sinon addImage() crash si la style n'est pas prête.
+        const map = e.target
+        for (const [kind, color] of Object.entries(KIND_COLORS)) {
+          registerDropletIcon(map, `drop-${kind}`, color)
+        }
+      }}
       onClick={(e: MapLayerMouseEvent) => {
         const feature = e.features?.[0]
         if (!feature?.properties) {
@@ -315,28 +393,34 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
             }}
             paint={{ 'text-color': '#ffffff' }}
           />
-          {/* Points individuels (couleur par type) */}
+          {/* Points individuels — icônes goutte d'eau (couleur par type) */}
           <Layer
             id="water-unclustered"
-            type="circle"
+            type="symbol"
             filter={['!', ['has', 'point_count']]}
-            paint={{
-              'circle-radius': 5,
-              'circle-color': [
+            layout={{
+              'icon-image': [
                 'match',
                 ['get', 'kind'],
-                'drinking_water', '#06b6d4',
-                'water_point', '#06b6d4',
-                'well', '#f59e0b',
-                'borehole', '#10b981',
-                'spring', '#14b8a6',
-                'tap', '#3b82f6',
-                'water_works', '#8b5cf6',
-                /* default */ '#9ca3af',
+                'drinking_water', 'drop-drinking_water',
+                'water_point', 'drop-water_point',
+                'well', 'drop-well',
+                'borehole', 'drop-borehole',
+                'spring', 'drop-spring',
+                'tap', 'drop-tap',
+                'water_works', 'drop-water_works',
+                /* default */ 'drop-other',
               ],
-              'circle-stroke-width': 1.5,
-              'circle-stroke-color': '#ffffff',
-              'circle-opacity': 0.9,
+              'icon-size': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 0.28,
+                7, 0.38,
+                11, 0.5,
+                15, 0.65,
+              ],
+              'icon-allow-overlap': true,
+              'icon-ignore-placement': true,
+              'icon-anchor': 'bottom',
             }}
           />
         </Source>
