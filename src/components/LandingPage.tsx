@@ -5,31 +5,33 @@ interface Props {
 }
 
 /**
- * Landing page MINAI — narrative + emotional + institutional.
- * Inspirations : Apple (typo monumentale, dark, beaucoup d'air),
- * Charity:Water (humain), Our World in Data (chiffres propres).
+ * Landing page MINAI — version blanche.
+ * Inspirations : Apple (typo monumentale, beaucoup d'air, blanc pur),
+ * Charity:Water (humain, photos), Our World in Data (chiffres propres).
+ *
+ * Photos : Pexels — free for commercial use, attribution non requise.
+ *   ‣ 30441483  Şeyhmus Kino — woman carrying jerrycan
+ *   ‣ 30629420  Jonathan John — smiling woman fetching water
+ *   ‣ 35328689  Sahara aerial
+ *   ‣ 4511301   women carrying water on heads
+ *   ‣ 19163045  woman carrying load on head
  */
+
+// URLs Pexels en CDN (auto-compressées, large)
+const IMG = {
+  woman_jerrycan: 'https://images.pexels.com/photos/30441483/pexels-photo-30441483.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  smiling_water:  'https://images.pexels.com/photos/30629420/pexels-photo-30629420.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  sahara_aerial:  'https://images.pexels.com/photos/35328689/pexels-photo-35328689.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  women_carrying: 'https://images.pexels.com/photos/4511301/pexels-photo-4511301.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  load_head:      'https://images.pexels.com/photos/19163045/pexels-photo-19163045.jpeg?auto=compress&cs=tinysrgb&w=2000',
+}
+
 export default function LandingPage({ onEnter }: Props) {
   return (
-    <div className="bg-[#05080f] text-white overflow-x-hidden font-sans antialiased">
-      {/* ---- keyframes locales (rise + breathe) ---- */}
-      <style>{`
-        @keyframes rise {
-          0%   { transform: translateY(0)        scale(0.6); opacity: 0; }
-          15%  {                                              opacity: 0.55; }
-          85%  {                                              opacity: 0.55; }
-          100% { transform: translateY(-110vh)   scale(1.1); opacity: 0; }
-        }
-        @keyframes breathe {
-          0%, 100% { transform: scale(1);    opacity: 0.55; }
-          50%      { transform: scale(1.18); opacity: 1; }
-        }
-        .rise   { animation: rise 18s linear infinite; }
-        .breathe{ animation: breathe 6s ease-in-out infinite; }
-      `}</style>
-
+    <div className="bg-white text-[#1d1d1f] overflow-x-hidden font-sans antialiased">
       <Nav onEnter={onEnter} />
       <Hero onEnter={onEnter} />
+      <HeroImage />
       <IntroStatement />
       <ProblemSection />
       <HumanImpactSection />
@@ -42,7 +44,7 @@ export default function LandingPage({ onEnter }: Props) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Reveal-on-scroll helper
+// Reveal-on-scroll
 // ─────────────────────────────────────────────────────────────────────────────
 
 function useReveal<T extends HTMLElement>() {
@@ -89,20 +91,20 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 
 function Nav({ onEnter }: { onEnter: () => void }) {
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-[#05080f]/70 border-b border-white/5">
+    <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-white/75 border-b border-black/5">
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-        <span className="font-semibold tracking-tight text-[15px]">
-          MINAI<span className="text-cyan-300/80">.</span>
+        <span className="font-semibold tracking-tight text-[15px] text-[#1d1d1f]">
+          MINAI<span className="text-cyan-600">.</span>
         </span>
-        <div className="hidden md:flex items-center gap-8 text-[13px] text-white/55">
-          <a href="#problem" className="hover:text-white transition">Problème</a>
-          <a href="#solution" className="hover:text-white transition">Solution</a>
-          <a href="#data" className="hover:text-white transition">Données</a>
-          <a href="#partner" className="hover:text-white transition">Partenaires</a>
+        <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
+          <a href="#problem"  className="hover:text-[#1d1d1f] transition">Problème</a>
+          <a href="#solution" className="hover:text-[#1d1d1f] transition">Solution</a>
+          <a href="#data"     className="hover:text-[#1d1d1f] transition">Données</a>
+          <a href="#partner"  className="hover:text-[#1d1d1f] transition">Partenaires</a>
         </div>
         <button
           onClick={onEnter}
-          className="text-[13px] bg-white text-slate-900 px-4 py-1.5 rounded-full font-medium hover:bg-white/90 transition"
+          className="text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
         >
           Explorer la carte →
         </button>
@@ -112,112 +114,91 @@ function Nav({ onEnter }: { onEnter: () => void }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HERO
+// HERO — texte sur blanc
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Hero({ onEnter }: { onEnter: () => void }) {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-14 overflow-hidden">
-      {/* Atmosphère : dégradés + gouttes qui montent */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-[#08111f] to-slate-950" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.20),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(14,165,233,0.10),transparent_55%)]" />
-        <RisingDroplets />
-      </div>
+    <section className="relative pt-32 md:pt-40 pb-16 md:pb-20 px-6">
+      <div className="max-w-5xl mx-auto text-center">
+        <Reveal>
+          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-7">
+            MINAI · Mauritanie
+          </p>
+        </Reveal>
 
-      <Reveal>
-        <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-300/70 mb-7">
-          MINAI · Mauritanie
-        </p>
-      </Reveal>
+        <Reveal delay={150}>
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-semibold tracking-tight leading-[1.03]">
+            Making the invisible
+            <br />
+            <span className="bg-gradient-to-b from-[#1d1d1f] to-[#6e6e73] bg-clip-text text-transparent">
+              visible again.
+            </span>
+          </h1>
+        </Reveal>
 
-      <Reveal delay={150}>
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-semibold tracking-tight leading-[1.03] text-center max-w-5xl">
-          Making the invisible
-          <br />
-          <span className="bg-gradient-to-b from-white to-white/55 bg-clip-text text-transparent">
-            visible again.
-          </span>
-        </h1>
-      </Reveal>
+        <Reveal delay={350}>
+          <p className="mt-9 text-base md:text-xl text-[#6e6e73] max-w-2xl mx-auto leading-relaxed">
+            MINAI est une intelligence géospatiale appliquée à l’accès à l’eau,
+            conçue pour révéler les communautés aujourd’hui invisibles dans les
+            systèmes de décision.
+          </p>
+        </Reveal>
 
-      <Reveal delay={350}>
-        <p className="mt-9 text-base md:text-xl text-white/65 max-w-2xl text-center leading-relaxed">
-          MINAI est une intelligence géospatiale appliquée à l’accès à l’eau,
-          conçue pour révéler les communautés aujourd’hui invisibles dans les
-          systèmes de décision.
-        </p>
-      </Reveal>
-
-      <Reveal delay={550}>
-        <div className="mt-10 flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={onEnter}
-            className="bg-white text-slate-900 px-7 py-3 rounded-full font-medium hover:bg-white/90 transition"
-          >
-            Explore the map
-          </button>
-          <a
-            href="#partner"
-            className="border border-white/25 text-white px-7 py-3 rounded-full font-medium hover:border-white/60 hover:bg-white/5 transition text-center"
-          >
-            Partner with MINAI
-          </a>
-        </div>
-      </Reveal>
-
-      {/* Scroll cue */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/30 text-[10px] tracking-[0.4em] uppercase flex flex-col items-center gap-2">
-        <span>Scroll</span>
-        <span className="block h-8 w-px bg-gradient-to-b from-white/30 to-transparent" />
+        <Reveal delay={550}>
+          <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={onEnter}
+              className="bg-[#1d1d1f] text-white px-7 py-3 rounded-full font-medium hover:bg-black transition"
+            >
+              Explore the map
+            </button>
+            <a
+              href="#partner"
+              className="border border-[#1d1d1f]/20 text-[#1d1d1f] px-7 py-3 rounded-full font-medium hover:bg-[#1d1d1f]/[0.04] transition text-center"
+            >
+              Partner with MINAI
+            </a>
+          </div>
+        </Reveal>
       </div>
     </section>
   )
 }
 
-// 12 gouttes qui s'élèvent doucement, vitesse et taille variées
-function RisingDroplets() {
-  const drops = Array.from({ length: 14 }, (_, i) => ({
-    left: `${(i * 137) % 100}%`,
-    size: 4 + ((i * 7) % 12),
-    delay: -((i * 1.7) % 18),
-    duration: 14 + ((i * 5) % 12),
-    blur: i % 3 === 0,
-  }))
+// Photo full-bleed sous le hero — woman carrying jerrycan
+function HeroImage() {
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {drops.map((d, i) => (
-        <span
-          key={i}
-          className={`rise absolute rounded-full bg-cyan-300/25 ${d.blur ? 'blur-[2px]' : ''}`}
-          style={{
-            left: d.left,
-            bottom: '-30px',
-            width: d.size,
-            height: d.size,
-            animationDelay: `${d.delay}s`,
-            animationDuration: `${d.duration}s`,
-          }}
-        />
-      ))}
+    <div className="px-4 sm:px-6 mb-24">
+      <Reveal>
+        <div className="relative max-w-7xl mx-auto rounded-3xl overflow-hidden aspect-[16/9] sm:aspect-[21/9] bg-slate-100">
+          <img
+            src={IMG.woman_jerrycan}
+            alt="Femme transportant un jerrycan d’eau dans un village rural d’Afrique"
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+          />
+          {/* léger fade en bas pour fondre vers le contenu suivant */}
+          <div className="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-transparent pointer-events-none" />
+        </div>
+      </Reveal>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// INTRO STATEMENT — large, calme, une phrase
+// INTRO STATEMENT — phrase calme, beaucoup d'air
 // ─────────────────────────────────────────────────────────────────────────────
 
 function IntroStatement() {
   return (
-    <section className="px-6 py-32 md:py-48">
+    <section className="px-6 py-32 md:py-44">
       <Reveal>
-        <p className="max-w-4xl mx-auto text-2xl md:text-4xl font-light leading-snug tracking-tight text-white/80 text-center">
+        <p className="max-w-4xl mx-auto text-2xl md:text-4xl font-light leading-snug tracking-tight text-[#1d1d1f] text-center">
           En Mauritanie, des milliers de familles vivent sans accès fiable à l’eau potable —{' '}
-          <span className="text-white">non pas parce que les solutions n’existent pas,</span>{' '}
+          <span className="text-[#86868b]">non pas parce que les solutions n’existent pas,</span>{' '}
           mais parce que{' '}
-          <span className="text-white">leur réalité reste invisible dans les données.</span>
+          <span className="text-[#86868b]">leur réalité reste invisible dans les données.</span>
         </p>
       </Reveal>
     </section>
@@ -230,13 +211,10 @@ function IntroStatement() {
 
 function ProblemSection() {
   return (
-    <section
-      id="problem"
-      className="px-6 py-32 md:py-40 border-t border-white/5"
-    >
+    <section id="problem" className="bg-[#fafafa] px-6 py-32 md:py-40">
       <div className="max-w-5xl mx-auto">
         <Reveal>
-          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-300/70 mb-6">
+          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
             Le problème
           </p>
         </Reveal>
@@ -244,7 +222,7 @@ function ProblemSection() {
           <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] max-w-3xl">
             L’accès à l’eau n’est pas qu’une question de ressources.
             <br />
-            <span className="text-white/45">C’est une question de visibilité.</span>
+            <span className="text-[#86868b]">C’est une question de visibilité.</span>
           </h2>
         </Reveal>
 
@@ -273,7 +251,7 @@ function ProblemSection() {
         </div>
 
         <Reveal delay={500}>
-          <p className="mt-24 text-2xl md:text-4xl font-light text-center text-white/75 max-w-3xl mx-auto leading-snug">
+          <p className="mt-24 text-2xl md:text-4xl font-light text-center text-[#1d1d1f] max-w-3xl mx-auto leading-snug">
             Résultat : des communautés entières restent ignorées.
           </p>
         </Reveal>
@@ -285,57 +263,65 @@ function ProblemSection() {
 function Pillar({ n, title, body }: { n: string; title: string; body: string }) {
   return (
     <div>
-      <span className="text-[11px] text-cyan-300/60 font-mono">{n}</span>
-      <h3 className="mt-3 text-xl font-semibold tracking-tight">{title}</h3>
-      <p className="mt-3 text-white/55 leading-relaxed text-[15px]">{body}</p>
+      <span className="text-[11px] text-cyan-700 font-mono">{n}</span>
+      <h3 className="mt-3 text-xl font-semibold tracking-tight text-[#1d1d1f]">{title}</h3>
+      <p className="mt-3 text-[#6e6e73] leading-relaxed text-[15px]">{body}</p>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HUMAN IMPACT — section émotion, fond chaud (terre / désert)
+// HUMAN IMPACT — full-bleed photo + texte en overlay
 // ─────────────────────────────────────────────────────────────────────────────
 
 function HumanImpactSection() {
   return (
-    <section className="relative px-6 py-32 md:py-48 border-t border-white/5 overflow-hidden">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-950/20 via-[#0a0e1a] to-[#05080f]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_50%,rgba(245,158,11,0.08),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(217,119,6,0.06),transparent_55%)]" />
-      </div>
+    <section className="relative px-4 sm:px-6 py-24 md:py-32 bg-white">
+      <Reveal>
+        <div className="relative max-w-7xl mx-auto rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9]">
+          <img
+            src={IMG.smiling_water}
+            alt="Femme cherchant de l'eau dans un paysage africain"
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+          {/* Overlay sombre dégradé pour la lisibilité du texte */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
-      <div className="max-w-5xl mx-auto">
-        <Reveal>
-          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] max-w-3xl">
-            Derrière chaque point invisible,
-            <br />
-            <span className="text-white/45">il y a une réalité.</span>
-          </h2>
-        </Reveal>
+          {/* Texte aligné en bas-gauche */}
+          <div className="absolute inset-0 flex flex-col justify-end p-8 sm:p-12 md:p-16 text-white">
+            <Reveal>
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-semibold tracking-tight leading-[1.08] max-w-3xl">
+                Derrière chaque point invisible,
+                <br />
+                <span className="text-white/70">il y a une réalité.</span>
+              </h2>
+            </Reveal>
 
-        <div className="mt-16 space-y-6 max-w-2xl text-xl md:text-2xl font-light text-white/75 leading-relaxed">
-          <Reveal delay={150}>
-            <p>Des femmes qui marchent des heures pour un seau d’eau.</p>
-          </Reveal>
-          <Reveal delay={250}>
-            <p>Des enfants qui quittent l’école pour aller au puits.</p>
-          </Reveal>
-          <Reveal delay={350}>
-            <p>Des villages qui attendent une intervention qui ne vient pas.</p>
-          </Reveal>
+            <div className="mt-6 sm:mt-8 space-y-2 sm:space-y-3 max-w-2xl text-base sm:text-lg md:text-xl font-light text-white/90 leading-relaxed">
+              <Reveal delay={150}>
+                <p>Des femmes qui marchent des heures pour un seau d’eau.</p>
+              </Reveal>
+              <Reveal delay={250}>
+                <p>Des enfants qui quittent l’école pour aller au puits.</p>
+              </Reveal>
+              <Reveal delay={350}>
+                <p>Des villages qui attendent une intervention qui ne vient pas.</p>
+              </Reveal>
+            </div>
+          </div>
         </div>
+      </Reveal>
 
-        <Reveal delay={550}>
-          <p className="mt-24 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] max-w-3xl">
-            Ce qui n’est pas visible
-            <br />
-            <span className="bg-gradient-to-r from-cyan-300 to-cyan-200 bg-clip-text text-transparent">
-              ne peut pas être servi.
-            </span>
-          </p>
-        </Reveal>
-      </div>
+      <Reveal delay={400}>
+        <p className="mt-16 md:mt-24 max-w-4xl mx-auto text-center text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] text-[#1d1d1f]">
+          Ce qui n’est pas visible
+          <br />
+          <span className="bg-gradient-to-r from-cyan-600 to-cyan-800 bg-clip-text text-transparent">
+            ne peut pas être servi.
+          </span>
+        </p>
+      </Reveal>
     </section>
   )
 }
@@ -346,25 +332,22 @@ function HumanImpactSection() {
 
 function SolutionSection() {
   return (
-    <section
-      id="solution"
-      className="px-6 py-32 md:py-40 border-t border-white/5"
-    >
+    <section id="solution" className="bg-[#fafafa] px-6 py-32 md:py-40">
       <div className="max-w-6xl mx-auto">
         <Reveal>
-          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-300/70 mb-6">
+          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
             La solution
           </p>
         </Reveal>
         <Reveal delay={100}>
-          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] max-w-3xl">
+          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] max-w-3xl text-[#1d1d1f]">
             MINAI transforme des données fragmentées
             <br />
-            <span className="text-white/45">en décisions claires.</span>
+            <span className="text-[#86868b]">en décisions claires.</span>
           </h2>
         </Reveal>
 
-        <div className="mt-20 grid md:grid-cols-3 gap-px bg-white/5 rounded-3xl overflow-hidden border border-white/5">
+        <div className="mt-20 grid md:grid-cols-3 gap-px bg-black/[0.06] rounded-3xl overflow-hidden border border-black/5">
           <Reveal delay={150}>
             <Feature
               icon={<TargetIcon />}
@@ -389,7 +372,7 @@ function SolutionSection() {
         </div>
 
         <Reveal delay={500}>
-          <p className="mt-24 text-3xl md:text-5xl font-semibold tracking-tight text-center bg-gradient-to-r from-cyan-200 to-cyan-400 bg-clip-text text-transparent">
+          <p className="mt-24 text-3xl md:text-5xl font-semibold tracking-tight text-center bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
             De la donnée à l’action.
           </p>
         </Reveal>
@@ -400,15 +383,14 @@ function SolutionSection() {
 
 function Feature({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
   return (
-    <div className="bg-[#05080f] p-10 h-full">
-      <div className="text-cyan-300 mb-5">{icon}</div>
-      <h3 className="text-xl font-semibold tracking-tight">{title}</h3>
-      <p className="mt-3 text-white/55 leading-relaxed text-[15px]">{body}</p>
+    <div className="bg-white p-10 h-full">
+      <div className="text-cyan-700 mb-5">{icon}</div>
+      <h3 className="text-xl font-semibold tracking-tight text-[#1d1d1f]">{title}</h3>
+      <p className="mt-3 text-[#6e6e73] leading-relaxed text-[15px]">{body}</p>
     </div>
   )
 }
 
-// Petits SVG d'icônes — line-art Apple-style, très sobres
 function TargetIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -436,36 +418,45 @@ function HandshakeIcon() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DATA — Our World in Data style
+// DATA — chiffres compacts (600K), photo Sahara à gauche
 // ─────────────────────────────────────────────────────────────────────────────
 
 function DataSection() {
   return (
-    <section
-      id="data"
-      className="px-6 py-32 md:py-40 border-t border-white/5"
-    >
+    <section id="data" className="bg-white px-6 py-32 md:py-40">
       <div className="max-w-6xl mx-auto">
         <Reveal>
-          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-300/70 mb-6 text-center">
+          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6 text-center">
             Aujourd’hui en Mauritanie
           </p>
         </Reveal>
         <div className="mt-12 grid md:grid-cols-3 gap-16 md:gap-8">
           <Reveal delay={100}>
-            <Stat n="600 000+" label="personnes en zone à risque" sub="Wilayas critiques au sud" />
+            <Stat n="600K" label="personnes en zone à risque" sub="Wilayas critiques au sud" />
           </Reveal>
           <Reveal delay={250}>
-            <Stat n="200+" label="villages prioritaires identifiés" sub="Densité OSM < cible Sphere" />
+            <Stat n="200+" label="villages prioritaires" sub="Densité OSM < cible Sphere" />
           </Reveal>
           <Reveal delay={400}>
-            <Stat n="3" label="régions pilotes en analyse" sub="Gorgol · Brakna · Guidimakha" />
+            <Stat n="3" label="régions pilotes" sub="Gorgol · Brakna · Guidimakha" />
           </Reveal>
         </div>
         <Reveal delay={600}>
-          <p className="mt-20 text-center text-white/40 text-xs">
+          <p className="mt-20 text-center text-[#86868b] text-xs">
             Sources : Office National de la Statistique (RGPH 2013) · UNICEF · World Bank · OpenStreetMap.
           </p>
+        </Reveal>
+
+        {/* Photo de contexte — Sahara aérien */}
+        <Reveal delay={300}>
+          <div className="mt-24 relative rounded-3xl overflow-hidden aspect-[21/9] bg-slate-100">
+            <img
+              src={IMG.sahara_aerial}
+              alt="Vue aérienne du désert du Sahara"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
         </Reveal>
       </div>
     </section>
@@ -475,73 +466,73 @@ function DataSection() {
 function Stat({ n, label, sub }: { n: string; label: string; sub: string }) {
   return (
     <div className="text-center">
-      <div className="text-6xl md:text-8xl font-semibold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent leading-none">
+      <div className="text-7xl md:text-9xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
         {n}
       </div>
-      <p className="mt-4 text-white/75 text-base">{label}</p>
-      <p className="mt-1 text-white/35 text-xs tracking-wide">{sub}</p>
+      <p className="mt-4 text-[#1d1d1f] text-base font-medium">{label}</p>
+      <p className="mt-1 text-[#86868b] text-xs tracking-wide">{sub}</p>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PARTNER
+// PARTNER — fond gris clair, image à droite, texte à gauche
 // ─────────────────────────────────────────────────────────────────────────────
 
 function PartnerSection() {
   return (
-    <section
-      id="partner"
-      className="relative px-6 py-32 md:py-48 border-t border-white/5 overflow-hidden"
-    >
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.10),transparent_55%)]" />
-      </div>
-
-      <div className="max-w-4xl mx-auto text-center">
-        <Reveal>
-          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-300/70 mb-6">
-            Collaborer
-          </p>
-        </Reveal>
-        <Reveal delay={100}>
-          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05]">
-            Partner with MINAI.
-          </h2>
-        </Reveal>
-        <Reveal delay={200}>
-          <p className="mt-8 text-base md:text-xl text-white/65 max-w-2xl mx-auto leading-relaxed">
-            Nous collaborons avec les ONG et les institutions pour rendre l’accès à l’eau plus
-            rapide, plus équitable et plus efficace.
-          </p>
-        </Reveal>
-
-        <div className="mt-14 grid sm:grid-cols-3 gap-8 text-left max-w-3xl mx-auto">
-          <Reveal delay={150}>
-            <Bullet text="Identifier les priorités" />
+    <section id="partner" className="bg-[#fafafa] px-6 py-32 md:py-40">
+      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+        <div>
+          <Reveal>
+            <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
+              Collaborer
+            </p>
           </Reveal>
-          <Reveal delay={250}>
-            <Bullet text="Optimiser les interventions" />
+          <Reveal delay={100}>
+            <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05]">
+              Partner with MINAI.
+            </h2>
           </Reveal>
-          <Reveal delay={350}>
-            <Bullet text="Renforcer l’impact terrain" />
+          <Reveal delay={200}>
+            <p className="mt-8 text-base md:text-xl text-[#6e6e73] max-w-xl leading-relaxed">
+              Nous collaborons avec les ONG et les institutions pour rendre l’accès à l’eau
+              plus rapide, plus équitable et plus efficace.
+            </p>
+          </Reveal>
+
+          <div className="mt-10 grid sm:grid-cols-1 gap-3 max-w-md">
+            <Reveal delay={250}><Bullet text="Identifier les priorités" /></Reveal>
+            <Reveal delay={350}><Bullet text="Optimiser les interventions" /></Reveal>
+            <Reveal delay={450}><Bullet text="Renforcer l’impact terrain" /></Reveal>
+          </div>
+
+          <Reveal delay={550}>
+            <div className="mt-10 flex flex-col sm:flex-row gap-3">
+              <a
+                href="mailto:imaneahmedou1@gmail.com?subject=Demo%20MINAI"
+                className="bg-[#1d1d1f] text-white px-7 py-3 rounded-full font-medium hover:bg-black transition text-center"
+              >
+                Request a demo
+              </a>
+              <a
+                href="mailto:imaneahmedou1@gmail.com?subject=Collaboration%20MINAI"
+                className="border border-[#1d1d1f]/20 text-[#1d1d1f] px-7 py-3 rounded-full font-medium hover:bg-[#1d1d1f]/[0.04] transition text-center"
+              >
+                Collaborate with us
+              </a>
+            </div>
           </Reveal>
         </div>
 
-        <Reveal delay={500}>
-          <div className="mt-14 flex flex-col sm:flex-row gap-3 justify-center">
-            <a
-              href="mailto:imaneahmedou1@gmail.com?subject=Demo%20MINAI"
-              className="bg-white text-slate-900 px-7 py-3 rounded-full font-medium hover:bg-white/90 transition"
-            >
-              Request a demo
-            </a>
-            <a
-              href="mailto:imaneahmedou1@gmail.com?subject=Collaboration%20MINAI"
-              className="border border-white/25 text-white px-7 py-3 rounded-full font-medium hover:border-white/60 hover:bg-white/5 transition"
-            >
-              Collaborate with us
-            </a>
+        <Reveal delay={300}>
+          <div className="relative rounded-3xl overflow-hidden aspect-square bg-slate-100">
+            <img
+              src={IMG.women_carrying}
+              alt="Femmes transportant de l'eau sur la tête"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
           </div>
         </Reveal>
       </div>
@@ -552,30 +543,30 @@ function PartnerSection() {
 function Bullet({ text }: { text: string }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-300 shrink-0" />
-      <p className="text-white/80 leading-relaxed">{text}</p>
+      <span className="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
+      <p className="text-[#1d1d1f] leading-relaxed">{text}</p>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SIGNATURE
+// SIGNATURE / FOOTER
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Signature() {
   return (
-    <footer className="px-6 py-24 border-t border-white/5">
+    <footer className="px-6 py-24 bg-white border-t border-black/5">
       <Reveal>
-        <p className="max-w-4xl mx-auto text-center text-2xl md:text-4xl font-light tracking-tight text-white/85 leading-snug">
-          MINAI <span className="text-white/30">—</span>{' '}
-          <span className="bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
+        <p className="max-w-4xl mx-auto text-center text-2xl md:text-4xl font-light tracking-tight leading-snug text-[#1d1d1f]">
+          MINAI <span className="text-[#86868b]">—</span>{' '}
+          <span className="bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
             making the invisible visible again.
           </span>
         </p>
       </Reveal>
-      <div className="mt-12 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-7xl mx-auto text-[11px] text-white/35">
+      <div className="mt-12 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-7xl mx-auto text-[11px] text-[#86868b]">
         <span>© 2026 MINAI · Nouakchott, Mauritanie</span>
-        <span>Données ouvertes · ONS · UNICEF · OpenStreetMap</span>
+        <span>Données ouvertes · ONS · UNICEF · OpenStreetMap · Photos : Pexels</span>
       </div>
     </footer>
   )
