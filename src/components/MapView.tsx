@@ -1,10 +1,15 @@
-import { useState, useMemo, useEffect } from 'react'
-import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent } from 'react-map-gl'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent, type MapRef } from 'react-map-gl'
 import { MAURITANIA_REGIONS, type Region, getScoreColor } from '../data/mauritania-regions'
 import { countPointsByWilaya, type WilayaStats } from '../lib/geo'
 import type { ComputedScore } from '../lib/score'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
+
+// Origine par défaut des convois NGO simulés : Nouakchott (capitale, port,
+// principal hub logistique humanitaire en Mauritanie).
+const CONVOY_ORIGIN: [number, number] = [-15.97, 18.08]
+const CONVOY_ORIGIN_NAME = 'Nouakchott'
 
 interface Props {
   onRegionClick: (region: Region | null) => void
@@ -13,6 +18,8 @@ interface Props {
   onStatsReady?: (stats: Record<string, WilayaStats>) => void
   kindFilters: Record<string, boolean>
   computedScores: Record<string, ComputedScore>
+  /** Wilaya cible du convoi simulé (null = aucun convoi affiché) */
+  convoyTarget: Region | null
 }
 
 interface HoveredRegion {
@@ -132,7 +139,8 @@ function findRegion(name: string): Region | undefined {
   )
 }
 
-export default function MapView({ onRegionClick, showWaterPoints, showWilayas, onStatsReady, kindFilters, computedScores }: Props) {
+export default function MapView({ onRegionClick, showWaterPoints, showWilayas, onStatsReady, kindFilters, computedScores, convoyTarget }: Props) {
+  const mapRef = useRef<MapRef | null>(null)
   const [hovered, setHovered] = useState<HoveredRegion | null>(null)
   const [waterPopup, setWaterPopup] = useState<WaterPointPopup | null>(null)
   const [waterPoints, setWaterPoints] = useState<GeoJSON.FeatureCollection | null>(null)
@@ -191,6 +199,63 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
     onStatsReady(stats)
   }, [waterPoints, wilayasGeo, onStatsReady])
 
+  // ─── Convoi NGO simulé ────────────────────────────────────────────────────
+  // Ligne droite de Nouakchott vers la wilaya cible. Visuellement subtil
+  // (pointillés cyan + halo blanc + cercles concentriques au point d'arrivée).
+  const convoyRouteGeoJSON = useMemo<GeoJSON.FeatureCollection | null>(() => {
+    if (!convoyTarget) return null
+    return {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: [CONVOY_ORIGIN, convoyTarget.center],
+          },
+          properties: {},
+        },
+      ],
+    }
+  }, [convoyTarget])
+
+  const convoyEndpointsGeoJSON = useMemo<GeoJSON.FeatureCollection | null>(() => {
+    if (!convoyTarget) return null
+    return {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: CONVOY_ORIGIN },
+          properties: { label: `Départ : ${CONVOY_ORIGIN_NAME}`, role: 'origin' },
+        },
+        {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: convoyTarget.center },
+          properties: { label: `Cible : ${convoyTarget.name}`, role: 'target' },
+        },
+      ],
+    }
+  }, [convoyTarget])
+
+  // Quand un convoi est tracé, on cadre la carte pour que origine + cible
+  // soient toutes les deux visibles, avec un peu de marge.
+  useEffect(() => {
+    if (!convoyTarget || !mapRef.current) return
+    const map = mapRef.current
+    const minLng = Math.min(CONVOY_ORIGIN[0], convoyTarget.center[0]) - 0.4
+    const maxLng = Math.max(CONVOY_ORIGIN[0], convoyTarget.center[0]) + 0.4
+    const minLat = Math.min(CONVOY_ORIGIN[1], convoyTarget.center[1]) - 0.4
+    const maxLat = Math.max(CONVOY_ORIGIN[1], convoyTarget.center[1]) + 0.4
+    map.fitBounds(
+      [
+        [minLng, minLat],
+        [maxLng, maxLat],
+      ],
+      { padding: { top: 80, bottom: 80, left: 60, right: 60 }, duration: 1200 }
+    )
+  }, [convoyTarget])
+
   // Filtrage par type — recalculé seulement quand les données ou les filtres changent
   const filteredWaterPoints = useMemo<GeoJSON.FeatureCollection | null>(() => {
     if (!waterPoints) return null
@@ -242,8 +307,11 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
 
   return (
     <Map
+      ref={mapRef}
       mapboxAccessToken={MAPBOX_TOKEN}
-      initialViewState={{ longitude: -10.94, latitude: 20.27, zoom: 4.8 }}
+      // Recadrage : centre légèrement décalé vers le sud (où sont les
+      // populations rurales) et zoom plus serré pour mieux remplir le viewport.
+      initialViewState={{ longitude: -11, latitude: 19.5, zoom: 5.1 }}
       mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
@@ -464,6 +532,104 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
           }}
         />
       </Source>
+
+      {/* ---------- Convoi NGO simulé (ligne + marqueurs origine/cible) ---------- */}
+      {convoyRouteGeoJSON && (
+        <Source id="convoy-route" type="geojson" data={convoyRouteGeoJSON}>
+          {/* Halo blanc autour de la ligne pour la lisibilité sur fond satellite */}
+          <Layer
+            id="convoy-line-halo"
+            type="line"
+            paint={{
+              'line-color': '#ffffff',
+              'line-width': 7,
+              'line-opacity': 0.45,
+              'line-blur': 1.2,
+            }}
+            layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+          />
+          {/* Trait pointillé cyan principal */}
+          <Layer
+            id="convoy-line"
+            type="line"
+            paint={{
+              'line-color': '#06b6d4',
+              'line-width': 3,
+              'line-dasharray': [2, 2],
+              'line-opacity': 0.95,
+            }}
+            layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+          />
+        </Source>
+      )}
+      {convoyEndpointsGeoJSON && (
+        <Source id="convoy-endpoints" type="geojson" data={convoyEndpointsGeoJSON}>
+          {/* Cible : 3 cercles concentriques pour effet "destination" */}
+          <Layer
+            id="convoy-target-outer"
+            type="circle"
+            filter={['==', ['get', 'role'], 'target']}
+            paint={{
+              'circle-radius': 22,
+              'circle-color': 'rgba(6,182,212,0.18)',
+              'circle-stroke-color': '#06b6d4',
+              'circle-stroke-width': 1,
+              'circle-stroke-opacity': 0.6,
+            }}
+          />
+          <Layer
+            id="convoy-target-mid"
+            type="circle"
+            filter={['==', ['get', 'role'], 'target']}
+            paint={{
+              'circle-radius': 13,
+              'circle-color': 'rgba(6,182,212,0.35)',
+              'circle-stroke-color': '#ffffff',
+              'circle-stroke-width': 1.5,
+            }}
+          />
+          <Layer
+            id="convoy-target-inner"
+            type="circle"
+            filter={['==', ['get', 'role'], 'target']}
+            paint={{
+              'circle-radius': 5,
+              'circle-color': '#06b6d4',
+              'circle-stroke-color': '#ffffff',
+              'circle-stroke-width': 2,
+            }}
+          />
+          {/* Origine : petit cercle blanc bordé cyan */}
+          <Layer
+            id="convoy-origin"
+            type="circle"
+            filter={['==', ['get', 'role'], 'origin']}
+            paint={{
+              'circle-radius': 6,
+              'circle-color': '#ffffff',
+              'circle-stroke-color': '#06b6d4',
+              'circle-stroke-width': 2.5,
+            }}
+          />
+          {/* Labels (Départ / Cible) */}
+          <Layer
+            id="convoy-labels"
+            type="symbol"
+            layout={{
+              'text-field': ['get', 'label'],
+              'text-size': 11,
+              'text-offset': [0, 1.8],
+              'text-anchor': 'top',
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+            }}
+            paint={{
+              'text-color': '#ffffff',
+              'text-halo-color': '#0c4a6e',
+              'text-halo-width': 1.5,
+            }}
+          />
+        </Source>
+      )}
 
       {hovered && (
         <Popup

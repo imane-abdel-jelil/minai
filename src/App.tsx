@@ -31,6 +31,8 @@ export default function App() {
   const [kindFilters, setKindFilters] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(ALL_KINDS.map((k) => [k, true]))
   )
+  // Cible du prochain convoi NGO simulé sur la carte (depuis Nouakchott)
+  const [convoyTarget, setConvoyTarget] = useState<Region | null>(null)
 
   const handleStatsReady = useCallback(
     (stats: Record<string, WilayaStats>) => setWilayaStats(stats),
@@ -85,6 +87,9 @@ export default function App() {
         onSetAllKinds={setAllKinds}
         kindCounts={kindCounts}
         computedScores={computedScores}
+        convoyTarget={convoyTarget}
+        onTargetConvoy={setConvoyTarget}
+        onClearConvoy={() => setConvoyTarget(null)}
       />
       <main className="flex-1 relative">
         {/* Bouton retour vers la landing — pill discret en haut à gauche de la carte */}
@@ -102,6 +107,7 @@ export default function App() {
           onStatsReady={handleStatsReady}
           kindFilters={kindFilters}
           computedScores={computedScores}
+          convoyTarget={convoyTarget}
         />
       </main>
     </div>

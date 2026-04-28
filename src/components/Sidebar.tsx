@@ -14,6 +14,9 @@ interface Props {
   onSetAllKinds: (value: boolean) => void
   kindCounts: Record<string, number>
   computedScores: Record<string, ComputedScore>
+  convoyTarget: Region | null
+  onTargetConvoy: (r: Region) => void
+  onClearConvoy: () => void
 }
 
 const KIND_LABELS: Record<string, string> = {
@@ -63,6 +66,9 @@ export default function Sidebar({
   onSetAllKinds,
   kindCounts,
   computedScores,
+  convoyTarget,
+  onTargetConvoy,
+  onClearConvoy,
 }: Props) {
   const visibleKinds = KIND_ORDER.filter((k) => (kindCounts[k] ?? 0) > 0)
   const totalShown = visibleKinds.reduce(
@@ -103,6 +109,15 @@ export default function Sidebar({
           <Stat label="Villages prioritaires" value={totalPriority.toString()} accent="bg-orange-500/30" />
         </div>
       </section>
+
+      {/* Module Décision — où envoyer le prochain convoi ? */}
+      <DecisionModule
+        computedScores={computedScores}
+        wilayaStats={wilayaStats}
+        convoyTarget={convoyTarget}
+        onTargetConvoy={onTargetConvoy}
+        onClearConvoy={onClearConvoy}
+      />
 
       {/* Toggles couches carto */}
       <section className="rounded-lg bg-water-700/40 p-3 space-y-3">
@@ -336,6 +351,113 @@ function LegendItem({ color, label }: { color: string; label: string }) {
       <span className="inline-block w-3 h-3 rounded-full" style={{ background: color }} />
       <span dangerouslySetInnerHTML={{ __html: label }} />
     </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Module DÉCISION — où envoyer le prochain convoi ?
+// Classement des wilayas par score d'accès ascendant (le plus critique d'abord)
+// + calcul du gap (combien de points d'eau manquent pour la cible Sphere).
+// ─────────────────────────────────────────────────────────────────────────────
+
+function DecisionModule({
+  computedScores,
+  wilayaStats,
+  convoyTarget,
+  onTargetConvoy,
+  onClearConvoy,
+}: {
+  computedScores: Record<string, ComputedScore>
+  wilayaStats: Record<string, WilayaStats>
+  convoyTarget: Region | null
+  onTargetConvoy: (r: Region) => void
+  onClearConvoy: () => void
+}) {
+  // Cible Sphere : 1 point d'eau pour 500 habitants ruraux
+  const ranked = MAURITANIA_REGIONS
+    .map((r) => {
+      const score = computedScores[r.id]
+      const current = wilayaStats[r.id]?.total ?? 0
+      const target = Math.ceil(r.ruralPopulation / 500)
+      const gap = Math.max(0, target - current)
+      return { region: r, score, current, target, gap }
+    })
+    .filter((x) => x.score && x.score.fromData)
+    .sort((a, b) => (a.score?.score ?? 100) - (b.score?.score ?? 100))
+    .slice(0, 3)
+
+  return (
+    <section className="rounded-lg p-4 bg-cyan-500/15 border border-cyan-300/40">
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-cyan-100">
+          Décision · Prochain convoi
+        </h2>
+        {convoyTarget && (
+          <button
+            onClick={onClearConvoy}
+            className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 transition opacity-80 hover:opacity-100"
+          >
+            Effacer
+          </button>
+        )}
+      </div>
+      <p className="text-[11px] opacity-70 mb-3 leading-snug">
+        Classement basé sur le score d'accès (norme Sphere : 1 pt&nbsp;/&nbsp;500&nbsp;hab).
+        Le convoi part de Nouakchott.
+      </p>
+
+      {ranked.length === 0 ? (
+        <p className="text-[11px] opacity-60 italic py-2">
+          En attente du chargement des données…
+        </p>
+      ) : (
+        <ol className="space-y-2">
+          {ranked.map((r, i) => {
+            const isTarget = convoyTarget?.id === r.region.id
+            const score = r.score!
+            return (
+              <li key={r.region.id}>
+                <button
+                  onClick={() => onTargetConvoy(r.region)}
+                  className={`w-full text-left rounded-md p-2.5 transition-colors ${
+                    isTarget
+                      ? 'bg-cyan-500/40 border border-cyan-300/70 ring-1 ring-cyan-300/40'
+                      : 'bg-water-700/40 border border-transparent hover:bg-water-700/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ background: score.color }}
+                    />
+                    <span className="text-cyan-100 font-mono text-[11px]">#{i + 1}</span>
+                    <span className="font-semibold text-sm flex-1 truncate">
+                      {r.region.name}
+                    </span>
+                    <span className="text-xs opacity-80 tabular-nums">
+                      {score.score}/100
+                    </span>
+                  </div>
+                  <div className="text-[11px] opacity-70 mt-1 leading-snug">
+                    {r.region.ruralPopulation.toLocaleString('fr-FR')} habitants ruraux
+                    <br />
+                    Manque ~<span className="font-medium">{r.gap.toLocaleString('fr-FR')}</span> points d'eau
+                    pour atteindre la cible
+                  </div>
+                  <div className="text-[10px] mt-1.5 text-cyan-100 font-medium flex items-center gap-1">
+                    {isTarget ? (
+                      <>✓ Convoi tracé sur la carte</>
+                    ) : (
+                      <>→ Tracer le convoi sur la carte</>
+                    )}
+                  </div>
+                </button>
+              </li>
+            )
+          })}
+        </ol>
+      )}
+    </section>
   )
 }
 
