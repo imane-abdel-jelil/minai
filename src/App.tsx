@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import MapView from './components/MapView'
 import Sidebar from './components/Sidebar'
+import LandingPage from './components/LandingPage'
 import type { Region } from './data/mauritania-regions'
 import type { WilayaStats } from './lib/geo'
 import { computeAllScores } from './lib/score'
@@ -16,7 +17,13 @@ const ALL_KINDS = [
   'other',
 ] as const
 
+type View = 'landing' | 'map'
+
 export default function App() {
+  // Vue par défaut = landing page (présentation MINAI).
+  // L'utilisateur entre dans la carte via un CTA.
+  const [view, setView] = useState<View>('landing')
+
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null)
   const [showWaterPoints, setShowWaterPoints] = useState(true)
   const [showWilayas, setShowWilayas] = useState(true)
@@ -52,6 +59,18 @@ export default function App() {
   // Scores calculés depuis les vraies données (densité OSM / cible Sphere)
   const computedScores = useMemo(() => computeAllScores(wilayaStats), [wilayaStats])
 
+  if (view === 'landing') {
+    return (
+      <LandingPage
+        onEnter={() => {
+          setView('map')
+          // remonte en haut de la fenêtre quand on entre dans la carte
+          window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+        }}
+      />
+    )
+  }
+
   return (
     <div className="flex h-screen w-screen">
       <Sidebar
@@ -68,6 +87,14 @@ export default function App() {
         computedScores={computedScores}
       />
       <main className="flex-1 relative">
+        {/* Bouton retour vers la landing — pill discret en haut à gauche de la carte */}
+        <button
+          onClick={() => setView('landing')}
+          className="absolute top-4 left-4 z-30 bg-slate-900/80 backdrop-blur-md text-white text-xs font-medium px-3.5 py-2 rounded-full border border-white/15 hover:bg-slate-900 hover:border-white/30 transition shadow-lg"
+          title="Retour à la page d'accueil"
+        >
+          ← MINAI
+        </button>
         <MapView
           onRegionClick={setSelectedRegion}
           showWaterPoints={showWaterPoints}
