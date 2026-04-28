@@ -5,21 +5,31 @@ interface Props {
 }
 
 /**
- * Landing page MINAI — version blanche, copy stratégique v3.
+ * Landing page MINAI — version blanche, copy stratégique v4.
  * Apple ⨯ Charity:Water ⨯ Our World in Data.
  *
  * Photos : Pexels — free for commercial use, attribution non requise.
- *   ‣ 30441483  Şeyhmus Kino — woman carrying jerrycan
- *   ‣ 30629420  Jonathan John — smiling woman fetching water
- *   ‣ 35328689  Sahara aerial
- *   ‣ 4511301   women carrying water on heads
+ *   ‣ 30441483  Şeyhmus Kino     — woman carrying jerrycan
+ *   ‣ 30629420  Jonathan John    — smiling woman fetching water
+ *   ‣ 35328689  ?                — Sahara aerial
+ *   ‣ 4511301   ?                — women carrying water on heads
+ *   ‣ 30441497  Şeyhmus Kino     — rural African woman carrying water jugs
+ *   ‣ 7165327   Jep Gambardella  — close-up boy drinking water
+ *   ‣ 11759837  Swastik Arora    — boy using manual water pump
+ *   ‣ 17844227  Tope A. Asokere  — group of children in African village
+ *   ‣ 32422620  Thato Moiketsi   — traditional water gathering
  */
 
 const IMG = {
-  woman_jerrycan: 'https://images.pexels.com/photos/30441483/pexels-photo-30441483.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  smiling_water:  'https://images.pexels.com/photos/30629420/pexels-photo-30629420.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  sahara_aerial:  'https://images.pexels.com/photos/35328689/pexels-photo-35328689.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  women_carrying: 'https://images.pexels.com/photos/4511301/pexels-photo-4511301.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  woman_jerrycan:    'https://images.pexels.com/photos/30441483/pexels-photo-30441483.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  smiling_water:     'https://images.pexels.com/photos/30629420/pexels-photo-30629420.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  sahara_aerial:     'https://images.pexels.com/photos/35328689/pexels-photo-35328689.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  women_carrying:    'https://images.pexels.com/photos/4511301/pexels-photo-4511301.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  woman_water_jugs:  'https://images.pexels.com/photos/30441497/pexels-photo-30441497.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  child_drinking:    'https://images.pexels.com/photos/7165327/pexels-photo-7165327.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  boy_pump:          'https://images.pexels.com/photos/11759837/pexels-photo-11759837.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  children_village:  'https://images.pexels.com/photos/17844227/pexels-photo-17844227.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  traditional_water: 'https://images.pexels.com/photos/32422620/pexels-photo-32422620.jpeg?auto=compress&cs=tinysrgb&w=1400',
 }
 
 export default function LandingPage({ onEnter }: Props) {
@@ -30,9 +40,11 @@ export default function LandingPage({ onEnter }: Props) {
       <HeroImage />
       <TransitionStatement />
       <ProblemSection />
+      <PainPointGallery />
       <HumanImpactSection />
       <SolutionSection />
       <ImpactSection />
+      <InstitutionsSection />
       <PartnerSection onEnter={onEnter} />
       <Signature />
     </div>
@@ -273,6 +285,57 @@ function Pillar({ n, title, body }: { n: string; title: string; body: string }) 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// PAIN POINT GALLERY — galerie 4 photos juste avant la section humaine
+// ─────────────────────────────────────────────────────────────────────────────
+
+function PainPointGallery() {
+  const items = [
+    { src: IMG.woman_water_jugs, alt: "Femme rurale transportant des bidons d'eau",
+      caption: 'Marche quotidienne pour l’eau' },
+    { src: IMG.boy_pump,          alt: 'Enfant utilisant une pompe à eau manuelle',
+      caption: 'Enfant à la pompe' },
+    { src: IMG.child_drinking,    alt: "Enfant buvant un verre d'eau",
+      caption: 'Le geste qu’on tient pour acquis' },
+    { src: IMG.children_village,  alt: 'Groupe d’enfants dans un village africain',
+      caption: 'Une génération en attente' },
+  ]
+  return (
+    <section className="bg-white px-4 sm:px-6 py-24 md:py-32">
+      <div className="max-w-7xl mx-auto">
+        <Reveal>
+          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-4 text-center">
+            La réalité, en images
+          </p>
+        </Reveal>
+        <Reveal delay={100}>
+          <h3 className="text-center text-3xl md:text-5xl font-semibold tracking-tight text-[#1d1d1f] max-w-3xl mx-auto leading-tight">
+            Voici ce que les chiffres ne disent pas.
+          </h3>
+        </Reveal>
+        <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          {items.map((it, i) => (
+            <Reveal key={i} delay={100 + i * 80}>
+              <figure className="group relative rounded-2xl overflow-hidden aspect-[3/4] bg-slate-100">
+                <img
+                  src={it.src}
+                  alt={it.alt}
+                  className="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-[1.04]"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/0" />
+                <figcaption className="absolute bottom-3 left-3 right-3 text-white text-[12px] md:text-sm font-medium tracking-tight">
+                  {it.caption}
+                </figcaption>
+              </figure>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // HUMAN IMPACT — full-bleed photo + texte en overlay
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -491,6 +554,116 @@ function Stat({ n, label, sub }: { n: string; label: string; sub: string }) {
       <p className="mt-4 text-[#1d1d1f] text-base font-medium">{label}</p>
       <p className="mt-1 text-[#86868b] text-xs tracking-wide">{sub}</p>
     </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INSTITUTIONS — 3 cards cliquables vers les vraies pages des institutions
+// ─────────────────────────────────────────────────────────────────────────────
+
+function InstitutionsSection() {
+  return (
+    <section className="bg-white px-6 py-32 md:py-40 border-t border-black/5">
+      <div className="max-w-6xl mx-auto">
+        <Reveal>
+          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-4 text-center">
+            Sources institutionnelles
+          </p>
+        </Reveal>
+        <Reveal delay={100}>
+          <h2 className="text-center text-3xl md:text-5xl font-semibold tracking-tight text-[#1d1d1f] max-w-3xl mx-auto leading-tight">
+            Des chiffres adossés aux institutions de référence.
+          </h2>
+        </Reveal>
+        <Reveal delay={200}>
+          <p className="mt-6 text-center text-[#6e6e73] max-w-2xl mx-auto leading-relaxed">
+            MINAI ne crée pas de données — il les croise et les rend lisibles.
+            Cliquez sur une carte pour accéder aux données originales.
+          </p>
+        </Reveal>
+
+        <div className="mt-16 grid md:grid-cols-3 gap-5">
+          <Reveal delay={150}>
+            <InstitutionCard
+              eyebrow="ANSADE"
+              tag="Recensement RGPH 2013"
+              stat="3,5 M"
+              statLabel="habitants recensés"
+              body="Office national de la statistique mauritanien : population, urbanisation et milieu rural par wilaya."
+              href="https://ansade.mr/fr/"
+            />
+          </Reveal>
+          <Reveal delay={250}>
+            <InstitutionCard
+              eyebrow="UNICEF"
+              tag="WHO/UNICEF JMP"
+              stat="1 / 4"
+              statLabel="enfant sans eau de base au Sahel"
+              body="Joint Monitoring Programme : suivi mondial de l'accès à l'eau, l'assainissement et l'hygiène."
+              href="https://washdata.org/data/country/MRT/water/overview"
+            />
+          </Reveal>
+          <Reveal delay={350}>
+            <InstitutionCard
+              eyebrow="World Bank"
+              tag="Indicator SH.H2O.BASW.ZS"
+              stat="57%"
+              statLabel="population rurale avec eau améliorée"
+              body="Open Data Bank : indicateurs de développement, accès à l'eau, sanitation, par pays."
+              href="https://data.worldbank.org/indicator/SH.H2O.BASW.ZS?locations=MR"
+            />
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function InstitutionCard({
+  eyebrow,
+  tag,
+  stat,
+  statLabel,
+  body,
+  href,
+}: {
+  eyebrow: string
+  tag: string
+  stat: string
+  statLabel: string
+  body: string
+  href: string
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group block bg-[#fafafa] rounded-3xl p-8 md:p-10 border border-black/[0.06] hover:border-black/15 hover:bg-white transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs tracking-[0.18em] uppercase text-[#1d1d1f] font-semibold">
+            {eyebrow}
+          </p>
+          <p className="mt-1 text-[11px] text-[#86868b] tracking-wide">{tag}</p>
+        </div>
+        <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">
+          ↗
+        </span>
+      </div>
+
+      <p className="mt-10 text-5xl md:text-6xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
+        {stat}
+      </p>
+      <p className="mt-3 text-[#1d1d1f] text-base font-medium">{statLabel}</p>
+
+      <p className="mt-6 text-[#6e6e73] text-[14px] leading-relaxed">{body}</p>
+
+      <p className="mt-8 text-cyan-700 text-sm font-medium tracking-tight inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+        Voir les données <span aria-hidden>→</span>
+      </p>
+    </a>
   )
 }
 
