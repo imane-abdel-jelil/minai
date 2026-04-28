@@ -253,12 +253,12 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
       ]}
       cursor={hovered || waterPopup ? 'pointer' : 'grab'}
       onLoad={(e) => {
-        // Enregistre toutes les icônes goutte d'eau (1 par type) dans le sprite Mapbox.
-        // À faire dans onLoad sinon addImage() crash si la style n'est pas prête.
+        // Trois gouttes bleues pour les clusters (taille croissante selon le compte).
+        // À faire dans onLoad sinon addImage() crash si le style n'est pas prêt.
         const map = e.target
-        for (const [kind, color] of Object.entries(KIND_COLORS)) {
-          registerDropletIcon(map, `drop-${kind}`, color)
-        }
+        registerDropletIcon(map, 'cluster-sm', '#06b6d4')
+        registerDropletIcon(map, 'cluster-md', '#0ea5e9')
+        registerDropletIcon(map, 'cluster-lg', '#0284c7')
       }}
       onClick={(e: MapLayerMouseEvent) => {
         const feature = e.features?.[0]
@@ -357,70 +357,78 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
           clusterRadius={45}
           clusterMaxZoom={12}
         >
-          {/* Clusters (bulles avec compteur) */}
+          {/* Clusters → grosses gouttes bleues avec compteur dedans */}
           <Layer
             id="water-clusters"
-            type="circle"
-            filter={['has', 'point_count']}
-            paint={{
-              'circle-color': [
-                'step',
-                ['get', 'point_count'],
-                '#06b6d4', 20,
-                '#0ea5e9', 100,
-                '#0284c7',
-              ],
-              'circle-radius': [
-                'step',
-                ['get', 'point_count'],
-                14, 20,
-                20, 100,
-                28,
-              ],
-              'circle-stroke-width': 2,
-              'circle-stroke-color': '#ffffff',
-              'circle-opacity': 0.85,
-            }}
-          />
-          <Layer
-            id="water-cluster-count"
             type="symbol"
             filter={['has', 'point_count']}
-            layout={{
-              'text-field': ['get', 'point_count_abbreviated'],
-              'text-size': 12,
-              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-            }}
-            paint={{ 'text-color': '#ffffff' }}
-          />
-          {/* Points individuels — icônes goutte d'eau (couleur par type) */}
-          <Layer
-            id="water-unclustered"
-            type="symbol"
-            filter={['!', ['has', 'point_count']]}
             layout={{
               'icon-image': [
-                'match',
-                ['get', 'kind'],
-                'drinking_water', 'drop-drinking_water',
-                'water_point', 'drop-water_point',
-                'well', 'drop-well',
-                'borehole', 'drop-borehole',
-                'spring', 'drop-spring',
-                'tap', 'drop-tap',
-                'water_works', 'drop-water_works',
-                /* default */ 'drop-other',
+                'step',
+                ['get', 'point_count'],
+                'cluster-sm', 20,
+                'cluster-md', 100,
+                'cluster-lg',
               ],
               'icon-size': [
-                'interpolate', ['linear'], ['zoom'],
-                4, 0.28,
-                7, 0.38,
-                11, 0.5,
-                15, 0.65,
+                'step',
+                ['get', 'point_count'],
+                0.55, 20,
+                0.78, 100,
+                1.0,
               ],
               'icon-allow-overlap': true,
               'icon-ignore-placement': true,
               'icon-anchor': 'bottom',
+              // Le compteur est posé sur le rond de la goutte (≈ centre du blob)
+              'text-field': ['get', 'point_count_abbreviated'],
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-size': [
+                'step',
+                ['get', 'point_count'],
+                12, 20,
+                14, 100,
+                16,
+              ],
+              'text-anchor': 'center',
+              'text-offset': [0, -1.0],
+              'text-allow-overlap': true,
+              'text-ignore-placement': true,
+            }}
+            paint={{
+              'text-color': '#ffffff',
+              'text-halo-color': '#0c4a6e',
+              'text-halo-width': 1.4,
+            }}
+          />
+          {/* Points individuels — petits cercles, seulement quand on zoome proche */}
+          <Layer
+            id="water-unclustered"
+            type="circle"
+            filter={['!', ['has', 'point_count']]}
+            minzoom={8}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                8, 3,
+                12, 5,
+                16, 8,
+              ],
+              'circle-color': [
+                'match',
+                ['get', 'kind'],
+                'drinking_water', '#06b6d4',
+                'water_point', '#06b6d4',
+                'well', '#f59e0b',
+                'borehole', '#10b981',
+                'spring', '#14b8a6',
+                'tap', '#3b82f6',
+                'water_works', '#8b5cf6',
+                /* default */ '#9ca3af',
+              ],
+              'circle-stroke-width': 1.5,
+              'circle-stroke-color': '#ffffff',
+              'circle-opacity': 0.92,
             }}
           />
         </Source>
