@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 interface Props {
   onEnter: () => void
+  onUnderstand: () => void
 }
 
 /**
@@ -26,18 +27,18 @@ const IMG = {
   boy_pump:          'https://images.pexels.com/photos/11759837/pexels-photo-11759837.jpeg?auto=compress&cs=tinysrgb&w=1400',
 }
 
-export default function LandingPage({ onEnter }: Props) {
+export default function LandingPage({ onEnter, onUnderstand }: Props) {
   return (
     <div className="bg-white text-[#1d1d1f] overflow-x-hidden font-sans antialiased">
-      <Nav onEnter={onEnter} />
-      <Hero onEnter={onEnter} />
+      <Nav onEnter={onEnter} onUnderstand={onUnderstand} />
+      <Hero onEnter={onEnter} onUnderstand={onUnderstand} />
       <HeroImage />
       <ProblemSection />
       <ConsequencesGallery />
       <HumanImpactSection />
       <SolutionSection />
       <ByTheNumbersSection />
-      <SDG6Section />
+      <SDG6Section onUnderstand={onUnderstand} />
       <CollaborationSection onEnter={onEnter} />
       <Signature />
     </div>
@@ -90,7 +91,7 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 // NAV
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Nav({ onEnter }: { onEnter: () => void }) {
+function Nav({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () => void }) {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-white/75 border-b border-black/5">
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
@@ -98,6 +99,9 @@ function Nav({ onEnter }: { onEnter: () => void }) {
           MINAI<span className="text-cyan-600">.</span>
         </span>
         <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
+          <button onClick={onUnderstand} className="hover:text-[#1d1d1f] transition">
+            Comprendre l’eau
+          </button>
           <a href="#problem"        className="hover:text-[#1d1d1f] transition">Problème</a>
           <a href="#solution"       className="hover:text-[#1d1d1f] transition">Solution</a>
           <a href="#impact"         className="hover:text-[#1d1d1f] transition">Impact</a>
@@ -119,7 +123,7 @@ function Nav({ onEnter }: { onEnter: () => void }) {
 // HERO — institutionnel, court, clair en moins de 10 secondes
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Hero({ onEnter }: { onEnter: () => void }) {
+function Hero({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () => void }) {
   return (
     <section className="relative pt-32 md:pt-40 pb-16 md:pb-20 px-6">
       <div className="max-w-5xl mx-auto text-center">
@@ -175,6 +179,17 @@ function Hero({ onEnter }: { onEnter: () => void }) {
               Collaborer
             </a>
           </div>
+        </Reveal>
+
+        {/* Lien tertiaire discret vers la page éditoriale */}
+        <Reveal delay={750}>
+          <button
+            onClick={onUnderstand}
+            className="mt-8 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition inline-flex items-center gap-1.5"
+          >
+            Pourquoi l’accès à l’eau ?{' '}
+            <span className="opacity-60">Comprendre l’enjeu →</span>
+          </button>
         </Reveal>
       </div>
     </section>
@@ -606,7 +621,7 @@ function NumberCard({
 // SDG 6 — alignement avec l'objectif onusien (institutionnel)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function SDG6Section() {
+function SDG6Section({ onUnderstand }: { onUnderstand: () => void }) {
   return (
     <section id="sdg6" className="bg-[#fafafa] px-6 py-32 md:py-40 border-t border-black/5">
       <div className="max-w-5xl mx-auto">
@@ -646,6 +661,15 @@ function SDG6Section() {
                 nécessaire, et en mettant à disposition des décideurs publics une
                 lecture commune du territoire.
               </p>
+            </Reveal>
+            <Reveal delay={400}>
+              <button
+                onClick={onUnderstand}
+                className="mt-6 text-sm text-cyan-700 hover:text-cyan-900 transition inline-flex items-center gap-1.5 font-medium"
+              >
+                Comprendre l’enjeu en détail{' '}
+                <span aria-hidden>→</span>
+              </button>
             </Reveal>
           </div>
         </div>

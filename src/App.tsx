@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import MapView from './components/MapView'
 import Sidebar from './components/Sidebar'
 import LandingPage from './components/LandingPage'
+import UnderstandingPage from './components/UnderstandingPage'
 import type { Region } from './data/mauritania-regions'
 import { MAURITANIA_VILLAGES, type Village } from './data/mauritania-villages'
 import type { WilayaStats } from './lib/geo'
@@ -19,7 +20,7 @@ const ALL_KINDS = [
   'other',
 ] as const
 
-type View = 'landing' | 'map'
+type View = 'landing' | 'understanding' | 'map'
 
 export default function App() {
   // Vue par défaut = landing page. L'utilisateur entre dans la carte via un CTA.
@@ -84,13 +85,33 @@ export default function App() {
     return villageEvals.find((e) => e.village.id === selectedVillage.id) ?? null
   }, [selectedVillage, villageEvals])
 
+  const enterMap = () => {
+    setView('map')
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+  }
+  const goToUnderstanding = () => {
+    setView('understanding')
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+  }
+  const goToLanding = () => {
+    setView('landing')
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+  }
+
   if (view === 'landing') {
     return (
       <LandingPage
-        onEnter={() => {
-          setView('map')
-          window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-        }}
+        onEnter={enterMap}
+        onUnderstand={goToUnderstanding}
+      />
+    )
+  }
+
+  if (view === 'understanding') {
+    return (
+      <UnderstandingPage
+        onBack={goToLanding}
+        onEnterMap={enterMap}
       />
     )
   }
