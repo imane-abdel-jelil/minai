@@ -1,22 +1,36 @@
 import { MAURITANIA_REGIONS, type Region, getScoreColor, getScoreLabel } from '../data/mauritania-regions'
+import type { Village } from '../data/mauritania-villages'
 import type { WilayaStats } from '../lib/geo'
 import { computeNationalScore, type ComputedScore } from '../lib/score'
+import {
+  recommendedDelay,
+  statusColor,
+  statusLabel,
+  type VillageEval,
+  type VillageStatus,
+} from '../lib/villages'
 
 interface Props {
   selectedRegion: Region | null
+  selectedVillage: Village | null
+  selectedVillageEval: VillageEval | null
   showWaterPoints: boolean
   onToggleWaterPoints: (v: boolean) => void
   showWilayas: boolean
   onToggleWilayas: (v: boolean) => void
+  showVillages: boolean
+  onToggleVillages: (v: boolean) => void
   wilayaStats: Record<string, WilayaStats>
   kindFilters: Record<string, boolean>
   onToggleKind: (kind: string) => void
   onSetAllKinds: (value: boolean) => void
   kindCounts: Record<string, number>
   computedScores: Record<string, ComputedScore>
-  convoyTarget: Region | null
-  onTargetConvoy: (r: Region) => void
+  priorities: VillageEval[]
+  convoyTarget: Village | null
+  onTargetConvoy: (v: Village) => void
   onClearConvoy: () => void
+  onSelectVillage: (v: Village | null) => void
 }
 
 const KIND_LABELS: Record<string, string> = {
@@ -30,7 +44,6 @@ const KIND_LABELS: Record<string, string> = {
   other: 'Autres',
 }
 
-// Couleurs alignées sur la couche Mapbox 'water-unclustered'
 const KIND_COLORS: Record<string, string> = {
   drinking_water: '#06b6d4',
   water_point: '#06b6d4',
@@ -42,33 +55,32 @@ const KIND_COLORS: Record<string, string> = {
   other: '#9ca3af',
 }
 
-// Ordre d'affichage des filtres
 const KIND_ORDER = [
-  'drinking_water',
-  'water_point',
-  'well',
-  'borehole',
-  'spring',
-  'tap',
-  'water_works',
-  'other',
+  'drinking_water', 'water_point', 'well', 'borehole',
+  'spring', 'tap', 'water_works', 'other',
 ]
 
 export default function Sidebar({
   selectedRegion,
+  selectedVillage,
+  selectedVillageEval,
   showWaterPoints,
   onToggleWaterPoints,
   showWilayas,
   onToggleWilayas,
+  showVillages,
+  onToggleVillages,
   wilayaStats,
   kindFilters,
   onToggleKind,
   onSetAllKinds,
   kindCounts,
   computedScores,
+  priorities,
   convoyTarget,
   onTargetConvoy,
   onClearConvoy,
+  onSelectVillage,
 }: Props) {
   const visibleKinds = KIND_ORDER.filter((k) => (kindCounts[k] ?? 0) > 0)
   const totalShown = visibleKinds.reduce(
@@ -78,180 +90,271 @@ export default function Sidebar({
   const totalAll = visibleKinds.reduce((s, k) => s + (kindCounts[k] || 0), 0)
   const allEnabled = visibleKinds.every((k) => kindFilters[k] !== false)
   const noneEnabled = visibleKinds.every((k) => kindFilters[k] === false)
-  const totalCounted = Object.values(wilayaStats).reduce((s, v) => s + v.total, 0)
   const totalRural = MAURITANIA_REGIONS.reduce((s, r) => s + r.ruralPopulation, 0)
 
-  // Score national pondéré + comptes critiques basés sur les scores LIVE
   const avgScore = computeNationalScore(computedScores)
   const criticalPeople = MAURITANIA_REGIONS
     .filter((r) => (computedScores[r.id]?.score ?? r.waterAccessScore) < 35)
     .reduce((s, r) => s + r.ruralPopulation, 0)
-  const totalPriority = MAURITANIA_REGIONS.reduce((s, r) => s + r.priorityVillages, 0)
 
   const selectedScore = selectedRegion ? computedScores[selectedRegion.id] : null
+
+  // La recommandation principale = le village le plus prioritaire
+  const topPriority = priorities[0] ?? null
 
   return (
     <aside className="w-96 bg-water-900 text-white overflow-y-auto p-6 flex flex-col gap-6">
       <header>
         <h1 className="text-2xl font-bold">MINAI</h1>
         <p className="text-xs opacity-70 leading-tight">
-          Mauritanie INtelligence Artificielle<br/>
-          Cartographie de l'accès à l'eau potable
+          Cartographie de l’accès à l’eau · Mauritanie
         </p>
       </header>
 
+      {/* ═══════════════════════════════════════════════════════════════
+          1. RECOMMANDATION MINAI — le cœur du produit
+          ═══════════════════════════════════════════════════════════════ */}
+      {topPriority ? (
+        <RecommendationCard
+          evaluation={topPriority}
+          isTargeted={convoyTarget?.id === topPriority.village.id}
+          onTarget={() => onTargetConvoy(topPriority.village)}
+          onClear={onClearConvoy}
+        />
+      ) : (
+        <section className="rounded-lg p-4 bg-cyan-500/10 border border-cyan-300/30 text-sm opacity-70 italic">
+          Calcul des priorités en cours…
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          2. TOP PRIORITÉS — liste des 3 villages les plus urgents
+          ═══════════════════════════════════════════════════════════════ */}
+      {priorities.length > 0 && (
+        <section>
+          <h2 className="text-sm uppercase tracking-wide opacity-70 mb-2 flex items-center gap-2">
+            🔥 <span>Zones prioritaires aujourd’hui</span>
+          </h2>
+          <ol className="space-y-2">
+            {priorities.map((e, i) => {
+              const isTarget = convoyTarget?.id === e.village.id
+              return (
+                <li key={e.village.id}>
+                  <div
+                    className={`rounded-md border transition-colors ${
+                      isTarget
+                        ? 'bg-cyan-500/30 border-cyan-300/60'
+                        : 'bg-water-700/40 border-transparent hover:bg-water-700/60'
+                    }`}
+                  >
+                    <button
+                      onClick={() => onSelectVillage(e.village)}
+                      className="w-full text-left p-2.5 flex items-start gap-2.5"
+                    >
+                      <span
+                        className="mt-1 inline-block w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        style={{ background: statusColor(e.status) }}
+                        title={statusLabel(e.status)}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="opacity-60 font-mono text-[10px]">#{i + 1}</span>
+                          <span className="font-semibold truncate">{e.village.name}</span>
+                          <StatusPill status={e.status} />
+                        </div>
+                        <div className="text-[11px] opacity-75 mt-0.5">
+                          {e.village.population.toLocaleString('fr-FR')}&nbsp;hab.
+                          {' · '}
+                          {Number.isFinite(e.distanceToWaterKm)
+                            ? `${e.distanceToWaterKm.toFixed(1)} km à l’eau`
+                            : 'distance inconnue'}
+                        </div>
+                      </div>
+                    </button>
+                    <div className="px-2.5 pb-2 -mt-1 flex gap-1.5">
+                      <button
+                        onClick={() => onTargetConvoy(e.village)}
+                        className="text-[11px] px-2 py-0.5 rounded bg-water-900/60 hover:bg-water-900/80 transition"
+                      >
+                        🚛 Tracer le convoi
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          3. DÉTAIL DU VILLAGE SÉLECTIONNÉ
+          ═══════════════════════════════════════════════════════════════ */}
+      {selectedVillage && selectedVillageEval && (
+        <section className="rounded-lg p-4 bg-water-700/50 border border-cyan-300/30">
+          <div className="flex items-start justify-between mb-2">
+            <div>
+              <h2 className="text-lg font-bold leading-tight">
+                {selectedVillage.name}
+              </h2>
+              <p className="text-xs opacity-70">
+                Wilaya : {regionName(selectedVillage.wilayaId)}
+              </p>
+            </div>
+            <button
+              onClick={() => onSelectVillage(null)}
+              className="text-xs opacity-60 hover:opacity-100"
+              title="Fermer"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 mb-3">
+            <span
+              className="inline-block w-3 h-3 rounded-full"
+              style={{ background: statusColor(selectedVillageEval.status) }}
+            />
+            <span className="font-semibold">
+              {statusLabel(selectedVillageEval.status)}
+            </span>
+            <span className="ml-auto text-xs opacity-70">
+              Niveau d’urgence
+            </span>
+          </div>
+
+          <dl className="text-sm space-y-1">
+            <Row
+              label="Population"
+              value={`${selectedVillage.population.toLocaleString('fr-FR')} habitants`}
+            />
+            <Row
+              label="Distance au point d’eau"
+              value={
+                Number.isFinite(selectedVillageEval.distanceToWaterKm)
+                  ? `${selectedVillageEval.distanceToWaterKm.toFixed(1)} km`
+                  : 'inconnue'
+              }
+            />
+            <Row label="Dernière intervention" value="Non renseignée" />
+          </dl>
+
+          <p
+            className="mt-3 px-3 py-2 rounded text-sm font-medium leading-snug"
+            style={{
+              background: `${statusColor(selectedVillageEval.status)}20`,
+              color: statusColor(selectedVillageEval.status),
+            }}
+          >
+            Intervention recommandée {recommendedDelay(selectedVillageEval.status)}.
+          </p>
+
+          {convoyTarget?.id !== selectedVillage.id && (
+            <button
+              onClick={() => onTargetConvoy(selectedVillage)}
+              className="mt-3 w-full bg-cyan-500/30 hover:bg-cyan-500/50 transition rounded py-2 text-sm font-medium"
+            >
+              🚛 Cibler ce village pour le prochain convoi
+            </button>
+          )}
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          4. VUE NATIONALE
+          ═══════════════════════════════════════════════════════════════ */}
       <section>
         <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Vue nationale</h2>
         <div className="grid grid-cols-2 gap-3">
           <Stat label="Pop. rurale" value={totalRural.toLocaleString('fr-FR')} />
           <Stat label="Score moyen" value={`${avgScore}/100`} />
           <Stat label="En zone critique" value={criticalPeople.toLocaleString('fr-FR')} accent="bg-red-500/30" />
-          <Stat label="Villages prioritaires" value={totalPriority.toString()} accent="bg-orange-500/30" />
+          <Stat label="Villages suivis" value={priorities.length > 0 ? '38+' : '…'} accent="bg-cyan-500/20" />
         </div>
       </section>
 
-      {/* Module Décision — où envoyer le prochain convoi ? */}
-      <DecisionModule
-        computedScores={computedScores}
-        wilayaStats={wilayaStats}
-        convoyTarget={convoyTarget}
-        onTargetConvoy={onTargetConvoy}
-        onClearConvoy={onClearConvoy}
-      />
-
-      {/* Toggles couches carto */}
-      <section className="rounded-lg bg-water-700/40 p-3 space-y-3">
-        <label className="flex items-center justify-between cursor-pointer">
-          <div className="flex-1">
-            <div className="text-sm font-semibold">Frontières des wilayas</div>
-            <div className="text-[11px] opacity-70 leading-tight">
-              13 régions administratives, colorées par score
+      {/* ═══════════════════════════════════════════════════════════════
+          5. WILAYA SÉLECTIONNÉE (vue secondaire)
+          ═══════════════════════════════════════════════════════════════ */}
+      {selectedRegion && (
+        <details className="rounded-lg p-3 bg-water-700/30">
+          <summary className="cursor-pointer text-sm font-semibold">
+            {selectedRegion.name} (vue wilaya)
+          </summary>
+          <div className="mt-3 space-y-1 text-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className="inline-block w-3 h-3 rounded-full"
+                style={{
+                  background:
+                    selectedScore?.color ?? getScoreColor(selectedRegion.waterAccessScore),
+                }}
+              />
+              <span className="font-semibold">
+                Score {selectedScore?.score ?? selectedRegion.waterAccessScore}/100
+              </span>
+              <span className="text-xs opacity-70">
+                — {selectedScore?.label ?? getScoreLabel(selectedRegion.waterAccessScore)}
+              </span>
             </div>
-          </div>
-          <Switch checked={showWilayas} onChange={onToggleWilayas} />
-        </label>
-
-        <div className="border-t border-white/10" />
-
-        <label className="flex items-center justify-between cursor-pointer">
-          <div className="flex-1">
-            <div className="text-sm font-semibold">Points d'eau réels</div>
-            <div className="text-[11px] opacity-70 leading-tight">
-              2 770 points (puits, forages, fontaines, sources)<br/>
-              Source : OpenStreetMap
-            </div>
-          </div>
-          <Switch checked={showWaterPoints} onChange={onToggleWaterPoints} />
-        </label>
-      </section>
-
-      {selectedRegion ? (
-        <section className="rounded-lg p-4 bg-water-700/40 border border-water-300/30">
-          <h2 className="text-lg font-bold">{selectedRegion.name}</h2>
-          <p className="text-xs opacity-70 mb-3">Capitale : {selectedRegion.capital}</p>
-
-          <div className="flex items-center gap-2 mb-3">
-            <span
-              className="inline-block w-3 h-3 rounded-full"
-              style={{
-                background: selectedScore?.color ?? getScoreColor(selectedRegion.waterAccessScore),
-              }}
-            />
-            <span className="font-semibold">
-              {(selectedScore?.score ?? selectedRegion.waterAccessScore)}/100
-            </span>
-            <span className="text-xs opacity-70">
-              — {selectedScore?.label ?? getScoreLabel(selectedRegion.waterAccessScore)}
-            </span>
-            {selectedScore?.fromData === false && (
-              <span className="text-[10px] opacity-50 italic ml-auto">estimation</span>
-            )}
-          </div>
-
-          <dl className="text-sm space-y-1">
             <Row label="Population totale" value={selectedRegion.population.toLocaleString('fr-FR')} />
             <Row label="Population rurale" value={selectedRegion.ruralPopulation.toLocaleString('fr-FR')} />
-            <Row label="Distance moyenne au pt d'eau" value={`${selectedRegion.avgDistanceToWater} km`} />
-            <Row label="Villages prioritaires" value={selectedRegion.priorityVillages.toString()} />
-          </dl>
-
-          {wilayaStats[selectedRegion.id] && (
-            <div className="mt-4 pt-3 border-t border-white/10">
-              <div className="text-xs uppercase tracking-wide opacity-60 mb-2">
-                Points d'eau dans cette wilaya
-              </div>
-              <div className="text-2xl font-bold leading-tight">
-                {wilayaStats[selectedRegion.id].total.toLocaleString('fr-FR')}
-              </div>
-              <div className="text-[11px] opacity-70 mb-2">
-                points référencés (OpenStreetMap)
-              </div>
-              {Object.keys(wilayaStats[selectedRegion.id].byKind).length > 0 && (
-                <ul className="text-xs space-y-0.5 opacity-90">
-                  {Object.entries(wilayaStats[selectedRegion.id].byKind)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([kind, n]) => (
-                      <li key={kind} className="flex justify-between">
-                        <span className="opacity-80">
-                          {KIND_LABELS[kind] || kind}
-                        </span>
-                        <span className="font-medium">{n}</span>
-                      </li>
-                    ))}
-                </ul>
-              )}
-              {selectedScore?.peoplePerPoint != null && (
-                <div className="text-[11px] opacity-70 mt-2 leading-snug">
-                  ≈ <span className="font-medium">1 point d'eau</span> pour{' '}
-                  <span className="font-medium">
-                    {selectedScore.peoplePerPoint.toLocaleString('fr-FR')}
-                  </span>{' '}
-                  habitants ruraux
-                  <br />
-                  <span className="opacity-70">
-                    (cible Sphere : 1 pour 500)
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-      ) : (
-        <section className="text-sm opacity-70 italic">
-          Clique sur une région pour voir ses détails.
-          {totalCounted > 0 && (
-            <div className="not-italic opacity-100 text-xs mt-2 opacity-70">
-              {totalCounted.toLocaleString('fr-FR')} points d'eau localisés dans les 13 wilayas.
-            </div>
-          )}
-        </section>
+            {wilayaStats[selectedRegion.id] && (
+              <Row label="Points d’eau (OSM)" value={wilayaStats[selectedRegion.id].total.toLocaleString('fr-FR')} />
+            )}
+          </div>
+        </details>
       )}
 
+      {/* ═══════════════════════════════════════════════════════════════
+          6. COUCHES (toggle visibilité)
+          ═══════════════════════════════════════════════════════════════ */}
+      <section className="rounded-lg bg-water-700/40 p-3 space-y-3">
+        <ToggleRow
+          title="Villages"
+          subtitle="Localités évaluées (statut Critique / Risque / OK)"
+          checked={showVillages}
+          onChange={onToggleVillages}
+        />
+        <Divider />
+        <ToggleRow
+          title="Frontières des wilayas"
+          subtitle="13 régions administratives, colorées par score"
+          checked={showWilayas}
+          onChange={onToggleWilayas}
+        />
+        <Divider />
+        <ToggleRow
+          title="Points d’eau (OSM)"
+          subtitle="Puits, forages, fontaines, sources"
+          checked={showWaterPoints}
+          onChange={onToggleWaterPoints}
+        />
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          7. LÉGENDE STATUT VILLAGE
+          ═══════════════════════════════════════════════════════════════ */}
       <section>
-        <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Score d'accès</h2>
-        <div className="space-y-1 text-sm">
-          <LegendItem color="#ef4444" label="Critique (&lt; 35)" />
-          <LegendItem color="#f97316" label="Préoccupant (35–55)" />
-          <LegendItem color="#eab308" label="Acceptable (55–75)" />
-          <LegendItem color="#22c55e" label="Bon (≥ 75)" />
-        </div>
+        <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Statut village</h2>
+        <ul className="space-y-1 text-sm">
+          <LegendVillage status="critical" desc="distance > 5 km au point d’eau le plus proche" />
+          <LegendVillage status="risk"     desc="distance entre 2 et 5 km" />
+          <LegendVillage status="ok"       desc="distance ≤ 2 km" />
+        </ul>
         <details className="mt-2 text-[11px] opacity-60">
-          <summary className="cursor-pointer hover:opacity-100">
-            Comment le score est calculé
-          </summary>
+          <summary className="cursor-pointer hover:opacity-100">Méthodologie</summary>
           <p className="mt-2 leading-snug">
-            Densité de points d'eau OSM par habitant rural, comparée à la cible
-            humanitaire <span className="italic">Sphere</span> : 1 point pour
-            500 personnes. Score = 100 quand la cible est atteinte.
-          </p>
-          <p className="mt-1 leading-snug">
-            Limite : OSM mesure la <span className="italic">couverture
-            cartographique</span>, pas la couverture réelle. WPDx (statut
-            fonctionnel) viendra affiner ça.
+            Pour chaque village, on calcule la distance au point d’eau OSM le
+            plus proche. Le statut est défini selon des seuils opérationnels
+            sahéliens. La priorité est pondérée par la population du village.
           </p>
         </details>
       </section>
 
+      {/* ═══════════════════════════════════════════════════════════════
+          8. FILTRES PAR TYPE DE POINT D'EAU
+          ═══════════════════════════════════════════════════════════════ */}
       {showWaterPoints && visibleKinds.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-2">
@@ -262,13 +365,12 @@ export default function Sidebar({
               {totalShown.toLocaleString('fr-FR')} / {totalAll.toLocaleString('fr-FR')}
             </div>
           </div>
-
           <div className="flex gap-1.5 mb-2">
             <button
               type="button"
               onClick={() => onSetAllKinds(true)}
               disabled={allEnabled}
-              className="text-[11px] px-2 py-0.5 rounded bg-water-700/40 hover:bg-water-700/70 disabled:opacity-40 disabled:hover:bg-water-700/40 transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded bg-water-700/40 hover:bg-water-700/70 disabled:opacity-40 transition-colors"
             >
               Tout
             </button>
@@ -276,12 +378,11 @@ export default function Sidebar({
               type="button"
               onClick={() => onSetAllKinds(false)}
               disabled={noneEnabled}
-              className="text-[11px] px-2 py-0.5 rounded bg-water-700/40 hover:bg-water-700/70 disabled:opacity-40 disabled:hover:bg-water-700/40 transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded bg-water-700/40 hover:bg-water-700/70 disabled:opacity-40 transition-colors"
             >
               Aucun
             </button>
           </div>
-
           <ul className="space-y-1 text-sm">
             {visibleKinds.map((kind) => {
               const enabled = kindFilters[kind] !== false
@@ -320,10 +421,117 @@ export default function Sidebar({
       )}
 
       <footer className="mt-auto text-xs opacity-50">
-        Démo v0.2 — points d'eau réels via OSM (Overpass).<br/>
-        Sources estimées : INSAE, OMS, WPDx (à venir).
+        Démo v0.4 · Villages curés + OSM Overpass.<br />
+        Sources : ANSADE · UNICEF/JMP · World Bank · OpenStreetMap.
       </footer>
     </aside>
+  )
+}
+
+// ─── Composants internes ─────────────────────────────────────────────
+
+function RecommendationCard({
+  evaluation,
+  isTargeted,
+  onTarget,
+  onClear,
+}: {
+  evaluation: VillageEval
+  isTargeted: boolean
+  onTarget: () => void
+  onClear: () => void
+}) {
+  const { village, status, distanceToWaterKm } = evaluation
+  return (
+    <section
+      className="rounded-lg p-4 border-2"
+      style={{
+        background: `${statusColor(status)}18`,
+        borderColor: `${statusColor(status)}80`,
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2">
+          🚛 <span>Recommandation MINAI</span>
+        </h2>
+        {isTargeted && (
+          <button
+            onClick={onClear}
+            className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 transition"
+          >
+            Effacer
+          </button>
+        )}
+      </div>
+
+      <p className="text-[11px] opacity-70 mt-1 mb-3">
+        Prochaine intervention prioritaire selon les données disponibles.
+      </p>
+
+      <div className="text-base font-semibold leading-tight">
+        → {village.name}
+        <span className="text-xs opacity-70 font-normal ml-1.5">
+          ({regionName(village.wilayaId)})
+        </span>
+      </div>
+
+      <ul className="mt-3 space-y-1 text-sm">
+        <RecommendationLine
+          label="Distance au point d’eau"
+          value={
+            Number.isFinite(distanceToWaterKm)
+              ? `${distanceToWaterKm.toFixed(1)} km`
+              : 'inconnue'
+          }
+        />
+        <RecommendationLine
+          label="Population"
+          value={`${village.population.toLocaleString('fr-FR')} hab.`}
+        />
+        <RecommendationLine label="Approvisionnement récent" value="aucun renseigné" />
+      </ul>
+
+      <p
+        className="mt-3 text-sm font-medium"
+        style={{ color: statusColor(status) }}
+      >
+        Intervention recommandée {recommendedDelay(status)}.
+      </p>
+
+      <button
+        onClick={onTarget}
+        className={`mt-3 w-full rounded py-2 text-sm font-medium transition ${
+          isTargeted
+            ? 'bg-cyan-500/40 cursor-default'
+            : 'bg-cyan-500/30 hover:bg-cyan-500/50'
+        }`}
+      >
+        {isTargeted ? '✓ Convoi tracé sur la carte' : '🚛 Tracer le convoi sur la carte'}
+      </button>
+    </section>
+  )
+}
+
+function RecommendationLine({ label, value }: { label: string; value: string }) {
+  return (
+    <li className="flex items-baseline justify-between gap-3">
+      <span className="text-xs opacity-70">{label}</span>
+      <span className="font-medium tabular-nums text-right">{value}</span>
+    </li>
+  )
+}
+
+function StatusPill({ status }: { status: VillageStatus }) {
+  return (
+    <span
+      className="text-[10px] uppercase tracking-wide font-bold px-1.5 py-0.5 rounded"
+      style={{
+        background: `${statusColor(status)}30`,
+        color: statusColor(status),
+      }}
+    >
+      {statusLabel(status)}
+    </span>
   )
 }
 
@@ -345,120 +553,37 @@ function Row({ label, value }: { label: string; value: string }) {
   )
 }
 
-function LegendItem({ color, label }: { color: string; label: string }) {
+function LegendVillage({ status, desc }: { status: VillageStatus; desc: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="inline-block w-3 h-3 rounded-full" style={{ background: color }} />
-      <span dangerouslySetInnerHTML={{ __html: label }} />
-    </div>
+    <li className="flex items-start gap-2">
+      <span
+        className="inline-block w-3 h-3 rounded-full mt-1 flex-shrink-0"
+        style={{ background: statusColor(status) }}
+      />
+      <span>
+        <span className="font-medium">{statusLabel(status)}</span>{' '}
+        <span className="opacity-70">— {desc}</span>
+      </span>
+    </li>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Module DÉCISION — où envoyer le prochain convoi ?
-// Classement des wilayas par score d'accès ascendant (le plus critique d'abord)
-// + calcul du gap (combien de points d'eau manquent pour la cible Sphere).
-// ─────────────────────────────────────────────────────────────────────────────
-
-function DecisionModule({
-  computedScores,
-  wilayaStats,
-  convoyTarget,
-  onTargetConvoy,
-  onClearConvoy,
-}: {
-  computedScores: Record<string, ComputedScore>
-  wilayaStats: Record<string, WilayaStats>
-  convoyTarget: Region | null
-  onTargetConvoy: (r: Region) => void
-  onClearConvoy: () => void
-}) {
-  // Cible Sphere : 1 point d'eau pour 500 habitants ruraux
-  const ranked = MAURITANIA_REGIONS
-    .map((r) => {
-      const score = computedScores[r.id]
-      const current = wilayaStats[r.id]?.total ?? 0
-      const target = Math.ceil(r.ruralPopulation / 500)
-      const gap = Math.max(0, target - current)
-      return { region: r, score, current, target, gap }
-    })
-    .filter((x) => x.score && x.score.fromData)
-    .sort((a, b) => (a.score?.score ?? 100) - (b.score?.score ?? 100))
-    .slice(0, 3)
-
+function ToggleRow({
+  title, subtitle, checked, onChange,
+}: { title: string; subtitle: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <section className="rounded-lg p-4 bg-cyan-500/15 border border-cyan-300/40">
-      <div className="flex items-center justify-between mb-1">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-cyan-100">
-          Décision · Prochain convoi
-        </h2>
-        {convoyTarget && (
-          <button
-            onClick={onClearConvoy}
-            className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 transition opacity-80 hover:opacity-100"
-          >
-            Effacer
-          </button>
-        )}
+    <label className="flex items-center justify-between cursor-pointer">
+      <div className="flex-1">
+        <div className="text-sm font-semibold">{title}</div>
+        <div className="text-[11px] opacity-70 leading-tight">{subtitle}</div>
       </div>
-      <p className="text-[11px] opacity-70 mb-3 leading-snug">
-        Classement basé sur le score d'accès (norme Sphere : 1 pt&nbsp;/&nbsp;500&nbsp;hab).
-        Le convoi part de Nouakchott.
-      </p>
-
-      {ranked.length === 0 ? (
-        <p className="text-[11px] opacity-60 italic py-2">
-          En attente du chargement des données…
-        </p>
-      ) : (
-        <ol className="space-y-2">
-          {ranked.map((r, i) => {
-            const isTarget = convoyTarget?.id === r.region.id
-            const score = r.score!
-            return (
-              <li key={r.region.id}>
-                <button
-                  onClick={() => onTargetConvoy(r.region)}
-                  className={`w-full text-left rounded-md p-2.5 transition-colors ${
-                    isTarget
-                      ? 'bg-cyan-500/40 border border-cyan-300/70 ring-1 ring-cyan-300/40'
-                      : 'bg-water-700/40 border border-transparent hover:bg-water-700/60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: score.color }}
-                    />
-                    <span className="text-cyan-100 font-mono text-[11px]">#{i + 1}</span>
-                    <span className="font-semibold text-sm flex-1 truncate">
-                      {r.region.name}
-                    </span>
-                    <span className="text-xs opacity-80 tabular-nums">
-                      {score.score}/100
-                    </span>
-                  </div>
-                  <div className="text-[11px] opacity-70 mt-1 leading-snug">
-                    {r.region.ruralPopulation.toLocaleString('fr-FR')} habitants ruraux
-                    <br />
-                    Manque ~<span className="font-medium">{r.gap.toLocaleString('fr-FR')}</span> points d'eau
-                    pour atteindre la cible
-                  </div>
-                  <div className="text-[10px] mt-1.5 text-cyan-100 font-medium flex items-center gap-1">
-                    {isTarget ? (
-                      <>✓ Convoi tracé sur la carte</>
-                    ) : (
-                      <>→ Tracer le convoi sur la carte</>
-                    )}
-                  </div>
-                </button>
-              </li>
-            )
-          })}
-        </ol>
-      )}
-    </section>
+      <Switch checked={checked} onChange={onChange} />
+    </label>
   )
+}
+
+function Divider() {
+  return <div className="border-t border-white/10" />
 }
 
 function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
@@ -479,4 +604,8 @@ function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       />
     </button>
   )
+}
+
+function regionName(wilayaId: string): string {
+  return MAURITANIA_REGIONS.find((r) => r.id === wilayaId)?.name ?? wilayaId
 }

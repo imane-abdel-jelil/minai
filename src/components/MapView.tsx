@@ -1,8 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent, type MapRef } from 'react-map-gl'
-import { MAURITANIA_REGIONS, type Region, getScoreColor } from '../data/mauritania-regions'
+import { MAURITANIA_REGIONS, type Region } from '../data/mauritania-regions'
+import { MAURITANIA_VILLAGES, type Village } from '../data/mauritania-villages'
 import { countPointsByWilaya, type WilayaStats } from '../lib/geo'
 import type { ComputedScore } from '../lib/score'
+import { statusColor, statusLabel, type VillageEval } from '../lib/villages'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 
@@ -13,20 +15,18 @@ const CONVOY_ORIGIN_NAME = 'Nouakchott'
 
 interface Props {
   onRegionClick: (region: Region | null) => void
+  onVillageClick: (village: Village | null) => void
+  selectedVillage: Village | null
   showWaterPoints: boolean
   showWilayas: boolean
+  showVillages: boolean
   onStatsReady?: (stats: Record<string, WilayaStats>) => void
+  onWaterPointsReady?: (data: GeoJSON.FeatureCollection | null) => void
   kindFilters: Record<string, boolean>
   computedScores: Record<string, ComputedScore>
-  /** Wilaya cible du convoi simulé (null = aucun convoi affiché) */
-  convoyTarget: Region | null
-}
-
-interface HoveredRegion {
-  lng: number
-  lat: number
-  name: string
-  score: number
+  villageEvals: VillageEval[]
+  /** Village cible du convoi simulé (null = aucun convoi affiché) */
+  convoyTarget: Village | null
 }
 
 interface WaterPointPopup {
@@ -139,9 +139,21 @@ function findRegion(name: string): Region | undefined {
   )
 }
 
-export default function MapView({ onRegionClick, showWaterPoints, showWilayas, onStatsReady, kindFilters, computedScores, convoyTarget }: Props) {
+export default function MapView({
+  onRegionClick,
+  onVillageClick,
+  selectedVillage,
+  showWaterPoints,
+  showWilayas,
+  showVillages,
+  onStatsReady,
+  onWaterPointsReady,
+  kindFilters,
+  computedScores,
+  villageEvals,
+  convoyTarget,
+}: Props) {
   const mapRef = useRef<MapRef | null>(null)
-  const [hovered, setHovered] = useState<HoveredRegion | null>(null)
   const [waterPopup, setWaterPopup] = useState<WaterPointPopup | null>(null)
   const [waterPoints, setWaterPoints] = useState<GeoJSON.FeatureCollection | null>(null)
   const [wilayasGeo, setWilayasGeo] = useState<GeoJSON.FeatureCollection | null>(null)
@@ -151,10 +163,13 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
     fetch('/data/water-points.geojson')
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (data) setWaterPoints(data)
+        if (data) {
+          setWaterPoints(data)
+          onWaterPointsReady?.(data)
+        }
       })
       .catch((e) => console.warn('Pas de données points d’eau :', e))
-  }, [])
+  }, [onWaterPointsReady])
 
   // Charger les polygones bruts des wilayas — l'enrichissement (score/couleur live)
   // est fait dans un useMemo en aval pour réagir aux changements de scores.
@@ -198,6 +213,37 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
     const stats = countPointsByWilaya(wilayasGeo, waterPoints, 'regionId')
     onStatsReady(stats)
   }, [waterPoints, wilayasGeo, onStatsReady])
+
+  // ─── Villages enrichis ─────────────────────────────────────────────────────
+  // Chaque village reçoit son statut + couleur calculés en live.
+  const villagesGeoJSON = useMemo<GeoJSON.FeatureCollection>(() => {
+    // Lookup id → eval (objet au lieu de Map pour éviter le conflit de nom
+    // avec le composant <Map> importé de react-map-gl).
+    const byId: Record<string, VillageEval> = {}
+    for (const e of villageEvals) byId[e.village.id] = e
+    return {
+      type: 'FeatureCollection',
+      features: MAURITANIA_VILLAGES.map((v) => {
+        const e = byId[v.id]
+        const status = e?.status ?? 'critical'
+        return {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: v.center },
+          properties: {
+            id: v.id,
+            name: v.name,
+            wilayaId: v.wilayaId,
+            population: v.population,
+            status,
+            color: statusColor(status),
+            statusLabel: statusLabel(status),
+            distanceKm: e?.distanceToWaterKm ?? null,
+            isSelected: selectedVillage?.id === v.id ? 1 : 0,
+          },
+        }
+      }),
+    }
+  }, [villageEvals, selectedVillage])
 
   // ─── Convoi NGO simulé ────────────────────────────────────────────────────
   // Ligne droite de Nouakchott vers la wilaya cible. Visuellement subtil
@@ -268,30 +314,6 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
     }
   }, [waterPoints, kindFilters])
 
-  // GeoJSON des wilayas (centroïdes) — utilise les scores live
-  const regionsGeoJSON = useMemo(
-    () => ({
-      type: 'FeatureCollection' as const,
-      features: MAURITANIA_REGIONS.map((r) => {
-        const live = computedScores[r.id]
-        const score = live?.score ?? r.waterAccessScore
-        return {
-          type: 'Feature' as const,
-          geometry: { type: 'Point' as const, coordinates: r.center },
-          properties: {
-            id: r.id,
-            name: r.name,
-            score,
-            color: live?.color ?? getScoreColor(score),
-            rural: r.ruralPopulation,
-            radius: 14 + Math.sqrt(r.ruralPopulation) / 50,
-          },
-        }
-      }),
-    }),
-    [computedScores]
-  )
-
   if (!MAPBOX_TOKEN || MAPBOX_TOKEN.startsWith('pk.PASTE')) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-water-900 text-white p-8 text-center">
@@ -315,11 +337,11 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
       mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
-        'region-circles',
+        ...(showVillages ? ['village-markers'] : []),
         ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
       ]}
-      cursor={hovered || waterPopup ? 'pointer' : 'grab'}
+      cursor={waterPopup ? 'pointer' : 'grab'}
       onLoad={(e) => {
         // Trois gouttes bleues pour les clusters (taille croissante selon le compte).
         // À faire dans onLoad sinon addImage() crash si le style n'est pas prêt.
@@ -332,12 +354,15 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
         const feature = e.features?.[0]
         if (!feature?.properties) {
           onRegionClick(null)
+          onVillageClick(null)
           setWaterPopup(null)
           return
         }
-        if (feature.layer && feature.layer.id === 'region-circles') {
-          const region = MAURITANIA_REGIONS.find((r) => r.id === feature.properties!.id)
-          if (region) onRegionClick(region)
+        if (feature.layer && feature.layer.id === 'village-markers') {
+          // Click village → ouvre le détail dans la sidebar
+          const id = feature.properties.id as string
+          const village = MAURITANIA_VILLAGES.find((v) => v.id === id)
+          if (village) onVillageClick(village)
         } else if (feature.layer && feature.layer.id === 'wilaya-fill') {
           const id = feature.properties.regionId as string | null
           if (id) {
@@ -355,20 +380,6 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
             drinkable: feature.properties.drinkable as string | undefined,
             status: feature.properties.status as string | undefined,
           })
-        }
-      }}
-      onMouseMove={(e: MapLayerMouseEvent) => {
-        const feature = e.features?.find((f) => f.layer?.id === 'region-circles')
-        if (feature?.properties) {
-          const coords = (feature.geometry as GeoJSON.Point).coordinates
-          setHovered({
-            lng: coords[0],
-            lat: coords[1],
-            name: feature.properties.name as string,
-            score: feature.properties.score as number,
-          })
-        } else if (hovered) {
-          setHovered(null)
         }
       }}
     >
@@ -502,36 +513,73 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
         </Source>
       )}
 
-      {/* ---------- Wilayas (centroïdes — toujours au-dessus) ---------- */}
-      <Source id="regions" type="geojson" data={regionsGeoJSON}>
-        <Layer
-          id="region-circles"
-          type="circle"
-          paint={{
-            'circle-radius': ['get', 'radius'],
-            'circle-color': ['get', 'color'],
-            'circle-stroke-width': 3,
-            'circle-stroke-color': '#ffffff',
-            'circle-opacity': 0.92,
-          }}
-        />
-        <Layer
-          id="region-labels"
-          type="symbol"
-          layout={{
-            'text-field': ['get', 'name'],
-            'text-size': 12,
-            'text-offset': [0, 1.8],
-            'text-anchor': 'top',
-            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-          }}
-          paint={{
-            'text-color': '#ffffff',
-            'text-halo-color': '#000000',
-            'text-halo-width': 1.5,
-          }}
-        />
-      </Source>
+      {/* ---------- Villages (statut Critique/Risque/OK — couche actionnable) ---------- */}
+      {showVillages && (
+        <Source id="villages" type="geojson" data={villagesGeoJSON}>
+          {/* Halo blanc pour la lisibilité sur fond satellite */}
+          <Layer
+            id="village-halo"
+            type="circle"
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 7,
+                7, 9,
+                12, 14,
+              ],
+              'circle-color': '#ffffff',
+              'circle-opacity': 0.85,
+            }}
+          />
+          {/* Cercle plein coloré par statut */}
+          <Layer
+            id="village-markers"
+            type="circle"
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 5,
+                7, 7,
+                12, 11,
+              ],
+              'circle-color': ['get', 'color'],
+              'circle-stroke-color': [
+                'case',
+                ['==', ['get', 'isSelected'], 1],
+                '#ffffff',
+                ['get', 'color'],
+              ],
+              'circle-stroke-width': [
+                'case',
+                ['==', ['get', 'isSelected'], 1],
+                3,
+                1,
+              ],
+              'circle-opacity': 0.95,
+            }}
+          />
+          {/* Nom du village au-dessus, halo bleu nuit pour lisibilité */}
+          <Layer
+            id="village-label"
+            type="symbol"
+            layout={{
+              'text-field': ['get', 'name'],
+              'text-size': 11,
+              'text-offset': [0, 1.2],
+              'text-anchor': 'top',
+              'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+              'text-allow-overlap': false,
+              'text-optional': true,
+            }}
+            paint={{
+              'text-color': '#ffffff',
+              'text-halo-color': '#0c4a6e',
+              'text-halo-width': 1.4,
+            }}
+            minzoom={5}
+          />
+        </Source>
+      )}
 
       {/* ---------- Convoi NGO simulé (ligne + marqueurs origine/cible) ---------- */}
       {convoyRouteGeoJSON && (
@@ -629,22 +677,6 @@ export default function MapView({ onRegionClick, showWaterPoints, showWilayas, o
             }}
           />
         </Source>
-      )}
-
-      {hovered && (
-        <Popup
-          longitude={hovered.lng}
-          latitude={hovered.lat}
-          anchor="bottom"
-          offset={20}
-          closeButton={false}
-          className="text-gray-900"
-        >
-          <div className="text-sm">
-            <div className="font-bold">{hovered.name}</div>
-            <div className="text-xs opacity-70">Score : {hovered.score}/100</div>
-          </div>
-        </Popup>
       )}
 
       {waterPopup && (
