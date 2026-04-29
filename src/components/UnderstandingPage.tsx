@@ -10,28 +10,30 @@ interface Props {
 /**
  * Page éditoriale : "Comprendre l'accès à l'eau"
  *
- * Storytelling 4 couches : vérité universelle → rupture → développement
- * → solution. Distincte de la landing produit. Ton institutionnel,
- * éditorial, lecture longue.
+ * Storytelling 8 sections : Ouverture → Rupture → Impact → Réalité rurale
+ * → Développement → Le défi → Transition → Conclusion. Distincte de la
+ * landing produit. Ton institutionnel, lecture longue, photos réelles
+ * de la Mauritanie.
  *
- * Photos : Pexels — free for commercial use.
+ * IMAGES À DÉPOSER MANUELLEMENT dans `public/images/` :
+ *   ‣ mauritania-woman-jerrycans.jpg   — femme mauritanienne, robe bleue, 3 jerrycans
+ *   ‣ girl-water-pump.jpg              — fillette au point d'eau (chemise rouge)
+ *   ‣ mauritania-water-tanker.jpg      — citerne d'eau distribution Mauritanie
+ *   ‣ women-water-sunset.jpg           — silhouettes de femmes avec jerrycans, coucher de soleil
+ *
+ * Photos symboliques (Pexels — fallback) :
  *   ‣ 6130668   Macro Photography of Water Drop (symbolique)
- *   ‣ 2101147   Clear Drinking Glass Filled With Water (symbolique)
- *   ‣ 30441483  Şeyhmus Kino — woman with jerrycan (réel)
- *   ‣ 30441497  Şeyhmus Kino — woman with water jugs (rural)
- *   ‣ 11759837  Swastik Arora — boy at hand pump (impact)
- *   ‣ 7165327   Jep Gambardella — child drinking (universel)
- *   ‣ 35328689  Sahara aerial (territoire)
+ *   ‣ 11759837  Swastik Arora — boy at hand pump (impact, fallback)
  */
 
 const IMG = {
-  water_drop:     'https://images.pexels.com/photos/6130668/pexels-photo-6130668.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  glass_water:    'https://images.pexels.com/photos/2101147/pexels-photo-2101147.jpeg?auto=compress&cs=tinysrgb&w=1600',
-  woman_jerrycan: 'https://images.pexels.com/photos/30441483/pexels-photo-30441483.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  woman_jugs:     'https://images.pexels.com/photos/30441497/pexels-photo-30441497.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  boy_pump:       'https://images.pexels.com/photos/11759837/pexels-photo-11759837.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  child_drinking: 'https://images.pexels.com/photos/7165327/pexels-photo-7165327.jpeg?auto=compress&cs=tinysrgb&w=2000',
-  sahara_aerial:  'https://images.pexels.com/photos/35328689/pexels-photo-35328689.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  // Symbolique (Pexels)
+  water_drop:    'https://images.pexels.com/photos/6130668/pexels-photo-6130668.jpeg?auto=compress&cs=tinysrgb&w=2000',
+  // Photos Mauritanie locales (à déposer dans public/images/)
+  mauritania_woman: '/images/mauritania-woman-jerrycans.jpg',
+  girl_pump:        '/images/girl-water-pump.jpg',
+  water_tanker:     '/images/mauritania-water-tanker.jpg',
+  women_sunset:     '/images/women-water-sunset.jpg',
 }
 
 export default function UnderstandingPage({ onBack, onEnterMap }: Props) {
@@ -40,11 +42,13 @@ export default function UnderstandingPage({ onBack, onEnterMap }: Props) {
       <Nav onBack={onBack} onEnterMap={onEnterMap} />
       <Hero />
       <Section1Opening />
-      <Section2Impact />
-      <Section3Rural />
-      <Section4Development />
-      <Section5SeeingToAct />
-      <Section6Conclusion onEnterMap={onEnterMap} />
+      <Section2Rupture />
+      <Section3Impact />
+      <Section4Rural />
+      <Section5Development />
+      <Section6Challenge />
+      <Section7Transition />
+      <Section8Conclusion onEnterMap={onEnterMap} />
       <Signature />
     </div>
   )
@@ -106,11 +110,11 @@ function Nav({ onBack, onEnterMap }: { onBack: () => void; onEnterMap: () => voi
         >
           <span className="text-[#86868b]">←</span> MINAI<span className="text-cyan-600">.</span>
         </button>
-        <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
+        <div className="hidden md:flex items-center gap-7 text-[13px] text-[#6e6e73]">
           <a href="#opening"     className="hover:text-[#1d1d1f] transition">L’eau</a>
+          <a href="#rupture"     className="hover:text-[#1d1d1f] transition">Rupture</a>
           <a href="#impact"      className="hover:text-[#1d1d1f] transition">Impact</a>
           <a href="#rural"       className="hover:text-[#1d1d1f] transition">Réalité rurale</a>
-          <a href="#development" className="hover:text-[#1d1d1f] transition">Développement</a>
           <a href="#challenge"   className="hover:text-[#1d1d1f] transition">Le défi</a>
         </div>
         <button
@@ -159,7 +163,7 @@ function Hero() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION 1 — OUVERTURE (vérité universelle)
+// SECTION 1 — OUVERTURE 🟢
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Section1Opening() {
@@ -181,7 +185,7 @@ function Section1Opening() {
 
       <div className="px-6 pb-32 md:pb-40">
         <div className="max-w-3xl mx-auto">
-          <SectionEyebrow num="01" label="Vérité universelle" />
+          <SectionEyebrow num="01" label="Ouverture" />
           <Reveal delay={100}>
             <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
               L’eau est une condition d’existence.
@@ -190,11 +194,14 @@ function Section1Opening() {
           <Reveal delay={250}>
             <div className="mt-8 space-y-5 text-lg md:text-xl text-[#1d1d1f] leading-relaxed">
               <p>
-                Sans eau, il n’y a ni santé, ni agriculture, ni développement.
+                Sans accès à l’eau, rien ne fonctionne durablement —{' '}
+                <span className="text-[#86868b]">
+                  ni la santé, ni l’éducation, ni l’économie.
+                </span>
               </p>
               <p className="text-[#6e6e73]">
-                Pourtant, pour des millions de personnes, l’accès à l’eau
-                potable reste incertain.
+                Pourtant, aujourd’hui encore, l’accès à l’eau potable reste
+                incertain.
               </p>
             </div>
           </Reveal>
@@ -215,56 +222,111 @@ function Section1Opening() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION 2 — IMPACT
+// SECTION 2 — RUPTURE 🔴 (NOUVELLE — photo Mauritanie pleine largeur)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Section2Impact() {
-  const levers = [
-    { title: 'Santé',           body: 'Une eau non sécurisée est l’une des principales causes de maladies évitables.' },
-    { title: 'Éducation',       body: 'Lorsque l’eau est éloignée, les enfants — en particulier les filles — manquent l’école.' },
-    { title: 'Économie locale', body: 'Le temps consacré à la collecte de l’eau réduit la capacité de travail et de production.' },
-    { title: 'Résilience climatique', body: 'L’accès à l’eau renforce la capacité des communautés à faire face aux sécheresses.' },
+function Section2Rupture() {
+  return (
+    <section id="rupture" className="bg-[#fafafa] py-32 md:py-40">
+      <div className="px-4 sm:px-6 mb-12 md:mb-16">
+        <Reveal>
+          <div className="relative max-w-7xl mx-auto rounded-3xl overflow-hidden aspect-[16/9] md:aspect-[21/9] bg-slate-200">
+            <img
+              src={IMG.mauritania_woman}
+              alt="Femme mauritanienne transportant trois jerrycans dans le désert"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+          </div>
+        </Reveal>
+      </div>
+
+      <div className="px-6">
+        <div className="max-w-3xl mx-auto">
+          <SectionEyebrow num="02" label="Rupture" />
+          <Reveal delay={100}>
+            <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
+              Mais cette réalité
+              <br />
+              <span className="text-[#86868b]">
+                n’est pas répartie de manière égale.
+              </span>
+            </h2>
+          </Reveal>
+          <Reveal delay={250}>
+            <div className="mt-8 space-y-5 text-lg md:text-xl text-[#1d1d1f] leading-relaxed">
+              <p>
+                Pour certaines communautés, l’accès à l’eau dépend encore de
+                plusieurs heures de marche.
+              </p>
+              <p className="text-3xl md:text-4xl font-semibold tracking-tight text-cyan-700">
+                Chaque jour.
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION 3 — IMPACT 🟠
+// ─────────────────────────────────────────────────────────────────────────────
+
+function Section3Impact() {
+  const consequences = [
+    'Santé fragilisée.',
+    'Scolarité interrompue.',
+    'Activité économique limitée.',
   ]
   return (
-    <section id="impact" className="bg-[#fafafa] px-6 py-32 md:py-40">
-      <div className="max-w-5xl mx-auto">
-        <SectionEyebrow num="02" label="Impact" />
-        <Reveal delay={100}>
-          <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] max-w-3xl">
-            L’accès à l’eau ne se limite pas
-            <br />
-            <span className="text-[#86868b]">
-              à un besoin fondamental.
-            </span>
-          </h2>
-        </Reveal>
-        <Reveal delay={250}>
-          <p className="mt-8 max-w-3xl text-lg md:text-xl text-[#1d1d1f] leading-relaxed">
-            Il conditionne l’ensemble des dynamiques de développement.
-          </p>
-        </Reveal>
-
-        <div className="mt-16 grid md:grid-cols-2 gap-px bg-black/[0.06] rounded-3xl overflow-hidden border border-black/5">
-          {levers.map((l, i) => (
-            <Reveal key={l.title} delay={150 + i * 80}>
-              <div className="bg-white p-8 md:p-10 h-full">
-                <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-[#1d1d1f]">
-                  {l.title}
-                </h3>
-                <p className="mt-3 text-[#6e6e73] leading-relaxed text-[15px]">
-                  {l.body}
-                </p>
-              </div>
-            </Reveal>
-          ))}
+    <section id="impact" className="bg-white px-6 py-32 md:py-40">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+        <div>
+          <SectionEyebrow num="03" label="Impact" />
+          <Reveal delay={100}>
+            <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
+              L’accès à l’eau ne détermine pas
+              <br />
+              <span className="text-[#86868b]">seulement la survie.</span>
+            </h2>
+          </Reveal>
+          <Reveal delay={250}>
+            <p className="mt-8 text-xl md:text-2xl text-[#1d1d1f] leading-snug">
+              Il détermine la capacité à vivre.
+            </p>
+          </Reveal>
+          <ul className="mt-10 space-y-3">
+            {consequences.map((text, i) => (
+              <Reveal key={i} delay={350 + i * 80}>
+                <li className="flex gap-3 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
+                  <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
+                  <span>{text}</span>
+                </li>
+              </Reveal>
+            ))}
+          </ul>
+          <Reveal delay={650}>
+            <p className="mt-10 text-base md:text-lg text-[#6e6e73] leading-relaxed border-t border-black/5 pt-6">
+              Dans certaines régions, accéder à l’eau peut représenter{' '}
+              <span className="text-[#1d1d1f] font-medium">
+                plusieurs heures chaque jour
+              </span>.
+            </p>
+          </Reveal>
         </div>
 
-        <Reveal delay={500}>
-          <p className="mt-16 max-w-3xl text-base md:text-lg text-[#6e6e73] leading-relaxed border-t border-black/5 pt-8">
-            Selon les estimations internationales, des centaines de millions
-            de personnes dans le monde n’ont toujours pas accès à un service
-            d’eau potable de base.
-          </p>
+        <Reveal delay={300}>
+          <div className="relative rounded-3xl overflow-hidden aspect-[4/5] bg-slate-100">
+            <img
+              src={IMG.girl_pump}
+              alt="Fillette debout près d'un point d'eau avec l'eau qui coule"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
         </Reveal>
       </div>
     </section>
@@ -272,18 +334,18 @@ function Section2Impact() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION 3 — RÉALITÉ RURALE
+// SECTION 4 — RÉALITÉ RURALE 🔵
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Section3Rural() {
+function Section4Rural() {
   return (
-    <section id="rural" className="bg-white">
-      <div className="px-4 sm:px-6 pt-32 md:pt-40 mb-16">
+    <section id="rural" className="bg-[#fafafa]">
+      <div className="px-4 sm:px-6 pt-32 md:pt-40 mb-12 md:mb-16">
         <Reveal>
-          <div className="relative max-w-7xl mx-auto rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9]">
+          <div className="relative max-w-7xl mx-auto rounded-3xl overflow-hidden aspect-[16/9] md:aspect-[21/9] bg-slate-200">
             <img
-              src={IMG.woman_jugs}
-              alt="Femme rurale transportant des bidons d'eau"
+              src={IMG.water_tanker}
+              alt="Distribution d'eau par citerne, jerrycans alignés en Mauritanie"
               className="absolute inset-0 w-full h-full object-cover"
               loading="lazy"
             />
@@ -291,8 +353,11 @@ function Section3Rural() {
             <div className="absolute inset-0 flex items-end p-8 sm:p-12 md:p-16 text-white">
               <Reveal>
                 <p className="max-w-xl text-lg md:text-2xl font-light leading-snug">
-                  Dans les zones rurales, l’accès à l’eau devient une
-                  contrainte quotidienne, plutôt qu’un service garanti.
+                  L’eau n’est pas absente.
+                  <br />
+                  <span className="text-white/75">
+                    Elle est difficilement accessible.
+                  </span>
                 </p>
               </Reveal>
             </div>
@@ -302,18 +367,21 @@ function Section3Rural() {
 
       <div className="px-6 pb-32 md:pb-40">
         <div className="max-w-3xl mx-auto">
-          <SectionEyebrow num="03" label="Réalité amplifiée en zones rurales" />
+          <SectionEyebrow num="04" label="Réalité rurale" />
           <Reveal delay={100}>
             <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-              En zones rurales,
+              Dans les zones rurales,
               <br />
-              <span className="text-[#86868b]">les contraintes se cumulent.</span>
+              <span className="text-[#86868b]">
+                une contrainte structurelle.
+              </span>
             </h2>
           </Reveal>
           <Reveal delay={250}>
             <p className="mt-8 text-lg md:text-xl text-[#1d1d1f] leading-relaxed">
-              Distances importantes, infrastructures limitées, ressources
-              irrégulières.
+              L’accès à l’eau n’y dépend pas seulement de la disponibilité.
+              Il dépend de l’infrastructure, de la régularité et de la
+              répartition géographique des services.
             </p>
           </Reveal>
 
@@ -325,20 +393,15 @@ function Section3Rural() {
               <ul className="space-y-3 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
                 <li className="flex gap-3">
                   <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
-                  <span>
-                    Certaines communautés sont situées à plusieurs kilomètres
-                    du point d’eau le plus proche.
-                  </span>
+                  <span>Villages éloignés des points d’eau.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
-                  <span>L’accès dépend souvent de ressources intermittentes.</span>
+                  <span>Ressources irrégulières.</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
-                  <span>
-                    Les systèmes de distribution restent inégalement développés.
-                  </span>
+                  <span>Infrastructures inégalement réparties.</span>
                 </li>
               </ul>
             </div>
@@ -350,71 +413,42 @@ function Section3Rural() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION 4 — DÉVELOPPEMENT (eau = levier)
+// SECTION 5 — DÉVELOPPEMENT 🟣 (eau = droit)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Section4Development() {
-  const levers = [
-    'Permettre aux enfants d’aller à l’école.',
-    'Améliorer les conditions sanitaires.',
-    'Soutenir les activités économiques locales.',
-    'Réduire les inégalités territoriales.',
-  ]
+function Section5Development() {
   return (
-    <section id="development" className="bg-[#fafafa] px-6 py-32 md:py-40">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-center">
-        <div>
-          <SectionEyebrow num="04" label="Une question de développement" />
-          <Reveal delay={100}>
-            <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-              L’eau, un levier
-              <br />
-              <span className="bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
-                de développement.
-              </span>
-            </h2>
-          </Reveal>
-          <Reveal delay={250}>
-            <p className="mt-8 text-base md:text-lg text-[#6e6e73] leading-relaxed">
-              Améliorer l’accès à l’eau, ce n’est pas seulement répondre à un
-              besoin immédiat. C’est créer les conditions du développement.
-            </p>
-          </Reveal>
-          <ul className="mt-8 space-y-3">
-            {levers.map((text, i) => (
-              <Reveal key={i} delay={350 + i * 80}>
-                <li className="flex gap-3 text-[#1d1d1f] leading-relaxed">
-                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
-                  <span>{text}</span>
-                </li>
-              </Reveal>
-            ))}
-          </ul>
+    <section id="development" className="bg-white px-6 py-32 md:py-40 border-t border-black/5">
+      <div className="max-w-4xl mx-auto">
+        <SectionEyebrow num="05" label="Développement" />
+        <Reveal delay={100}>
+          <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
+            Pas seulement une question de ressources.
+            <br />
+            <span className="bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
+              Une question de droit.
+            </span>
+          </h2>
+        </Reveal>
+        <Reveal delay={250}>
+          <p className="mt-10 text-lg md:text-xl text-[#1d1d1f] leading-relaxed max-w-3xl">
+            Reconnu comme un droit humain fondamental, l’accès à l’eau reste,
+            dans de nombreuses régions, inégalement garanti.
+          </p>
+        </Reveal>
 
-          {/* Mention SDG 6 — discrète, institutionnelle */}
-          <Reveal delay={700}>
-            <div className="mt-10 flex items-center gap-4 p-4 rounded-2xl bg-white border border-black/5">
-              <div className="shrink-0 w-12 h-12 rounded-lg bg-[#26BDE2] flex items-center justify-center">
-                <span className="text-white font-bold text-sm">06</span>
-              </div>
-              <p className="text-sm text-[#6e6e73] leading-snug">
-                <span className="text-[#1d1d1f] font-medium">
-                  Objectif de développement durable n°6
-                </span>{' '}
-                des Nations Unies — Eau propre et assainissement.
-              </p>
+        {/* Mention SDG 6 — discrète, institutionnelle */}
+        <Reveal delay={400}>
+          <div className="mt-10 flex items-center gap-4 p-4 rounded-2xl bg-[#fafafa] border border-black/5 max-w-xl">
+            <div className="shrink-0 w-12 h-12 rounded-lg bg-[#26BDE2] flex items-center justify-center">
+              <span className="text-white font-bold text-sm">06</span>
             </div>
-          </Reveal>
-        </div>
-
-        <Reveal delay={300}>
-          <div className="relative rounded-3xl overflow-hidden aspect-[4/5] bg-slate-100">
-            <img
-              src={IMG.boy_pump}
-              alt="Enfant utilisant une pompe à eau manuelle"
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="lazy"
-            />
+            <p className="text-sm text-[#6e6e73] leading-snug">
+              <span className="text-[#1d1d1f] font-medium">
+                Objectif de développement durable n°6
+              </span>{' '}
+              des Nations Unies — Eau propre et assainissement.
+            </p>
           </div>
         </Reveal>
       </div>
@@ -423,56 +457,50 @@ function Section4Development() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION 5 — VOIR POUR AGIR (transition vers MINAI)
+// SECTION 6 — LE DÉFI ⚫
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Section5SeeingToAct() {
+function Section6Challenge() {
   return (
-    <section id="challenge" className="bg-white px-6 py-32 md:py-40 border-t border-black/5">
+    <section id="challenge" className="bg-[#fafafa] px-6 py-32 md:py-40 border-t border-black/5">
       <div className="max-w-4xl mx-auto">
-        <SectionEyebrow num="05" label="Le défi" />
+        <SectionEyebrow num="06" label="Le défi" />
         <Reveal delay={100}>
           <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-            Voir pour agir.
+            Toutes les zones ne sont pas
+            <br />
+            <span className="text-[#86868b]">
+              identifiées avec la même précision.
+            </span>
           </h2>
         </Reveal>
         <Reveal delay={250}>
           <p className="mt-8 text-lg md:text-xl text-[#1d1d1f] leading-relaxed max-w-3xl">
-            Pourtant, malgré l’importance de cet enjeu, toutes les zones ne
-            sont pas identifiées avec la même précision.
+            Dans de nombreux cas, les communautés les plus exposées restent
+            en dehors des systèmes de décision.
           </p>
         </Reveal>
 
-        <div className="mt-12 grid md:grid-cols-3 gap-6 md:gap-8">
-          <Reveal delay={150}>
-            <ChallengeCard
-              n="A"
-              title="Communautés absentes des données"
-              body="Certaines zones rurales n’apparaissent pas dans les systèmes officiels d’information."
-            />
-          </Reveal>
-          <Reveal delay={250}>
-            <ChallengeCard
-              n="B"
-              title="Informations fragmentées"
-              body="Les sources existent, mais ne sont pas croisées entre elles."
-            />
-          </Reveal>
+        <div className="mt-16 grid md:grid-cols-2 gap-12 md:gap-16 max-w-4xl">
           <Reveal delay={350}>
-            <ChallengeCard
-              n="C"
-              title="Priorités peu établies"
-              body="Sans lecture commune, les interventions ne ciblent pas toujours les zones les plus critiques."
+            <ChallengeBlock
+              title="Les données existent"
+              body="Mais elles sont fragmentées, dispersées entre les institutions."
+            />
+          </Reveal>
+          <Reveal delay={450}>
+            <ChallengeBlock
+              title="Les informations sont disponibles"
+              body="Mais rarement croisées entre elles pour produire une lecture commune."
             />
           </Reveal>
         </div>
 
-        <Reveal delay={550}>
-          <p className="mt-16 max-w-3xl text-2xl md:text-3xl font-light tracking-tight leading-snug text-[#1d1d1f]">
-            Résultat :{' '}
+        <Reveal delay={650}>
+          <p className="mt-16 text-2xl md:text-3xl font-light tracking-tight leading-snug max-w-3xl text-[#1d1d1f]">
+            Sans une lecture claire du terrain,{' '}
             <span className="text-[#86868b]">
-              les interventions ne ciblent pas toujours les zones les plus
-              critiques.
+              les priorités ne sont pas toujours établies.
             </span>
           </p>
         </Reveal>
@@ -481,50 +509,91 @@ function Section5SeeingToAct() {
   )
 }
 
-function ChallengeCard({ n, title, body }: { n: string; title: string; body: string }) {
+function ChallengeBlock({ title, body }: { title: string; body: string }) {
   return (
     <div className="border-t border-black/10 pt-5">
-      <span className="text-[11px] font-mono text-cyan-700">{n}</span>
-      <h3 className="mt-2 text-lg font-semibold tracking-tight text-[#1d1d1f]">
+      <h3 className="text-xl md:text-2xl font-semibold tracking-tight text-[#1d1d1f]">
         {title}
       </h3>
-      <p className="mt-2 text-[#6e6e73] leading-relaxed text-[14px]">{body}</p>
+      <p className="mt-3 text-[#6e6e73] leading-relaxed">{body}</p>
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION 6 — CONCLUSION (lien MINAI)
+// SECTION 7 — TRANSITION 🔥 (NOUVELLE — pivot vers MINAI)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Section6Conclusion({ onEnterMap }: { onEnterMap: () => void }) {
+function Section7Transition() {
+  return (
+    <section className="relative bg-white">
+      {/* Photo silhouettes coucher de soleil — pleine largeur, tonalité poétique */}
+      <div className="px-4 sm:px-6 pt-32 md:pt-40 mb-12">
+        <Reveal>
+          <div className="relative max-w-7xl mx-auto rounded-3xl overflow-hidden aspect-[16/9] md:aspect-[21/9] bg-slate-200">
+            <img
+              src={IMG.women_sunset}
+              alt="Silhouettes de femmes transportant des jerrycans au coucher du soleil"
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent" />
+          </div>
+        </Reveal>
+      </div>
+
+      <div className="px-6 pb-32 md:pb-40">
+        <div className="max-w-4xl mx-auto text-center">
+          <Reveal>
+            <p className="text-2xl md:text-4xl font-light tracking-tight text-[#86868b] leading-snug">
+              Le défi n’est pas uniquement d’agir.
+            </p>
+          </Reveal>
+          <Reveal delay={300}>
+            <p className="mt-4 text-3xl md:text-5xl font-semibold tracking-tight text-[#1d1d1f] leading-[1.1]">
+              Le défi est de savoir{' '}
+              <span className="bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
+                où agir en premier.
+              </span>
+            </p>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION 8 — CONCLUSION 🟢 (lien MINAI)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function Section8Conclusion({ onEnterMap }: { onEnterMap: () => void }) {
   return (
     <section className="relative bg-[#fafafa] px-6 py-32 md:py-44 border-t border-black/5 overflow-hidden">
-      <div className="max-w-4xl mx-auto text-center">
-        <SectionEyebrow num="06" label="Conclusion" centered />
+      <div className="max-w-4xl mx-auto">
+        <SectionEyebrow num="08" label="Conclusion" />
         <Reveal delay={100}>
-          <h2 className="mt-6 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
+          <h2 className="mt-5 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
             Améliorer l’accès à l’eau
             <br />
-            <span className="text-[#86868b]">
-              nécessite des ressources.
-            </span>
+            <span className="text-[#86868b]">nécessite des ressources.</span>
           </h2>
         </Reveal>
         <Reveal delay={250}>
-          <p className="mt-6 text-2xl md:text-3xl font-light tracking-tight text-[#1d1d1f] leading-snug">
-            Mais cela nécessite aussi une meilleure capacité à orienter les
-            interventions.
+          <p className="mt-8 text-lg md:text-xl text-[#1d1d1f] leading-relaxed max-w-3xl">
+            Mais sans une lecture claire du terrain,{' '}
+            <span className="text-[#86868b]">
+              ces ressources ne sont pas orientées de manière optimale.
+            </span>
           </p>
         </Reveal>
 
         <Reveal delay={450}>
-          <div className="mt-14 max-w-2xl mx-auto p-8 md:p-10 rounded-3xl bg-white border border-black/5">
+          <div className="mt-14 max-w-2xl p-8 md:p-10 rounded-3xl bg-white border border-black/5">
             <p className="text-base md:text-lg text-[#1d1d1f] leading-relaxed">
               <span className="font-semibold">MINAI</span> aide les ONG et les
-              institutions à identifier les zones où l’accès à l’eau est le
-              plus critique, afin de prioriser les actions là où elles sont
-              réellement nécessaires.
+              institutions à identifier les zones les plus critiques, afin de
+              prioriser les interventions et maximiser leur impact.
             </p>
             <button
               onClick={onEnterMap}
