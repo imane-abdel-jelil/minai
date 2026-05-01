@@ -33,6 +33,7 @@ export default function LandingPage({ onEnter, onUnderstand }: Props) {
       <Nav onEnter={onEnter} onUnderstand={onUnderstand} />
       <Hero onEnter={onEnter} onUnderstand={onUnderstand} />
       <HeroImage />
+      <ContextSection />
       <ProblemSection />
       <ConsequencesGallery />
       <HumanImpactSection />
@@ -275,6 +276,95 @@ function HeroImage() {
         </div>
       </Reveal>
     </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTEXT — passage du global (Afrique) au local (Mauritanie)
+// Pont de crédibilité entre le hero et le problème.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ContextSection() {
+  return (
+    <section className="bg-white px-6 py-28 md:py-36 border-t border-black/5">
+      <div className="max-w-5xl mx-auto">
+        <Reveal>
+          <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
+            Contexte
+          </p>
+        </Reveal>
+        <Reveal delay={100}>
+          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] max-w-3xl">
+            Un enjeu global,
+            <br />
+            <span className="text-[#86868b]">une réalité locale.</span>
+          </h2>
+        </Reveal>
+
+        <div className="mt-12 grid md:grid-cols-3 gap-8 md:gap-12 items-start">
+          {/* Texte — 2 colonnes sur desktop */}
+          <div className="md:col-span-2 space-y-5 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
+            <Reveal delay={200}>
+              <p>
+                En Afrique subsaharienne, des centaines de millions de
+                personnes vivent sans accès fiable à l’eau potable.
+              </p>
+            </Reveal>
+            <Reveal delay={300}>
+              <p>
+                En Mauritanie, cette situation est particulièrement marquée
+                dans les zones rurales, où l’accès dépend de la distance, de
+                la disponibilité et de la régularité des ressources.
+              </p>
+            </Reveal>
+            <Reveal delay={500}>
+              <p className="text-[#6e6e73] border-t border-black/5 pt-5 mt-7">
+                Une réalité qui reste partiellement invisible dans les
+                systèmes de décision.
+              </p>
+            </Reveal>
+          </div>
+
+          {/* Stat card cliquable — World Bank 57% */}
+          <Reveal delay={400}>
+            <a
+              href="https://data.worldbank.org/indicator/SH.H2O.BASW.ZS?locations=MR"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block rounded-3xl border border-black/[0.06] bg-[#fafafa] p-6 hover:bg-white hover:border-black/15 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[11px] tracking-[0.18em] uppercase text-[#1d1d1f] font-semibold">
+                    World Bank
+                  </p>
+                  <p className="mt-1 text-[10px] text-[#86868b] tracking-wide">
+                    Indicator SH.H2O.BASW.ZS
+                  </p>
+                </div>
+                <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">
+                  ↗
+                </span>
+              </div>
+
+              <p className="mt-8 text-5xl md:text-6xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
+                57%
+              </p>
+              <p className="mt-3 text-sm text-[#1d1d1f] font-medium">
+                de la population rurale en Mauritanie
+              </p>
+              <p className="mt-1 text-sm text-[#6e6e73] leading-snug">
+                avec accès à une source d’eau améliorée.
+              </p>
+
+              <p className="mt-6 text-xs text-cyan-700 font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                Voir l’indicateur <span aria-hidden>→</span>
+              </p>
+            </a>
+          </Reveal>
+        </div>
+      </div>
+    </section>
   )
 }
 
