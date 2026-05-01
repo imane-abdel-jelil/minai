@@ -98,16 +98,12 @@ function Nav({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () 
         <span className="font-semibold tracking-tight text-[15px] text-[#1d1d1f]">
           MINAI<span className="text-cyan-600">.</span>
         </span>
-        <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
-          <button onClick={onUnderstand} className="hover:text-[#1d1d1f] transition">
-            Comprendre l’eau
-          </button>
-          <a href="#problem"        className="hover:text-[#1d1d1f] transition">Problème</a>
-          <a href="#solution"       className="hover:text-[#1d1d1f] transition">Solution</a>
-          <a href="#impact"         className="hover:text-[#1d1d1f] transition">Impact</a>
-          <a href="#sdg6"           className="hover:text-[#1d1d1f] transition">SDG 6</a>
-          <a href="#collaboration"  className="hover:text-[#1d1d1f] transition">Collaboration</a>
-        </div>
+        <button
+          onClick={onUnderstand}
+          className="text-[13px] text-[#6e6e73] hover:text-[#1d1d1f] transition tracking-tight"
+        >
+          Comprendre l’eau
+        </button>
         <button
           onClick={onEnter}
           className="text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
