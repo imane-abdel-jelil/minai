@@ -302,7 +302,7 @@ function ContextSection() {
         </Reveal>
 
         {/* 2 colonnes 50/50 : texte gauche / stat card droite, alignés en haut */}
-        <div className="mt-12 grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+        <div className="mt-12 grid sm:grid-cols-2 gap-8 md:gap-12 items-start">
           <div className="space-y-5 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
             <Reveal delay={200}>
               <p>
@@ -681,7 +681,7 @@ function ByTheNumbersSection() {
               source="ANSADE"
               sourceTag="Recensement RGPH 2013"
               body="Office national de la statistique mauritanien : population totale et milieu rural par wilaya."
-              href="https://ansade.mr/fr/"
+              href="https://ansade.mr"
             />
           </Reveal>
           <Reveal delay={250}>
