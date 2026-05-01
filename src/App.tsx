@@ -104,14 +104,23 @@ export default function App() {
   // à l'eau, qui pointent vers des sections de la landing).
   const goToLandingSection = (sectionId: string) => {
     setView('landing')
-    // attendre que la landing soit montée avant de scroller
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const el = document.getElementById(sectionId)
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        else window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
-      })
-    })
+    // Réessaie pendant 1 seconde max — la landing peut prendre du temps à
+    // monter (Reveal animations, photos, etc.). On tente toutes les 50ms
+    // jusqu'à trouver l'élément.
+    let attempts = 0
+    const tryScroll = () => {
+      const el = document.getElementById(sectionId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        return
+      }
+      if (attempts++ < 20) {
+        setTimeout(tryScroll, 50)
+      } else {
+        window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+      }
+    }
+    setTimeout(tryScroll, 50)
   }
 
   if (view === 'landing') {
