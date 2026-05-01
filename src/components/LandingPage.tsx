@@ -327,7 +327,7 @@ function ContextSection() {
 
           <Reveal delay={400}>
             <a
-              href="https://data.worldbank.org/indicator/SH.H2O.BASW.ZS?locations=MR"
+              href="https://data.worldbank.org/country/mauritania?view=chart"
               target="_blank"
               rel="noopener noreferrer"
               className="group block rounded-3xl border border-black/[0.06] bg-[#fafafa] p-6 md:p-8 hover:bg-white hover:border-black/15 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
@@ -681,7 +681,7 @@ function ByTheNumbersSection() {
               source="ANSADE"
               sourceTag="Recensement RGPH 2013"
               body="Office national de la statistique mauritanien : population totale et milieu rural par wilaya."
-              href="https://ansade.mr"
+              href="https://ansade.mr/fr/publications-rgph-5/"
             />
           </Reveal>
           <Reveal delay={250}>
@@ -691,7 +691,7 @@ function ByTheNumbersSection() {
               source="World Bank"
               sourceTag="Indicator SH.H2O.BASW.ZS"
               body="Open Data Bank : indicateurs de développement, accès à l'eau et sanitation, par pays."
-              href="https://data.worldbank.org/indicator/SH.H2O.BASW.ZS?locations=MR"
+              href="https://data.worldbank.org/country/mauritania?view=chart"
             />
           </Reveal>
           <Reveal delay={350}>
