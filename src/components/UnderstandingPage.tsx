@@ -119,9 +119,9 @@ function Nav({ onBack, onEnterMap }: { onBack: () => void; onEnterMap: () => voi
           MINAI<span className="text-cyan-600">.</span>
         </button>
 
-        {/* Indicateur page courante — 'L'eau' actif, statique */}
+        {/* Indicateur page courante — statique */}
         <span className="text-[13px] text-[#1d1d1f] font-medium tracking-tight">
-          L’eau
+          Comprendre l'eau
         </span>
 
         <button
