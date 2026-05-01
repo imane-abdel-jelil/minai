@@ -31,6 +31,8 @@ interface Props {
   onTargetConvoy: (v: Village) => void
   onClearConvoy: () => void
   onSelectVillage: (v: Village | null) => void
+  /** Fermeture de la sidebar sur mobile (drawer) */
+  onCloseMobile?: () => void
 }
 
 const KIND_LABELS: Record<string, string> = {
@@ -81,6 +83,7 @@ export default function Sidebar({
   onTargetConvoy,
   onClearConvoy,
   onSelectVillage,
+  onCloseMobile,
 }: Props) {
   const visibleKinds = KIND_ORDER.filter((k) => (kindCounts[k] ?? 0) > 0)
   const totalShown = visibleKinds.reduce(
@@ -103,12 +106,24 @@ export default function Sidebar({
   const topPriority = priorities[0] ?? null
 
   return (
-    <aside className="w-96 bg-water-900 text-white overflow-y-auto p-6 flex flex-col gap-6">
-      <header>
-        <h1 className="text-2xl font-bold">MINAI</h1>
-        <p className="text-xs opacity-70 leading-tight">
-          Cartographie de l’accès à l’eau · Mauritanie
-        </p>
+    <aside className="h-full w-full md:w-96 bg-water-900 text-white overflow-y-auto p-6 flex flex-col gap-6">
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">MINAI</h1>
+          <p className="text-xs opacity-70 leading-tight">
+            Cartographie de l’accès à l’eau · Mauritanie
+          </p>
+        </div>
+        {/* Bouton fermer — mobile uniquement */}
+        {onCloseMobile && (
+          <button
+            onClick={onCloseMobile}
+            aria-label="Fermer le panneau"
+            className="md:hidden -mt-1 -mr-1 w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition text-white"
+          >
+            <span className="text-lg leading-none">×</span>
+          </button>
+        )}
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════

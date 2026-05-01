@@ -38,6 +38,8 @@ export default function App() {
   )
   // Convoi simulé : cible = un village (depuis Nouakchott)
   const [convoyTarget, setConvoyTarget] = useState<Village | null>(null)
+  // Sidebar visible ? Sur mobile elle est masquée par défaut, sur desktop visible.
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const handleStatsReady = useCallback(
     (stats: Record<string, WilayaStats>) => setWilayaStats(stats),
@@ -132,40 +134,80 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen w-screen">
-      <Sidebar
-        selectedRegion={selectedRegion}
-        selectedVillage={selectedVillage}
-        selectedVillageEval={selectedVillageEval}
-        showWaterPoints={showWaterPoints}
-        onToggleWaterPoints={setShowWaterPoints}
-        showWilayas={showWilayas}
-        onToggleWilayas={setShowWilayas}
-        showVillages={showVillages}
-        onToggleVillages={setShowVillages}
-        wilayaStats={wilayaStats}
-        kindFilters={kindFilters}
-        onToggleKind={toggleKind}
-        onSetAllKinds={setAllKinds}
-        kindCounts={kindCounts}
-        computedScores={computedScores}
-        priorities={priorities}
-        convoyTarget={convoyTarget}
-        onTargetConvoy={(v) => {
-          setConvoyTarget(v)
-          setSelectedVillage(v)
-        }}
-        onClearConvoy={() => setConvoyTarget(null)}
-        onSelectVillage={setSelectedVillage}
-      />
+    <div className="flex h-screen w-screen overflow-hidden">
+      {/* Sidebar : drawer slide-in sur mobile, fixe sur desktop */}
+      <aside
+        className={`
+          fixed md:static inset-y-0 left-0 z-40
+          w-full sm:w-96 md:w-96 max-w-[100vw]
+          transform transition-transform duration-300 ease-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}
+      >
+        <Sidebar
+          selectedRegion={selectedRegion}
+          selectedVillage={selectedVillage}
+          selectedVillageEval={selectedVillageEval}
+          showWaterPoints={showWaterPoints}
+          onToggleWaterPoints={setShowWaterPoints}
+          showWilayas={showWilayas}
+          onToggleWilayas={setShowWilayas}
+          showVillages={showVillages}
+          onToggleVillages={setShowVillages}
+          wilayaStats={wilayaStats}
+          kindFilters={kindFilters}
+          onToggleKind={toggleKind}
+          onSetAllKinds={setAllKinds}
+          kindCounts={kindCounts}
+          computedScores={computedScores}
+          priorities={priorities}
+          convoyTarget={convoyTarget}
+          onTargetConvoy={(v) => {
+            setConvoyTarget(v)
+            setSelectedVillage(v)
+            // sur mobile, on referme le panneau pour voir le convoi sur la carte
+            if (window.innerWidth < 768) setSidebarOpen(false)
+          }}
+          onClearConvoy={() => setConvoyTarget(null)}
+          onSelectVillage={(v) => {
+            setSelectedVillage(v)
+          }}
+          onCloseMobile={() => setSidebarOpen(false)}
+        />
+      </aside>
+
+      {/* Backdrop quand sidebar ouverte sur mobile */}
+      {sidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <main className="flex-1 relative">
+        {/* Bouton retour landing — coin haut-gauche */}
         <button
           onClick={() => setView('landing')}
-          className="absolute top-4 left-4 z-30 bg-slate-900/80 backdrop-blur-md text-white text-xs font-medium px-3.5 py-2 rounded-full border border-white/15 hover:bg-slate-900 hover:border-white/30 transition shadow-lg"
+          className="absolute top-4 left-4 z-20 bg-slate-900/80 backdrop-blur-md text-white text-xs font-medium px-3.5 py-2 rounded-full border border-white/15 hover:bg-slate-900 hover:border-white/30 transition shadow-lg"
           title="Retour à la page d'accueil"
         >
           ← MINAI
         </button>
+
+        {/* Bouton hamburger mobile pour ouvrir la sidebar — coin haut-droit */}
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="md:hidden absolute top-4 right-4 z-20 bg-slate-900/80 backdrop-blur-md text-white text-xs font-medium px-3.5 py-2 rounded-full border border-white/15 hover:bg-slate-900 transition shadow-lg flex items-center gap-2"
+          title="Ouvrir le panneau"
+        >
+          <span className="relative block w-4 h-3">
+            <span className="absolute left-0 top-0 h-0.5 w-4 bg-white rounded-full" />
+            <span className="absolute left-0 top-1.5 h-0.5 w-4 bg-white rounded-full" />
+            <span className="absolute left-0 top-3 h-0.5 w-4 bg-white rounded-full" />
+          </span>
+          Panneau
+        </button>
+
         <MapView
           onRegionClick={setSelectedRegion}
           onVillageClick={setSelectedVillage}

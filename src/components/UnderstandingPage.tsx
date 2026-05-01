@@ -119,38 +119,78 @@ function Nav({
   onEnterMap: () => void
   onJumpToSection: (id: string) => void
 }) {
+  const [open, setOpen] = useState(false)
+  const close = () => setOpen(false)
+
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-white/80 border-b border-black/5">
-      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-        <button
-          onClick={onBack}
-          className="font-semibold tracking-tight text-[15px] text-[#1d1d1f] hover:opacity-70 transition"
-        >
-          MINAI<span className="text-cyan-600">.</span>
-        </button>
+    <>
+      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-white/80 border-b border-black/5">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 h-14 flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="font-semibold tracking-tight text-[15px] text-[#1d1d1f] hover:opacity-70 transition"
+          >
+            MINAI<span className="text-cyan-600">.</span>
+          </button>
 
-        <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
-          {/* 'Accès à l'eau' = page courante, font-medium pour signaler l'état actif */}
-          <span className="text-[#1d1d1f] font-medium tracking-tight">
-            Accès à l’eau
-          </span>
-          {/* Liens vers les sections de la landing — App.tsx bascule la vue
-              et scrolle vers l'ancre demandée */}
-          <button onClick={() => onJumpToSection('problem')}       className="hover:text-[#1d1d1f] transition">Problème</button>
-          <button onClick={() => onJumpToSection('solution')}      className="hover:text-[#1d1d1f] transition">Solution</button>
-          <button onClick={() => onJumpToSection('impact')}        className="hover:text-[#1d1d1f] transition">Impact</button>
-          <button onClick={() => onJumpToSection('sdg6')}          className="hover:text-[#1d1d1f] transition">SDG 6</button>
-          <button onClick={() => onJumpToSection('collaboration')} className="hover:text-[#1d1d1f] transition">Collaboration</button>
+          {/* Liens — desktop */}
+          <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
+            <span className="text-[#1d1d1f] font-medium tracking-tight">Accès à l’eau</span>
+            <button onClick={() => onJumpToSection('problem')}       className="hover:text-[#1d1d1f] transition">Problème</button>
+            <button onClick={() => onJumpToSection('solution')}      className="hover:text-[#1d1d1f] transition">Solution</button>
+            <button onClick={() => onJumpToSection('impact')}        className="hover:text-[#1d1d1f] transition">Impact</button>
+            <button onClick={() => onJumpToSection('sdg6')}          className="hover:text-[#1d1d1f] transition">SDG 6</button>
+            <button onClick={() => onJumpToSection('collaboration')} className="hover:text-[#1d1d1f] transition">Collaboration</button>
+          </div>
+
+          {/* CTA desktop */}
+          <button
+            onClick={onEnterMap}
+            className="hidden md:block text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
+          >
+            Voir la cartographie →
+          </button>
+
+          {/* Hamburger mobile */}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={open}
+            className="md:hidden w-10 h-10 -mr-2 flex items-center justify-center"
+          >
+            <span className="relative block w-5 h-4">
+              <span className={`absolute left-0 top-0 h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-transform duration-200 ${open ? 'translate-y-[7px] rotate-45' : ''}`} />
+              <span className={`absolute left-0 top-[7px] h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-opacity duration-200 ${open ? 'opacity-0' : 'opacity-100'}`} />
+              <span className={`absolute left-0 top-[14px] h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-transform duration-200 ${open ? '-translate-y-[7px] -rotate-45' : ''}`} />
+            </span>
+          </button>
         </div>
+      </nav>
 
-        <button
-          onClick={onEnterMap}
-          className="text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
-        >
-          Voir la cartographie →
-        </button>
-      </div>
-    </nav>
+      {/* Sheet mobile */}
+      {open && (
+        <>
+          <div className="md:hidden fixed inset-0 top-14 z-40 bg-black/30" onClick={close} />
+          <div className="md:hidden fixed top-14 inset-x-0 z-40 bg-white border-b border-black/5 shadow-lg">
+            <div className="px-6 py-5 flex flex-col text-[15px] text-[#1d1d1f]">
+              <span className="py-3 border-b border-black/5 font-medium">Accès à l’eau</span>
+              <button onClick={() => { close(); onJumpToSection('problem') }}       className="text-left py-3 border-b border-black/5">Problème</button>
+              <button onClick={() => { close(); onJumpToSection('solution') }}      className="text-left py-3 border-b border-black/5">Solution</button>
+              <button onClick={() => { close(); onJumpToSection('impact') }}        className="text-left py-3 border-b border-black/5">Impact</button>
+              <button onClick={() => { close(); onJumpToSection('sdg6') }}          className="text-left py-3 border-b border-black/5">SDG 6</button>
+              <button onClick={() => { close(); onJumpToSection('collaboration') }} className="text-left py-3 border-b border-black/5">Collaboration</button>
+              <button
+                onClick={() => { close(); onEnterMap() }}
+                className="mt-5 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
+              >
+                Voir la cartographie →
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   )
 }
 

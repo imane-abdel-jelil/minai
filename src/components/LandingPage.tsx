@@ -92,30 +92,94 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Nav({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () => void }) {
+  const [open, setOpen] = useState(false)
+  const close = () => setOpen(false)
+
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-white/75 border-b border-black/5">
-      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-        <span className="font-semibold tracking-tight text-[15px] text-[#1d1d1f]">
-          MINAI<span className="text-cyan-600">.</span>
-        </span>
-        <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
-          <button onClick={onUnderstand} className="hover:text-[#1d1d1f] transition">
-            Accès à l’eau
+    <>
+      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-white/75 border-b border-black/5">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 h-14 flex items-center justify-between">
+          <span className="font-semibold tracking-tight text-[15px] text-[#1d1d1f]">
+            MINAI<span className="text-cyan-600">.</span>
+          </span>
+
+          {/* Liens — desktop seulement */}
+          <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
+            <button onClick={onUnderstand} className="hover:text-[#1d1d1f] transition">
+              Accès à l’eau
+            </button>
+            <a href="#problem"        className="hover:text-[#1d1d1f] transition">Problème</a>
+            <a href="#solution"       className="hover:text-[#1d1d1f] transition">Solution</a>
+            <a href="#impact"         className="hover:text-[#1d1d1f] transition">Impact</a>
+            <a href="#sdg6"           className="hover:text-[#1d1d1f] transition">SDG 6</a>
+            <a href="#collaboration"  className="hover:text-[#1d1d1f] transition">Collaboration</a>
+          </div>
+
+          {/* CTA desktop */}
+          <button
+            onClick={onEnter}
+            className="hidden md:block text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
+          >
+            Voir la cartographie →
           </button>
-          <a href="#problem"        className="hover:text-[#1d1d1f] transition">Problème</a>
-          <a href="#solution"       className="hover:text-[#1d1d1f] transition">Solution</a>
-          <a href="#impact"         className="hover:text-[#1d1d1f] transition">Impact</a>
-          <a href="#sdg6"           className="hover:text-[#1d1d1f] transition">SDG 6</a>
-          <a href="#collaboration"  className="hover:text-[#1d1d1f] transition">Collaboration</a>
+
+          {/* Hamburger mobile */}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={open}
+            className="md:hidden w-10 h-10 -mr-2 flex items-center justify-center"
+          >
+            <span className="relative block w-5 h-4">
+              <span
+                className={`absolute left-0 top-0 h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-transform duration-200 ${
+                  open ? 'translate-y-[7px] rotate-45' : ''
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-[7px] h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-opacity duration-200 ${
+                  open ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-[14px] h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-transform duration-200 ${
+                  open ? '-translate-y-[7px] -rotate-45' : ''
+                }`}
+              />
+            </span>
+          </button>
         </div>
-        <button
-          onClick={onEnter}
-          className="text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
-        >
-          Voir la cartographie →
-        </button>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Sheet mobile */}
+      {open && (
+        <>
+          <div
+            className="md:hidden fixed inset-0 top-14 z-40 bg-black/30"
+            onClick={close}
+          />
+          <div className="md:hidden fixed top-14 inset-x-0 z-40 bg-white border-b border-black/5 shadow-lg">
+            <div className="px-6 py-5 flex flex-col text-[15px] text-[#1d1d1f]">
+              <button onClick={() => { close(); onUnderstand() }} className="text-left py-3 border-b border-black/5">
+                Accès à l’eau
+              </button>
+              <a href="#problem"       onClick={close} className="py-3 border-b border-black/5">Problème</a>
+              <a href="#solution"      onClick={close} className="py-3 border-b border-black/5">Solution</a>
+              <a href="#impact"        onClick={close} className="py-3 border-b border-black/5">Impact</a>
+              <a href="#sdg6"          onClick={close} className="py-3 border-b border-black/5">SDG 6</a>
+              <a href="#collaboration" onClick={close} className="py-3 border-b border-black/5">Collaboration</a>
+              <button
+                onClick={() => { close(); onEnter() }}
+                className="mt-5 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
+              >
+                Voir la cartographie →
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   )
 }
 
