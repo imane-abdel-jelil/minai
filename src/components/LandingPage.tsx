@@ -330,7 +330,7 @@ function ContextSection() {
               href="https://data.worldbank.org/country/mauritania?view=chart"
               target="_blank"
               rel="noopener noreferrer"
-              className="group block rounded-3xl border border-black/[0.06] bg-[#fafafa] p-6 md:p-8 hover:bg-white hover:border-black/15 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
+              className="group block rounded-3xl border border-black/[0.06] bg-[#fafafa] p-6 md:p-8 hover:border-black/15 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
             >
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -676,11 +676,11 @@ function ByTheNumbersSection() {
         <div className="mt-16 grid md:grid-cols-3 gap-5">
           <Reveal delay={150}>
             <NumberCard
-              stat="600K+"
-              label="personnes en zones critiques"
+              stat="1,7 M"
+              label="habitants en milieu rural"
               source="ANSADE"
-              sourceTag="Recensement RGPH (ANSADE)"
-              body="Office national de la statistique mauritanien : population totale et milieu rural par wilaya."
+              sourceTag="Recensement RGPH 2013"
+              body="Office national de la statistique mauritanien. Population mauritanienne ventilée par wilaya, avec répartition urbain / rural."
               href="https://experience.arcgis.com/experience/2ded1160faac4295861634a47ff18d03/page/RGPH-5?views=Infrastructures"
             />
           </Reveal>
@@ -740,7 +740,7 @@ function NumberCard({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block bg-[#fafafa] rounded-3xl p-8 md:p-10 border border-black/[0.06] hover:border-black/15 hover:bg-white transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
+      className="group block bg-[#fafafa] rounded-3xl p-8 md:p-10 border border-black/[0.06] hover:border-black/15 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300"
     >
       <div className="flex items-start justify-between">
         <div>
