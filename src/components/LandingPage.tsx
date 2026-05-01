@@ -679,9 +679,9 @@ function ByTheNumbersSection() {
               stat="600K+"
               label="personnes en zones critiques"
               source="ANSADE"
-              sourceTag="Recensement RGPH 2013"
+              sourceTag="Recensement RGPH (ANSADE)"
               body="Office national de la statistique mauritanien : population totale et milieu rural par wilaya."
-              href="https://ansade.mr/fr/publications-rgph-5/"
+              href="https://experience.arcgis.com/experience/2ded1160faac4295861634a47ff18d03/page/RGPH-5?views=Infrastructures"
             />
           </Reveal>
           <Reveal delay={250}>
