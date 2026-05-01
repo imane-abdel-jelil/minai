@@ -287,82 +287,80 @@ function HeroImage() {
 function ContextSection() {
   return (
     <section className="bg-white px-6 py-28 md:py-36 border-t border-black/5">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
             Contexte
           </p>
         </Reveal>
         <Reveal delay={100}>
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] max-w-3xl">
+          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
             Un enjeu global,
             <br />
             <span className="text-[#86868b]">une réalité locale.</span>
           </h2>
         </Reveal>
 
-        <div className="mt-12 grid md:grid-cols-3 gap-8 md:gap-12 items-start">
-          {/* Texte — 2 colonnes sur desktop */}
-          <div className="md:col-span-2 space-y-5 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
-            <Reveal delay={200}>
-              <p>
-                En Afrique subsaharienne, des centaines de millions de
-                personnes vivent sans accès fiable à l’eau potable.
-              </p>
-            </Reveal>
-            <Reveal delay={300}>
-              <p>
-                En Mauritanie, cette situation est particulièrement marquée
-                dans les zones rurales, où l’accès dépend de la distance, de
-                la disponibilité et de la régularité des ressources.
-              </p>
-            </Reveal>
-            <Reveal delay={500}>
-              <p className="text-[#6e6e73] border-t border-black/5 pt-5 mt-7">
-                Une réalité qui reste partiellement invisible dans les
-                systèmes de décision.
-              </p>
-            </Reveal>
-          </div>
-
-          {/* Stat card cliquable — World Bank 57% */}
-          <Reveal delay={400}>
-            <a
-              href="https://data.worldbank.org/indicator/SH.H2O.BASW.ZS?locations=MR"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block rounded-3xl border border-black/[0.06] bg-[#fafafa] p-6 hover:bg-white hover:border-black/15 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[11px] tracking-[0.18em] uppercase text-[#1d1d1f] font-semibold">
-                    World Bank
-                  </p>
-                  <p className="mt-1 text-[10px] text-[#86868b] tracking-wide">
-                    Indicator SH.H2O.BASW.ZS
-                  </p>
-                </div>
-                <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">
-                  ↗
-                </span>
-              </div>
-
-              <p className="mt-8 text-5xl md:text-6xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
-                57%
-              </p>
-              <p className="mt-3 text-sm text-[#1d1d1f] font-medium">
-                de la population rurale en Mauritanie
-              </p>
-              <p className="mt-1 text-sm text-[#6e6e73] leading-snug">
-                avec accès à une source d’eau améliorée.
-              </p>
-
-              <p className="mt-6 text-xs text-cyan-700 font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                Voir l’indicateur <span aria-hidden>→</span>
-              </p>
-            </a>
+        <div className="mt-10 space-y-5 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
+          <Reveal delay={200}>
+            <p>
+              En Afrique subsaharienne, des centaines de millions de personnes
+              vivent sans accès fiable à l’eau potable.
+            </p>
+          </Reveal>
+          <Reveal delay={300}>
+            <p>
+              En Mauritanie, cette situation est particulièrement marquée dans
+              les zones rurales, où l’accès dépend de la distance, de la
+              disponibilité et de la régularité des ressources.
+            </p>
           </Reveal>
         </div>
+
+        {/* Stat banner pleine largeur — World Bank 57% */}
+        <Reveal delay={400}>
+          <a
+            href="https://data.worldbank.org/indicator/SH.H2O.BASW.ZS?locations=MR"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mt-10 block rounded-3xl border border-black/[0.06] bg-[#fafafa] p-6 md:p-8 hover:bg-white hover:border-black/15 hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all"
+          >
+            <div className="flex items-center justify-between gap-4 mb-5">
+              <div>
+                <p className="text-[11px] tracking-[0.18em] uppercase text-[#1d1d1f] font-semibold">
+                  World Bank
+                </p>
+                <p className="mt-1 text-[10px] text-[#86868b] tracking-wide">
+                  Indicator SH.H2O.BASW.ZS
+                </p>
+              </div>
+              <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">
+                ↗
+              </span>
+            </div>
+
+            <div className="flex items-baseline gap-5 md:gap-8 flex-wrap">
+              <p className="text-5xl md:text-6xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
+                57%
+              </p>
+              <p className="text-sm md:text-base text-[#1d1d1f] leading-snug max-w-md">
+                de la population rurale en Mauritanie dispose d’un accès à une
+                source d’eau améliorée.
+              </p>
+            </div>
+
+            <p className="mt-5 text-xs text-cyan-700 font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+              Voir l’indicateur <span aria-hidden>→</span>
+            </p>
+          </a>
+        </Reveal>
+
+        <Reveal delay={500}>
+          <p className="mt-10 text-base md:text-lg text-[#6e6e73] leading-relaxed border-t border-black/5 pt-6">
+            Une réalité qui reste partiellement invisible dans les systèmes
+            de décision.
+          </p>
+        </Reveal>
       </div>
     </section>
   )

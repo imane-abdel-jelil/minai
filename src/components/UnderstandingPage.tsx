@@ -282,7 +282,7 @@ function Beat2Reality() {
 function Beat3Impact() {
   return (
     <section className="bg-[#fafafa] px-6 py-24 md:py-32 border-t border-black/5">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 md:gap-14 items-start">
         <div>
           <Reveal>
             <p className="text-base md:text-lg text-[#86868b] leading-relaxed">
@@ -333,7 +333,7 @@ function Beat3Impact() {
         </div>
 
         <Reveal delay={250}>
-          <div className="relative rounded-3xl overflow-hidden aspect-[4/5] bg-slate-200">
+          <div className="relative rounded-3xl overflow-hidden aspect-[4/5] md:aspect-square bg-slate-200 md:sticky md:top-20">
             <img
               src={IMG.girl_pump}
               alt="Fillette debout près d'un point d'eau"
