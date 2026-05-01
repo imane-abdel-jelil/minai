@@ -121,7 +121,7 @@ function Nav({ onBack, onEnterMap }: { onBack: () => void; onEnterMap: () => voi
 
         {/* Indicateur page courante — statique */}
         <span className="text-[13px] text-[#1d1d1f] font-medium tracking-tight">
-          Comprendre l'eau
+          Accès à l'eau
         </span>
 
         <button
