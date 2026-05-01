@@ -5,6 +5,8 @@ interface Props {
   onBack: () => void
   /** Entrer dans la cartographie (CTA primaire) */
   onEnterMap: () => void
+  /** Naviguer vers une section précise de la landing (#problem, #solution, …) */
+  onJumpToSection: (sectionId: string) => void
 }
 
 /**
@@ -31,10 +33,10 @@ const IMG = {
   women_sunset:     '/images/women-water-sunset.jpg',
 }
 
-export default function UnderstandingPage({ onBack, onEnterMap }: Props) {
+export default function UnderstandingPage({ onBack, onEnterMap, onJumpToSection }: Props) {
   return (
     <div className="bg-white text-[#1d1d1f] overflow-x-hidden font-sans antialiased">
-      <Nav onBack={onBack} onEnterMap={onEnterMap} />
+      <Nav onBack={onBack} onEnterMap={onEnterMap} onJumpToSection={onJumpToSection} />
       <Beat1Universal />
       <FullBleedImage
         src={IMG.mauritania_woman}
@@ -108,7 +110,15 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 // NAV — 3 items seulement
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Nav({ onBack, onEnterMap }: { onBack: () => void; onEnterMap: () => void }) {
+function Nav({
+  onBack,
+  onEnterMap,
+  onJumpToSection,
+}: {
+  onBack: () => void
+  onEnterMap: () => void
+  onJumpToSection: (id: string) => void
+}) {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-white/80 border-b border-black/5">
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
@@ -119,10 +129,19 @@ function Nav({ onBack, onEnterMap }: { onBack: () => void; onEnterMap: () => voi
           MINAI<span className="text-cyan-600">.</span>
         </button>
 
-        {/* Indicateur page courante — statique */}
-        <span className="text-[13px] text-[#1d1d1f] font-medium tracking-tight">
-          Accès à l'eau
-        </span>
+        <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
+          {/* 'Accès à l'eau' = page courante, font-medium pour signaler l'état actif */}
+          <span className="text-[#1d1d1f] font-medium tracking-tight">
+            Accès à l’eau
+          </span>
+          {/* Liens vers les sections de la landing — App.tsx bascule la vue
+              et scrolle vers l'ancre demandée */}
+          <button onClick={() => onJumpToSection('problem')}       className="hover:text-[#1d1d1f] transition">Problème</button>
+          <button onClick={() => onJumpToSection('solution')}      className="hover:text-[#1d1d1f] transition">Solution</button>
+          <button onClick={() => onJumpToSection('impact')}        className="hover:text-[#1d1d1f] transition">Impact</button>
+          <button onClick={() => onJumpToSection('sdg6')}          className="hover:text-[#1d1d1f] transition">SDG 6</button>
+          <button onClick={() => onJumpToSection('collaboration')} className="hover:text-[#1d1d1f] transition">Collaboration</button>
+        </div>
 
         <button
           onClick={onEnterMap}

@@ -97,6 +97,20 @@ export default function App() {
     setView('landing')
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
   }
+  // Bascule sur la landing puis scrolle vers l'ancre demandée (utilisé par
+  // les liens 'Problème', 'Solution', etc. dans le header de la page Accès
+  // à l'eau, qui pointent vers des sections de la landing).
+  const goToLandingSection = (sectionId: string) => {
+    setView('landing')
+    // attendre que la landing soit montée avant de scroller
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(sectionId)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        else window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+      })
+    })
+  }
 
   if (view === 'landing') {
     return (
@@ -112,6 +126,7 @@ export default function App() {
       <UnderstandingPage
         onBack={goToLanding}
         onEnterMap={enterMap}
+        onJumpToSection={goToLandingSection}
       />
     )
   }
