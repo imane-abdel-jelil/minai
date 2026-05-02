@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useI18n } from '../lib/i18n'
+import LanguageSwitch from './LanguageSwitch'
 
 interface Props {
   onEnter: () => void
@@ -93,6 +95,7 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Nav({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () => void }) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
 
@@ -105,49 +108,39 @@ function Nav({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () 
           </span>
 
           {/* Liens — desktop seulement */}
-          <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
+          <div className="hidden md:flex items-center gap-7 text-[13px] text-[#6e6e73]">
             <button onClick={onUnderstand} className="hover:text-[#1d1d1f] transition">
-              Accès à l’eau
+              {t('Accès à l’eau')}
             </button>
-            <a href="#problem"        className="hover:text-[#1d1d1f] transition">Problème</a>
-            <a href="#solution"       className="hover:text-[#1d1d1f] transition">Solution</a>
-            <a href="#impact"         className="hover:text-[#1d1d1f] transition">Impact</a>
-            <a href="#sdg6"           className="hover:text-[#1d1d1f] transition">SDG 6</a>
-            <a href="#collaboration"  className="hover:text-[#1d1d1f] transition">Collaboration</a>
+            <a href="#problem"        className="hover:text-[#1d1d1f] transition">{t('Problème')}</a>
+            <a href="#solution"       className="hover:text-[#1d1d1f] transition">{t('Solution')}</a>
+            <a href="#impact"         className="hover:text-[#1d1d1f] transition">{t('Impact')}</a>
+            <a href="#sdg6"           className="hover:text-[#1d1d1f] transition">{t('SDG 6')}</a>
+            <a href="#collaboration"  className="hover:text-[#1d1d1f] transition">{t('Collaboration')}</a>
           </div>
 
-          {/* CTA desktop */}
-          <button
-            onClick={onEnter}
-            className="hidden md:block text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
-          >
-            Voir la cartographie →
-          </button>
+          <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitch />
+            <button
+              onClick={onEnter}
+              className="text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
+            >
+              {t('Voir la cartographie →')}
+            </button>
+          </div>
 
           {/* Hamburger mobile */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-label={open ? t('Fermer le menu') : t('Ouvrir le menu')}
             aria-expanded={open}
             className="md:hidden w-10 h-10 -mr-2 flex items-center justify-center"
           >
             <span className="relative block w-5 h-4">
-              <span
-                className={`absolute left-0 top-0 h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-transform duration-200 ${
-                  open ? 'translate-y-[7px] rotate-45' : ''
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-[7px] h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-opacity duration-200 ${
-                  open ? 'opacity-0' : 'opacity-100'
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-[14px] h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-transform duration-200 ${
-                  open ? '-translate-y-[7px] -rotate-45' : ''
-                }`}
-              />
+              <span className={`absolute left-0 top-0 h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-transform duration-200 ${open ? 'translate-y-[7px] rotate-45' : ''}`} />
+              <span className={`absolute left-0 top-[7px] h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-opacity duration-200 ${open ? 'opacity-0' : 'opacity-100'}`} />
+              <span className={`absolute left-0 top-[14px] h-0.5 w-5 bg-[#1d1d1f] rounded-full transition-transform duration-200 ${open ? '-translate-y-[7px] -rotate-45' : ''}`} />
             </span>
           </button>
         </div>
@@ -156,25 +149,25 @@ function Nav({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () 
       {/* Sheet mobile */}
       {open && (
         <>
-          <div
-            className="md:hidden fixed inset-0 top-14 z-40 bg-black/30"
-            onClick={close}
-          />
+          <div className="md:hidden fixed inset-0 top-14 z-40 bg-black/30" onClick={close} />
           <div className="md:hidden fixed top-14 inset-x-0 z-40 bg-white border-b border-black/5 shadow-lg">
             <div className="px-6 py-5 flex flex-col text-[15px] text-[#1d1d1f]">
               <button onClick={() => { close(); onUnderstand() }} className="text-left py-3 border-b border-black/5">
-                Accès à l’eau
+                {t('Accès à l’eau')}
               </button>
-              <a href="#problem"       onClick={close} className="py-3 border-b border-black/5">Problème</a>
-              <a href="#solution"      onClick={close} className="py-3 border-b border-black/5">Solution</a>
-              <a href="#impact"        onClick={close} className="py-3 border-b border-black/5">Impact</a>
-              <a href="#sdg6"          onClick={close} className="py-3 border-b border-black/5">SDG 6</a>
-              <a href="#collaboration" onClick={close} className="py-3 border-b border-black/5">Collaboration</a>
+              <a href="#problem"       onClick={close} className="py-3 border-b border-black/5">{t('Problème')}</a>
+              <a href="#solution"      onClick={close} className="py-3 border-b border-black/5">{t('Solution')}</a>
+              <a href="#impact"        onClick={close} className="py-3 border-b border-black/5">{t('Impact')}</a>
+              <a href="#sdg6"          onClick={close} className="py-3 border-b border-black/5">{t('SDG 6')}</a>
+              <a href="#collaboration" onClick={close} className="py-3 border-b border-black/5">{t('Collaboration')}</a>
+              <div className="mt-4 mb-1 flex justify-center">
+                <LanguageSwitch />
+              </div>
               <button
                 onClick={() => { close(); onEnter() }}
-                className="mt-5 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
+                className="mt-3 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
               >
-                Voir la cartographie →
+                {t('Voir la cartographie →')}
               </button>
             </div>
           </div>
@@ -189,34 +182,32 @@ function Nav({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () 
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Hero({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: () => void }) {
+  const { t } = useI18n()
   return (
     <section className="relative pt-32 md:pt-40 pb-16 md:pb-20 px-6">
       <div className="max-w-5xl mx-auto text-center">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-7">
-            Initiative géospatiale · Mauritanie
+            {t('Initiative géospatiale · Mauritanie')}
           </p>
         </Reveal>
 
         <Reveal delay={150}>
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-semibold tracking-tight leading-[1.03]">
-            Making the invisible
+            {t('Making the invisible')}
             <br />
             <span className="bg-gradient-to-b from-[#1d1d1f] to-[#6e6e73] bg-clip-text text-transparent">
-              visible again.
+              {t('visible again.')}
             </span>
           </h1>
         </Reveal>
 
         <Reveal delay={300}>
           <p className="mt-9 text-lg md:text-2xl text-[#1d1d1f] max-w-3xl mx-auto leading-snug">
-            MINAI est une initiative d’intelligence géospatiale dédiée à l’accès à
-            l’eau potable en Mauritanie. Elle vise à rendre visibles les communautés
-            aujourd’hui absentes des systèmes de décision.
+            {t('MINAI est une initiative d’intelligence géospatiale dédiée à l’accès à l’eau potable en Mauritanie. Elle vise à rendre visibles les communautés aujourd’hui absentes des systèmes de décision.')}
           </p>
         </Reveal>
 
-        {/* Chip discret avec les chiffres clés et leurs sources */}
         <Reveal delay={450}>
           <a
             href="#impact"
@@ -224,8 +215,8 @@ function Hero({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: ()
           >
             <span className="text-cyan-700">↳</span>
             <span className="font-medium text-[#1d1d1f]">600K+</span>
-            <span>personnes en zones critiques</span>
-            <span className="text-[#86868b]">· Sources : ANSADE · UNICEF · World Bank</span>
+            <span>{t('personnes en zones critiques')}</span>
+            <span className="text-[#86868b]">· {t('Sources : ANSADE · UNICEF · World Bank')}</span>
           </a>
         </Reveal>
 
@@ -235,25 +226,24 @@ function Hero({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: ()
               onClick={onEnter}
               className="bg-[#1d1d1f] text-white px-7 py-3 rounded-full font-medium hover:bg-black transition"
             >
-              Voir la cartographie
+              {t('Voir la cartographie')}
             </button>
             <a
               href="#collaboration"
               className="border border-[#1d1d1f]/20 text-[#1d1d1f] px-7 py-3 rounded-full font-medium hover:bg-[#1d1d1f]/[0.04] transition text-center"
             >
-              Collaborer
+              {t('Collaborer')}
             </a>
           </div>
         </Reveal>
 
-        {/* Lien tertiaire discret vers la page éditoriale */}
         <Reveal delay={750}>
           <button
             onClick={onUnderstand}
             className="mt-8 text-sm text-[#6e6e73] hover:text-[#1d1d1f] transition inline-flex items-center gap-1.5"
           >
-            Pourquoi l’accès à l’eau ?{' '}
-            <span className="opacity-60">Comprendre l’enjeu →</span>
+            {t('Pourquoi l’accès à l’eau ?')}{' '}
+            <span className="opacity-60">{t('Comprendre l’enjeu →')}</span>
           </button>
         </Reveal>
       </div>
@@ -285,42 +275,34 @@ function HeroImage() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ContextSection() {
+  const { t } = useI18n()
   return (
     <section className="bg-white px-6 py-28 md:py-36 border-t border-black/5">
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
-            Contexte
+            {t('Contexte')}
           </p>
         </Reveal>
         <Reveal delay={100}>
           <h2 className="text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] max-w-3xl">
-            Un enjeu global,
+            {t('Un enjeu global,')}
             <br />
-            <span className="text-[#86868b]">une réalité locale.</span>
+            <span className="text-[#86868b]">{t('une réalité locale.')}</span>
           </h2>
         </Reveal>
 
-        {/* 2 colonnes 50/50 : texte gauche / stat card droite, alignés en haut */}
         <div className="mt-12 grid sm:grid-cols-2 gap-8 md:gap-12 items-start">
           <div className="space-y-5 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
             <Reveal delay={200}>
-              <p>
-                En Afrique subsaharienne, des centaines de millions de personnes
-                vivent sans accès fiable à l’eau potable.
-              </p>
+              <p>{t('En Afrique subsaharienne, des centaines de millions de personnes vivent sans accès fiable à l’eau potable.')}</p>
             </Reveal>
             <Reveal delay={300}>
-              <p>
-                En Mauritanie, cette situation est particulièrement marquée dans
-                les zones rurales, où l’accès dépend de la distance, de la
-                disponibilité et de la régularité des ressources.
-              </p>
+              <p>{t('En Mauritanie, cette situation est particulièrement marquée dans les zones rurales, où l’accès dépend de la distance, de la disponibilité et de la régularité des ressources.')}</p>
             </Reveal>
             <Reveal delay={500}>
               <p className="text-[#6e6e73] border-t border-black/5 pt-5 mt-7">
-                Une réalité qui reste partiellement invisible dans les systèmes
-                de décision.
+                {t('Une réalité qui reste partiellement invisible dans les systèmes de décision.')}
               </p>
             </Reveal>
           </div>
@@ -335,27 +317,22 @@ function ContextSection() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[11px] tracking-[0.18em] uppercase text-[#1d1d1f] font-semibold">
-                    World Bank
+                    {t('World Bank')}
                   </p>
                   <p className="mt-1 text-[10px] text-[#86868b] tracking-wide">
-                    Indicator SH.H2O.BASW.ZS
+                    {t('Indicator SH.H2O.BASW.ZS')}
                   </p>
                 </div>
-                <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">
-                  ↗
-                </span>
+                <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">↗</span>
               </div>
 
-              <p className="mt-8 text-6xl md:text-7xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
-                57%
-              </p>
+              <p className="mt-8 text-6xl md:text-7xl font-semibold tracking-tight text-[#1d1d1f] leading-none">57%</p>
               <p className="mt-4 text-sm md:text-base text-[#1d1d1f] leading-snug">
-                de la population rurale en Mauritanie dispose d’un accès à une
-                source d’eau améliorée.
+                {t('de la population rurale en Mauritanie dispose d’un accès à une source d’eau améliorée.')}
               </p>
 
               <p className="mt-6 text-xs text-cyan-700 font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                Voir l’indicateur <span aria-hidden>→</span>
+                {t('Voir l’indicateur')} <span aria-hidden>→</span>
               </p>
             </a>
           </Reveal>
@@ -370,32 +347,28 @@ function ContextSection() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ProblemSection() {
+  const { t } = useI18n()
   return (
     <section id="problem" className="bg-[#fafafa] px-6 py-32 md:py-40">
       <div className="max-w-5xl mx-auto">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
-            Le problème
+            {t('Le problème')}
           </p>
         </Reveal>
 
         <Reveal delay={100}>
           <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] max-w-3xl">
-            Ce n’est pas un manque de ressources.
+            {t('Ce n’est pas un manque de ressources.')}
             <br />
-            <span className="text-[#86868b]">C’est un manque de visibilité.</span>
+            <span className="text-[#86868b]">{t('C’est un manque de visibilité.')}</span>
           </h2>
         </Reveal>
 
         <Reveal delay={250}>
           <p className="mt-12 max-w-3xl text-lg md:text-xl text-[#1d1d1f] leading-relaxed border-l-2 border-cyan-700 pl-6">
-            Dans les zones rurales du sud mauritanien, des villages se trouvent à
-            plus de cinq kilomètres du point d’eau le plus proche. Ils
-            n’apparaissent pas systématiquement comme prioritaires dans les
-            systèmes officiels d’aide à la décision.{' '}
-            <span className="text-[#86868b]">
-              Ce qui n’est pas vu n’est pas servi.
-            </span>
+            {t('Dans les zones rurales du sud mauritanien, des villages se trouvent à plus de cinq kilomètres du point d’eau le plus proche. Ils n’apparaissent pas systématiquement comme prioritaires dans les systèmes officiels d’aide à la décision.')}{' '}
+            <span className="text-[#86868b]">{t('Ce qui n’est pas vu n’est pas servi.')}</span>
           </p>
         </Reveal>
 
@@ -403,32 +376,30 @@ function ProblemSection() {
           <Reveal delay={150}>
             <Pillar
               n="01"
-              title="Données fragmentées"
-              body="Les informations existent — UNICEF, ANSADE, OpenStreetMap, ONG. Elles restent dispersées et difficilement exploitables."
+              title={t('Données fragmentées')}
+              body={t('Les informations existent — UNICEF, ANSADE, OpenStreetMap, ONG. Elles restent dispersées et difficilement exploitables.')}
             />
           </Reveal>
           <Reveal delay={250}>
             <Pillar
               n="02"
-              title="Territoires invisibles"
-              body="Une part importante des zones rurales n’est pas correctement représentée dans les systèmes d’aide à la décision."
+              title={t('Territoires invisibles')}
+              body={t('Une part importante des zones rurales n’est pas correctement représentée dans les systèmes d’aide à la décision.')}
             />
           </Reveal>
           <Reveal delay={350}>
             <Pillar
               n="03"
-              title="Interventions non priorisées"
-              body="Les ressources sont mobilisées là où les données sont visibles, pas nécessairement là où les besoins sont les plus critiques."
+              title={t('Interventions non priorisées')}
+              body={t('Les ressources sont mobilisées là où les données sont visibles, pas nécessairement là où les besoins sont les plus critiques.')}
             />
           </Reveal>
         </div>
 
         <Reveal delay={500}>
           <p className="mt-24 text-2xl md:text-4xl font-light text-center text-[#1d1d1f] max-w-3xl mx-auto leading-snug">
-            Les données existent.{' '}
-            <span className="text-[#86868b]">
-              Elles ne deviennent pas systématiquement des décisions.
-            </span>
+            {t('Les données existent.')}{' '}
+            <span className="text-[#86868b]">{t('Elles ne deviennent pas systématiquement des décisions.')}</span>
           </p>
         </Reveal>
       </div>
@@ -451,27 +422,28 @@ function Pillar({ n, title, body }: { n: string; title: string; body: string }) 
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ConsequencesGallery() {
+  const { t } = useI18n()
   const items = [
     { src: IMG.woman_water_jugs, alt: "Femme rurale transportant des bidons d'eau",
-      caption: 'Marche quotidienne vers l’eau' },
+      caption: t('Marche quotidienne pour l’eau') },
     { src: IMG.boy_pump,          alt: 'Enfant utilisant une pompe à eau manuelle',
-      caption: 'L’enfance face à la pompe' },
+      caption: t('L’enfance face à la pompe') },
     { src: IMG.child_drinking,    alt: "Enfant buvant un verre d'eau",
-      caption: 'Le geste qu’on tient pour acquis' },
+      caption: t('Le geste qu’on tient pour acquis') },
   ]
   return (
     <section className="bg-white px-4 sm:px-6 py-24 md:py-32">
       <div className="max-w-7xl mx-auto">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-4 text-center">
-            Les conséquences
+            {t('Les conséquences')}
           </p>
         </Reveal>
         <Reveal delay={100}>
           <h3 className="text-center text-3xl md:text-5xl font-semibold tracking-tight text-[#1d1d1f] max-w-3xl mx-auto leading-tight">
-            Quand un territoire devient invisible,
+            {t('Quand un territoire devient invisible,')}
             <br />
-            <span className="text-[#86868b]">ses habitants aussi.</span>
+            <span className="text-[#86868b]">{t('ses habitants aussi.')}</span>
           </h3>
         </Reveal>
         <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
@@ -502,6 +474,7 @@ function ConsequencesGallery() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function HumanImpactSection() {
+  const { t } = useI18n()
   return (
     <section className="relative px-4 sm:px-6 py-24 md:py-32 bg-white">
       <Reveal>
@@ -517,22 +490,16 @@ function HumanImpactSection() {
           <div className="absolute inset-0 flex flex-col justify-end p-8 sm:p-12 md:p-16 text-white">
             <Reveal>
               <h2 className="text-3xl sm:text-4xl md:text-6xl font-semibold tracking-tight leading-[1.08] max-w-3xl">
-                Derrière chaque zone invisible,
+                {t('Derrière chaque zone invisible,')}
                 <br />
-                <span className="text-white/70">il y a une réalité.</span>
+                <span className="text-white/70">{t('il y a une réalité.')}</span>
               </h2>
             </Reveal>
 
             <div className="mt-6 sm:mt-8 space-y-2 sm:space-y-3 max-w-2xl text-base sm:text-lg md:text-xl font-light text-white/90 leading-relaxed">
-              <Reveal delay={150}>
-                <p>Des femmes qui marchent plusieurs heures pour un accès limité à l’eau.</p>
-              </Reveal>
-              <Reveal delay={250}>
-                <p>Des enfants qui quittent l’école pour subvenir aux besoins du foyer.</p>
-              </Reveal>
-              <Reveal delay={350}>
-                <p>Des communautés entières en attente d’une intervention qui ne vient pas.</p>
-              </Reveal>
+              <Reveal delay={150}><p>{t('Des femmes qui marchent plusieurs heures pour un accès limité à l’eau.')}</p></Reveal>
+              <Reveal delay={250}><p>{t('Des enfants qui quittent l’école pour subvenir aux besoins du foyer.')}</p></Reveal>
+              <Reveal delay={350}><p>{t('Des communautés entières en attente d’une intervention qui ne vient pas.')}</p></Reveal>
             </div>
           </div>
         </div>
@@ -540,10 +507,10 @@ function HumanImpactSection() {
 
       <Reveal delay={400}>
         <p className="mt-16 md:mt-24 max-w-4xl mx-auto text-center text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1] text-[#1d1d1f]">
-          Ce qui n’est pas visible
+          {t('Ce qui n’est pas visible')}
           <br />
           <span className="bg-gradient-to-r from-cyan-600 to-cyan-800 bg-clip-text text-transparent">
-            ne peut pas être servi.
+            {t('ne peut pas être servi.')}
           </span>
         </p>
       </Reveal>
@@ -556,29 +523,27 @@ function HumanImpactSection() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SolutionSection() {
+  const { t } = useI18n()
   return (
     <section id="solution" className="bg-[#fafafa] px-6 py-32 md:py-40">
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
-            L’initiative
+            {t('L’initiative')}
           </p>
         </Reveal>
         <Reveal delay={100}>
           <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] max-w-3xl text-[#1d1d1f]">
-            Rendre les données existantes
+            {t('Rendre les données existantes')}
             <br />
             <span className="bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
-              utilisables pour décider.
+              {t('utilisables pour décider.')}
             </span>
           </h2>
         </Reveal>
         <Reveal delay={250}>
           <p className="mt-10 text-lg md:text-xl text-[#1d1d1f] max-w-3xl leading-relaxed">
-            MINAI ne collecte pas de nouvelles données. L’initiative croise et
-            structure les informations institutionnelles déjà publiques pour
-            révéler ce qu’elles ne montrent pas seules : les zones où l’accès à
-            l’eau potable est insuffisant et où les interventions sont les plus urgentes.
+            {t('MINAI ne collecte pas de nouvelles données. L’initiative croise et structure les informations institutionnelles déjà publiques pour révéler ce qu’elles ne montrent pas seules : les zones où l’accès à l’eau potable est insuffisant et où les interventions sont les plus urgentes.')}
           </p>
         </Reveal>
 
@@ -586,29 +551,29 @@ function SolutionSection() {
           <Reveal delay={150}>
             <Axis
               icon={<TargetIcon />}
-              title="Cartographier les zones sous-desservies"
-              body="Croisement des données démographiques (ANSADE), des infrastructures (OpenStreetMap) et des standards humanitaires."
+              title={t('Cartographier les zones sous-desservies')}
+              body={t('Croisement des données démographiques (ANSADE), des infrastructures (OpenStreetMap) et des standards humanitaires.')}
             />
           </Reveal>
           <Reveal delay={250}>
             <Axis
               icon={<PinIcon />}
-              title="Révéler les priorités"
-              body="Score d’accès calculé selon la norme humanitaire Sphere — un point d’eau pour cinq cents habitants."
+              title={t('Révéler les priorités')}
+              body={t('Score d’accès calculé selon la norme humanitaire Sphere — un point d’eau pour cinq cents habitants.')}
             />
           </Reveal>
           <Reveal delay={350}>
             <Axis
               icon={<HandshakeIcon />}
-              title="Soutenir la décision publique"
-              body="Une vision commune et vérifiable, accessible aux ONG, aux institutions et aux décideurs locaux."
+              title={t('Soutenir la décision publique')}
+              body={t('Une vision commune et vérifiable, accessible aux ONG, aux institutions et aux décideurs locaux.')}
             />
           </Reveal>
         </div>
 
         <Reveal delay={500}>
           <p className="mt-24 text-3xl md:text-5xl font-semibold tracking-tight text-center bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
-            De la donnée à l’action.
+            {t('De la donnée à l’action.')}
           </p>
         </Reveal>
       </div>
@@ -657,19 +622,20 @@ function HandshakeIcon() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ByTheNumbersSection() {
+  const { t } = useI18n()
   return (
     <section id="impact" className="bg-white px-6 py-32 md:py-40 border-t border-black/5">
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6 text-center">
-            Aujourd’hui en Mauritanie
+            {t('Aujourd’hui en Mauritanie')}
           </p>
         </Reveal>
         <Reveal delay={100}>
           <h2 className="text-center text-3xl md:text-5xl font-semibold tracking-tight text-[#1d1d1f] max-w-3xl mx-auto leading-tight">
-            Trois chiffres. Trois sources publiques.
+            {t('Trois chiffres. Trois sources publiques.')}
             <br />
-            <span className="text-[#86868b]">Une seule réalité.</span>
+            <span className="text-[#86868b]">{t('Une seule réalité.')}</span>
           </h2>
         </Reveal>
 
@@ -677,30 +643,30 @@ function ByTheNumbersSection() {
           <Reveal delay={150}>
             <NumberCard
               stat="1,7 M"
-              label="habitants en milieu rural"
-              source="ANSADE"
-              sourceTag="Recensement RGPH 2013"
-              body="Office national de la statistique mauritanien. Population mauritanienne ventilée par wilaya, avec répartition urbain / rural."
+              label={t('habitants en milieu rural')}
+              source={t('ANSADE')}
+              sourceTag={t('Recensement RGPH 2013')}
+              body={t('Office national de la statistique mauritanien. Population mauritanienne ventilée par wilaya, avec répartition urbain / rural.')}
               href="https://experience.arcgis.com/experience/2ded1160faac4295861634a47ff18d03/page/RGPH-5?views=Infrastructures"
             />
           </Reveal>
           <Reveal delay={250}>
             <NumberCard
               stat="57%"
-              label="population rurale avec eau améliorée"
-              source="World Bank"
-              sourceTag="Indicator SH.H2O.BASW.ZS"
-              body="Open Data Bank : indicateurs de développement, accès à l'eau et sanitation, par pays."
+              label={t('population rurale avec eau améliorée')}
+              source={t('World Bank')}
+              sourceTag={t('Indicator SH.H2O.BASW.ZS')}
+              body={t("Open Data Bank : indicateurs de développement, accès à l'eau et sanitation, par pays.")}
               href="https://data.worldbank.org/country/mauritania?view=chart"
             />
           </Reveal>
           <Reveal delay={350}>
             <NumberCard
               stat="1 / 4"
-              label="enfant sans eau de base au Sahel"
-              source="UNICEF · WHO"
-              sourceTag="Joint Monitoring Programme"
-              body="JMP : suivi mondial de l'accès à l'eau, l'assainissement et l'hygiène — profil Mauritanie."
+              label={t('enfant sans eau de base au Sahel')}
+              source={t('UNICEF · WHO')}
+              sourceTag={t('Joint Monitoring Programme')}
+              body={t("JMP : suivi mondial de l'accès à l'eau, l'assainissement et l'hygiène — profil Mauritanie.")}
               href="https://data.unicef.org/topic/water-and-sanitation/drinking-water/"
             />
           </Reveal>
@@ -708,11 +674,9 @@ function ByTheNumbersSection() {
 
         <Reveal delay={550}>
           <p className="mt-20 max-w-3xl mx-auto text-center text-2xl md:text-3xl font-light tracking-tight leading-snug text-[#1d1d1f]">
-            Ces chiffres sont publics.
+            {t('Ces chiffres sont publics.')}
             <br />
-            <span className="text-[#86868b]">
-              Ils ne sont pas systématiquement croisés avec le terrain.
-            </span>
+            <span className="text-[#86868b]">{t('Ils ne sont pas systématiquement croisés avec le terrain.')}</span>
           </p>
         </Reveal>
       </div>
@@ -735,6 +699,7 @@ function NumberCard({
   body: string
   href: string
 }) {
+  const { t } = useI18n()
   return (
     <a
       href={href}
@@ -749,9 +714,7 @@ function NumberCard({
           </p>
           <p className="mt-1 text-[11px] text-[#86868b] tracking-wide">{sourceTag}</p>
         </div>
-        <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">
-          ↗
-        </span>
+        <span className="text-[#86868b] group-hover:text-[#1d1d1f] group-hover:translate-x-0.5 transition transform">↗</span>
       </div>
 
       <p className="mt-10 text-6xl md:text-7xl font-semibold tracking-tight text-[#1d1d1f] leading-none">
@@ -762,7 +725,7 @@ function NumberCard({
       <p className="mt-6 text-[#6e6e73] text-[14px] leading-relaxed">{body}</p>
 
       <p className="mt-8 text-cyan-700 text-sm font-medium tracking-tight inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-        Consulter la source <span aria-hidden>→</span>
+        {t('Consulter la source')} <span aria-hidden>→</span>
       </p>
     </a>
   )
@@ -773,11 +736,11 @@ function NumberCard({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SDG6Section({ onUnderstand }: { onUnderstand: () => void }) {
+  const { t } = useI18n()
   return (
     <section id="sdg6" className="bg-[#fafafa] px-6 py-32 md:py-40 border-t border-black/5">
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-10 md:gap-16">
-          {/* Badge inspiré de l'ODD 6 — couleur officielle des Nations Unies */}
           <div className="shrink-0">
             <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-[#26BDE2] flex items-center justify-center shadow-[0_8px_30px_rgba(38,189,226,0.25)]">
               <div className="text-white text-center">
@@ -790,27 +753,21 @@ function SDG6Section({ onUnderstand }: { onUnderstand: () => void }) {
           <div>
             <Reveal>
               <p className="text-[11px] tracking-[0.35em] uppercase text-[#26BDE2] mb-3">
-                Nations Unies · Objectif 6
+                {t('Nations Unies · Objectif 6')}
               </p>
             </Reveal>
             <Reveal delay={100}>
               <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-[#1d1d1f] leading-tight">
-                Eau propre et assainissement,
+                {t('Eau propre et assainissement,')}
                 <br />
-                <span className="text-[#86868b]">pour tous, d’ici 2030.</span>
+                <span className="text-[#86868b]">{t('pour tous, d’ici 2030.')}</span>
               </h2>
             </Reveal>
             <Reveal delay={250}>
               <p className="mt-6 text-base md:text-lg text-[#6e6e73] leading-relaxed max-w-2xl">
-                L’objectif de développement durable n°6 vise un accès universel et
-                équitable à l’eau potable d’ici 2030. En Mauritanie, le rythme
-                actuel ne permet pas d’y parvenir.{' '}
-                <span className="text-[#1d1d1f] font-medium">
-                  MINAI s’inscrit dans cet effort
-                </span>
-                {' '}en rendant visibles les zones où l’accélération est la plus
-                nécessaire, et en mettant à disposition des décideurs publics une
-                lecture commune du territoire.
+                {t('L’objectif de développement durable n°6 vise un accès universel et équitable à l’eau potable d’ici 2030. En Mauritanie, le rythme actuel ne permet pas d’y parvenir.')}{' '}
+                <span className="text-[#1d1d1f] font-medium">{t('MINAI s’inscrit dans cet effort')}</span>{' '}
+                {t('en rendant visibles les zones où l’accélération est la plus nécessaire, et en mettant à disposition des décideurs publics une lecture commune du territoire.')}
               </p>
             </Reveal>
             <Reveal delay={400}>
@@ -818,7 +775,7 @@ function SDG6Section({ onUnderstand }: { onUnderstand: () => void }) {
                 onClick={onUnderstand}
                 className="mt-6 text-sm text-cyan-700 hover:text-cyan-900 transition inline-flex items-center gap-1.5 font-medium"
               >
-                Comprendre l’enjeu en détail{' '}
+                {t('Comprendre l’enjeu en détail')}{' '}
                 <span aria-hidden>→</span>
               </button>
             </Reveal>
@@ -834,40 +791,38 @@ function SDG6Section({ onUnderstand }: { onUnderstand: () => void }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function CollaborationSection({ onEnter }: { onEnter: () => void }) {
+  const { t } = useI18n()
   return (
     <section id="collaboration" className="bg-white px-6 py-32 md:py-40 border-t border-black/5">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-center">
         <div>
           <Reveal>
             <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-6">
-              Collaboration
+              {t('Collaboration')}
             </p>
           </Reveal>
           <Reveal delay={100}>
             <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05]">
-              Une initiative ouverte
+              {t('Une initiative ouverte')}
               <br />
-              <span className="text-[#86868b]">aux acteurs de l’eau.</span>
+              <span className="text-[#86868b]">{t('aux acteurs de l’eau.')}</span>
             </h2>
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-8 text-lg md:text-xl text-[#1d1d1f] max-w-xl leading-relaxed">
-              MINAI est conçue pour être partagée. Toute organisation engagée
-              dans l’accès à l’eau potable — ONG, institution publique, agence
-              internationale — peut s’en saisir, contribuer ou en demander
-              l’adaptation à son contexte d’intervention.
+              {t('MINAI est conçue pour être partagée. Toute organisation engagée dans l’accès à l’eau potable — ONG, institution publique, agence internationale — peut s’en saisir, contribuer ou en demander l’adaptation à son contexte d’intervention.')}
             </p>
           </Reveal>
           <Reveal delay={300}>
             <p className="mt-6 text-base md:text-lg text-[#6e6e73] max-w-xl leading-relaxed">
-              L’initiative travaille avec ses partenaires pour :
+              {t('L’initiative travaille avec ses partenaires pour :')}
             </p>
           </Reveal>
 
           <div className="mt-8 grid gap-3 max-w-md">
-            <Reveal delay={350}><Bullet text="Identifier les priorités d’intervention" /></Reveal>
-            <Reveal delay={450}><Bullet text="Optimiser l’allocation des ressources" /></Reveal>
-            <Reveal delay={550}><Bullet text="Renforcer l’impact des actions terrain" /></Reveal>
+            <Reveal delay={350}><Bullet text={t('Identifier les priorités d’intervention')} /></Reveal>
+            <Reveal delay={450}><Bullet text={t('Optimiser l’allocation des ressources')} /></Reveal>
+            <Reveal delay={550}><Bullet text={t('Renforcer l’impact des actions terrain')} /></Reveal>
           </div>
 
           <Reveal delay={650}>
@@ -876,13 +831,13 @@ function CollaborationSection({ onEnter }: { onEnter: () => void }) {
                 onClick={onEnter}
                 className="bg-[#1d1d1f] text-white px-7 py-3 rounded-full font-medium hover:bg-black transition text-center"
               >
-                Visualiser les zones prioritaires
+                {t('Visualiser les zones prioritaires')}
               </button>
               <a
                 href="mailto:imaneahmedou1@gmail.com?subject=Collaboration%20MINAI"
                 className="border border-[#1d1d1f]/20 text-[#1d1d1f] px-7 py-3 rounded-full font-medium hover:bg-[#1d1d1f]/[0.04] transition text-center"
               >
-                Contacter l’initiative
+                {t('Contacter l’initiative')}
               </a>
             </div>
           </Reveal>
@@ -917,21 +872,20 @@ function Bullet({ text }: { text: string }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Signature() {
+  const { t } = useI18n()
   return (
     <footer className="px-6 py-24 bg-[#fafafa] border-t border-black/5">
       <Reveal>
         <p className="max-w-4xl mx-auto text-center text-2xl md:text-4xl font-light tracking-tight leading-snug text-[#1d1d1f]">
           MINAI <span className="text-[#86868b]">—</span>{' '}
           <span className="bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
-            making the invisible visible again.
+            {t('making the invisible visible again.')}
           </span>
         </p>
       </Reveal>
       <div className="mt-12 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-7xl mx-auto text-[11px] text-[#86868b]">
-        <span>Nouakchott, Mauritanie · © 2026 MINAI</span>
-        <span>
-          Aligned with UN SDG 6 · Sources : ANSADE · UNICEF · World Bank · OpenStreetMap
-        </span>
+        <span>{t('Nouakchott, Mauritanie · © 2026 MINAI')}</span>
+        <span>{t('Aligned with UN SDG 6 · Sources : ANSADE · UNICEF · World Bank · OpenStreetMap')}</span>
       </div>
     </footer>
   )

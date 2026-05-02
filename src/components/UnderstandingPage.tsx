@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useI18n } from '../lib/i18n'
+import LanguageSwitch from './LanguageSwitch'
 
 interface Props {
   /** Retour à la landing */
@@ -34,6 +36,7 @@ const IMG = {
 }
 
 export default function UnderstandingPage({ onBack, onEnterMap, onJumpToSection }: Props) {
+  const { t } = useI18n()
   return (
     <div className="bg-white text-[#1d1d1f] overflow-x-hidden font-sans antialiased">
       <Nav onBack={onBack} onEnterMap={onEnterMap} onJumpToSection={onJumpToSection} />
@@ -41,7 +44,7 @@ export default function UnderstandingPage({ onBack, onEnterMap, onJumpToSection 
       <FullBleedImage
         src={IMG.mauritania_woman}
         alt="Femme mauritanienne transportant trois jerrycans dans le désert"
-        caption="Mauritanie · Le quotidien de l’accès à l’eau"
+        caption={t('Mauritanie · Le quotidien de l’accès à l’eau')}
       />
       <Beat2Reality />
       <Beat3Impact />
@@ -49,7 +52,7 @@ export default function UnderstandingPage({ onBack, onEnterMap, onJumpToSection 
       <FullBleedImage
         src={IMG.water_tanker}
         alt="Distribution d'eau par citerne, jerrycans alignés en Mauritanie"
-        caption="Une intervention. Des centaines d’attentes."
+        caption={t('Une intervention. Des centaines d’attentes.')}
       />
       <Beat5Challenge />
       <FullBleedImage
@@ -119,6 +122,7 @@ function Nav({
   onEnterMap: () => void
   onJumpToSection: (id: string) => void
 }) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
 
@@ -134,28 +138,30 @@ function Nav({
           </button>
 
           {/* Liens — desktop */}
-          <div className="hidden md:flex items-center gap-8 text-[13px] text-[#6e6e73]">
-            <span className="text-[#1d1d1f] font-medium tracking-tight">Accès à l’eau</span>
-            <button onClick={() => onJumpToSection('problem')}       className="hover:text-[#1d1d1f] transition">Problème</button>
-            <button onClick={() => onJumpToSection('solution')}      className="hover:text-[#1d1d1f] transition">Solution</button>
-            <button onClick={() => onJumpToSection('impact')}        className="hover:text-[#1d1d1f] transition">Impact</button>
-            <button onClick={() => onJumpToSection('sdg6')}          className="hover:text-[#1d1d1f] transition">SDG 6</button>
-            <button onClick={() => onJumpToSection('collaboration')} className="hover:text-[#1d1d1f] transition">Collaboration</button>
+          <div className="hidden md:flex items-center gap-7 text-[13px] text-[#6e6e73]">
+            <span className="text-[#1d1d1f] font-medium tracking-tight">{t('Accès à l’eau')}</span>
+            <button onClick={() => onJumpToSection('problem')}       className="hover:text-[#1d1d1f] transition">{t('Problème')}</button>
+            <button onClick={() => onJumpToSection('solution')}      className="hover:text-[#1d1d1f] transition">{t('Solution')}</button>
+            <button onClick={() => onJumpToSection('impact')}        className="hover:text-[#1d1d1f] transition">{t('Impact')}</button>
+            <button onClick={() => onJumpToSection('sdg6')}          className="hover:text-[#1d1d1f] transition">{t('SDG 6')}</button>
+            <button onClick={() => onJumpToSection('collaboration')} className="hover:text-[#1d1d1f] transition">{t('Collaboration')}</button>
           </div>
 
-          {/* CTA desktop */}
-          <button
-            onClick={onEnterMap}
-            className="hidden md:block text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
-          >
-            Voir la cartographie →
-          </button>
+          <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitch />
+            <button
+              onClick={onEnterMap}
+              className="text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
+            >
+              {t('Voir la cartographie →')}
+            </button>
+          </div>
 
           {/* Hamburger mobile */}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-label={open ? t('Fermer le menu') : t('Ouvrir le menu')}
             aria-expanded={open}
             className="md:hidden w-10 h-10 -mr-2 flex items-center justify-center"
           >
@@ -174,17 +180,20 @@ function Nav({
           <div className="md:hidden fixed inset-0 top-14 z-40 bg-black/30" onClick={close} />
           <div className="md:hidden fixed top-14 inset-x-0 z-40 bg-white border-b border-black/5 shadow-lg">
             <div className="px-6 py-5 flex flex-col text-[15px] text-[#1d1d1f]">
-              <span className="py-3 border-b border-black/5 font-medium">Accès à l’eau</span>
-              <button onClick={() => { close(); onJumpToSection('problem') }}       className="text-left py-3 border-b border-black/5">Problème</button>
-              <button onClick={() => { close(); onJumpToSection('solution') }}      className="text-left py-3 border-b border-black/5">Solution</button>
-              <button onClick={() => { close(); onJumpToSection('impact') }}        className="text-left py-3 border-b border-black/5">Impact</button>
-              <button onClick={() => { close(); onJumpToSection('sdg6') }}          className="text-left py-3 border-b border-black/5">SDG 6</button>
-              <button onClick={() => { close(); onJumpToSection('collaboration') }} className="text-left py-3 border-b border-black/5">Collaboration</button>
+              <span className="py-3 border-b border-black/5 font-medium">{t('Accès à l’eau')}</span>
+              <button onClick={() => { close(); onJumpToSection('problem') }}       className="text-left py-3 border-b border-black/5">{t('Problème')}</button>
+              <button onClick={() => { close(); onJumpToSection('solution') }}      className="text-left py-3 border-b border-black/5">{t('Solution')}</button>
+              <button onClick={() => { close(); onJumpToSection('impact') }}        className="text-left py-3 border-b border-black/5">{t('Impact')}</button>
+              <button onClick={() => { close(); onJumpToSection('sdg6') }}          className="text-left py-3 border-b border-black/5">{t('SDG 6')}</button>
+              <button onClick={() => { close(); onJumpToSection('collaboration') }} className="text-left py-3 border-b border-black/5">{t('Collaboration')}</button>
+              <div className="mt-4 mb-1 flex justify-center">
+                <LanguageSwitch />
+              </div>
               <button
                 onClick={() => { close(); onEnterMap() }}
-                className="mt-5 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
+                className="mt-3 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
               >
-                Voir la cartographie →
+                {t('Voir la cartographie →')}
               </button>
             </div>
           </div>
@@ -199,43 +208,42 @@ function Nav({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Beat1Universal() {
+  const { t } = useI18n()
   return (
     <section className="pt-32 md:pt-40 pb-20 md:pb-28 px-6">
       <div className="max-w-4xl mx-auto text-center">
         <Reveal>
           <p className="text-[11px] tracking-[0.35em] uppercase text-cyan-700 mb-7">
-            MINAI · Comprendre
+            {t('MINAI · Comprendre')}
           </p>
         </Reveal>
 
         <Reveal delay={150}>
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-semibold tracking-tight leading-[1.03]">
-            L’eau, condition
+            {t('L’eau, condition')}
             <br />
             <span className="bg-gradient-to-b from-[#1d1d1f] to-[#6e6e73] bg-clip-text text-transparent">
-              d’existence.
+              {t('d’existence.')}
             </span>
           </h1>
         </Reveal>
 
         <Reveal delay={350}>
           <p className="mt-10 text-lg md:text-2xl text-[#1d1d1f] leading-snug max-w-2xl mx-auto">
-            Sans accès à l’eau, rien ne fonctionne durablement —{' '}
-            <span className="text-[#86868b]">
-              ni la santé, ni l’éducation, ni l’économie.
-            </span>
+            {t('Sans accès à l’eau, rien ne fonctionne durablement —')}{' '}
+            <span className="text-[#86868b]">{t('ni la santé, ni l’éducation, ni l’économie.')}</span>
           </p>
         </Reveal>
 
         <Reveal delay={500}>
           <p className="mt-6 text-base md:text-lg text-[#6e6e73] max-w-2xl mx-auto leading-relaxed">
-            Pourtant, aujourd’hui encore, l’accès à l’eau potable reste incertain.
+            {t('Pourtant, aujourd’hui encore, l’accès à l’eau potable reste incertain.')}
           </p>
         </Reveal>
 
         <Reveal delay={700}>
           <p className="mt-12 text-sm md:text-base italic text-[#86868b]">
-            « L’eau est le principe de toute chose. » — Thalès de Milet
+            {t('« L’eau est le principe de toute chose. » — Thalès de Milet')}
           </p>
         </Reveal>
       </div>
@@ -248,26 +256,25 @@ function Beat1Universal() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Beat2Reality() {
+  const { t } = useI18n()
   return (
     <section className="px-6 py-24 md:py-32">
       <div className="max-w-3xl mx-auto">
         <Reveal>
           <p className="text-base md:text-lg text-[#86868b] leading-relaxed">
-            Mais cette réalité n’est pas répartie de manière égale.
+            {t('Mais cette réalité n’est pas répartie de manière égale.')}
           </p>
         </Reveal>
         <Reveal delay={150}>
           <h2 className="mt-4 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-            Pour certaines communautés,
+            {t('Pour certaines communautés,')}
             <br />
-            <span className="text-[#86868b]">
-              l’accès à l’eau dépend de plusieurs heures de marche.
-            </span>
+            <span className="text-[#86868b]">{t('l’accès à l’eau dépend de plusieurs heures de marche.')}</span>
           </h2>
         </Reveal>
         <Reveal delay={300}>
           <p className="mt-6 text-2xl md:text-3xl font-semibold tracking-tight text-cyan-700">
-            Chaque jour.
+            {t('Chaque jour.')}
           </p>
         </Reveal>
       </div>
@@ -280,25 +287,26 @@ function Beat2Reality() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Beat3Impact() {
+  const { t } = useI18n()
   return (
     <section className="bg-[#fafafa] px-6 py-24 md:py-32 border-t border-black/5">
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 md:gap-14 items-start">
         <div>
           <Reveal>
             <p className="text-base md:text-lg text-[#86868b] leading-relaxed">
-              Ce déséquilibre se traduit en conséquences concrètes.
+              {t('Ce déséquilibre se traduit en conséquences concrètes.')}
             </p>
           </Reveal>
           <Reveal delay={150}>
             <h2 className="mt-4 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-              L’accès à l’eau ne détermine pas
+              {t('L’accès à l’eau ne détermine pas')}
               <br />
-              <span className="text-[#86868b]">seulement la survie.</span>
+              <span className="text-[#86868b]">{t('seulement la survie.')}</span>
             </h2>
           </Reveal>
           <Reveal delay={300}>
             <p className="mt-6 text-xl md:text-2xl text-[#1d1d1f] leading-snug">
-              Il détermine la capacité à vivre.
+              {t('Il détermine la capacité à vivre.')}
             </p>
           </Reveal>
 
@@ -306,28 +314,26 @@ function Beat3Impact() {
             <Reveal delay={400}>
               <li className="flex gap-3">
                 <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
-                <span>Santé fragilisée.</span>
+                <span>{t('Santé fragilisée.')}</span>
               </li>
             </Reveal>
             <Reveal delay={480}>
               <li className="flex gap-3">
                 <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
-                <span>Scolarité interrompue.</span>
+                <span>{t('Scolarité interrompue.')}</span>
               </li>
             </Reveal>
             <Reveal delay={560}>
               <li className="flex gap-3">
                 <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-cyan-700 shrink-0" />
-                <span>Activité économique limitée.</span>
+                <span>{t('Activité économique limitée.')}</span>
               </li>
             </Reveal>
           </ul>
 
           <Reveal delay={700}>
             <p className="mt-10 text-sm md:text-base text-[#6e6e73] leading-relaxed border-t border-black/5 pt-5">
-              En Mauritanie, l’eau n’est pas absente. Elle est difficilement
-              accessible : villages éloignés des points d’eau, ressources
-              irrégulières, infrastructures inégalement réparties.
+              {t('En Mauritanie, l’eau n’est pas absente. Elle est difficilement accessible : villages éloignés des points d’eau, ressources irrégulières, infrastructures inégalement réparties.')}
             </p>
           </Reveal>
         </div>
@@ -352,34 +358,31 @@ function Beat3Impact() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Beat4Visibility() {
+  const { t } = useI18n()
   return (
     <section className="px-6 py-24 md:py-32">
       <div className="max-w-3xl mx-auto">
         <Reveal>
           <p className="text-base md:text-lg text-[#86868b] leading-relaxed">
-            Ce constat est connu. Il est même reconnu :
+            {t('Ce constat est connu. Il est même reconnu :')}
           </p>
         </Reveal>
         <Reveal delay={150}>
           <h2 className="mt-4 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-            l’accès à l’eau
+            {t('l’accès à l’eau')}
             <br />
             <span className="bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
-              est un droit humain fondamental.
+              {t('est un droit humain fondamental.')}
             </span>
           </h2>
         </Reveal>
 
         <Reveal delay={300}>
           <p className="mt-8 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
-            Mais malgré cette reconnaissance, toutes les zones ne sont pas
-            identifiées avec la même précision. Dans de nombreux cas, les
-            communautés les plus exposées restent en dehors des systèmes
-            de décision.
+            {t('Mais malgré cette reconnaissance, toutes les zones ne sont pas identifiées avec la même précision. Dans de nombreux cas, les communautés les plus exposées restent en dehors des systèmes de décision.')}
           </p>
         </Reveal>
 
-        {/* SDG 6 inline, discret */}
         <Reveal delay={500}>
           <div className="mt-8 flex items-center gap-3 p-3 rounded-xl bg-[#fafafa] border border-black/5 max-w-md">
             <div className="shrink-0 w-10 h-10 rounded-lg bg-[#26BDE2] flex items-center justify-center">
@@ -387,9 +390,9 @@ function Beat4Visibility() {
             </div>
             <p className="text-xs text-[#6e6e73] leading-snug">
               <span className="text-[#1d1d1f] font-medium">
-                Objectif de développement durable n°6
+                {t('Objectif de développement durable n°6')}
               </span>
-              {' '}— Eau propre et assainissement, Nations Unies.
+              {' '}{t('— Eau propre et assainissement, Nations Unies.')}
             </p>
           </div>
         </Reveal>
@@ -403,38 +406,35 @@ function Beat4Visibility() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Beat5Challenge() {
+  const { t } = useI18n()
   return (
     <section className="bg-[#fafafa] px-6 py-24 md:py-32 border-t border-black/5">
       <div className="max-w-3xl mx-auto">
         <Reveal>
           <p className="text-base md:text-lg text-[#86868b] leading-relaxed">
-            Le problème n’est pas un manque de données.
+            {t('Le problème n’est pas un manque de données.')}
           </p>
         </Reveal>
         <Reveal delay={150}>
           <h2 className="mt-4 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-            Les données existent.
+            {t('Les données existent.')}
             <br />
-            <span className="text-[#86868b]">
-              Mais elles ne sont pas croisées.
-            </span>
+            <span className="text-[#86868b]">{t('Mais elles ne sont pas croisées.')}</span>
           </h2>
         </Reveal>
         <Reveal delay={300}>
           <p className="mt-8 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
-            ANSADE, UNICEF, World Bank, OpenStreetMap : les informations sont
-            disponibles, mais dispersées. Sans une lecture claire du terrain,
-            les priorités ne sont pas toujours établies.
+            {t('ANSADE, UNICEF, World Bank, OpenStreetMap : les informations sont disponibles, mais dispersées. Sans une lecture claire du terrain, les priorités ne sont pas toujours établies.')}
           </p>
         </Reveal>
 
         <Reveal delay={500}>
           <div className="mt-12 border-l-2 border-cyan-700 pl-6">
             <p className="text-2xl md:text-3xl font-semibold tracking-tight text-[#1d1d1f] leading-snug">
-              Le défi n’est pas uniquement d’agir.
+              {t('Le défi n’est pas uniquement d’agir.')}
             </p>
             <p className="mt-3 text-2xl md:text-3xl font-semibold tracking-tight bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent leading-snug">
-              Le défi est de savoir où agir en premier.
+              {t('Le défi est de savoir où agir en premier.')}
             </p>
           </div>
         </Reveal>
@@ -448,41 +448,38 @@ function Beat5Challenge() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Beat6Decision({ onEnterMap }: { onEnterMap: () => void }) {
+  const { t } = useI18n()
   return (
     <section className="px-6 py-32 md:py-40">
       <div className="max-w-3xl mx-auto">
         <Reveal>
           <p className="text-base md:text-lg text-[#86868b] leading-relaxed">
-            C’est là que MINAI intervient.
+            {t('C’est là que MINAI intervient.')}
           </p>
         </Reveal>
         <Reveal delay={150}>
           <h2 className="mt-4 text-3xl md:text-5xl font-semibold tracking-tight leading-[1.1]">
-            Identifier les zones critiques.
+            {t('Identifier les zones critiques.')}
             <br />
-            <span className="text-[#86868b]">
-              Prioriser les interventions.
-            </span>
+            <span className="text-[#86868b]">{t('Prioriser les interventions.')}</span>
           </h2>
         </Reveal>
         <Reveal delay={300}>
           <p className="mt-8 text-base md:text-lg text-[#1d1d1f] leading-relaxed">
-            MINAI aide les ONG et les institutions à identifier les zones où
-            l’accès à l’eau est le plus critique en Mauritanie, et à orienter
-            leurs interventions là où elles auront le plus d’impact.
+            {t('MINAI aide les ONG et les institutions à identifier les zones où l’accès à l’eau est le plus critique en Mauritanie, et à orienter leurs interventions là où elles auront le plus d’impact.')}
           </p>
         </Reveal>
 
         <Reveal delay={500}>
           <div className="mt-12 p-8 md:p-10 rounded-3xl bg-[#1d1d1f] text-white">
             <p className="text-lg md:text-xl leading-relaxed">
-              La carte rend visible ce que les données isolées ne montrent pas.
+              {t('La carte rend visible ce que les données isolées ne montrent pas.')}
             </p>
             <button
               onClick={onEnterMap}
               className="mt-8 bg-white text-[#1d1d1f] px-7 py-3 rounded-full font-medium hover:bg-white/90 transition inline-flex items-center gap-2"
             >
-              Voir la cartographie
+              {t('Voir la cartographie')}
               <span aria-hidden>→</span>
             </button>
           </div>
@@ -538,19 +535,18 @@ function FullBleedImage({
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Signature() {
+  const { t } = useI18n()
   return (
     <footer className="px-6 py-16 bg-white border-t border-black/5">
       <p className="max-w-4xl mx-auto text-center text-base md:text-xl font-light tracking-tight leading-snug text-[#1d1d1f]">
         MINAI <span className="text-[#86868b]">—</span>{' '}
         <span className="bg-gradient-to-r from-cyan-700 to-cyan-500 bg-clip-text text-transparent">
-          making the invisible visible again.
+          {t('making the invisible visible again.')}
         </span>
       </p>
       <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-3 max-w-7xl mx-auto text-[11px] text-[#86868b]">
-        <span>Nouakchott, Mauritanie · © 2026 MINAI</span>
-        <span>
-          Aligned with UN SDG 6 · Sources : ANSADE · UNICEF · World Bank · OpenStreetMap
-        </span>
+        <span>{t('Nouakchott, Mauritanie · © 2026 MINAI')}</span>
+        <span>{t('Aligned with UN SDG 6 · Sources : ANSADE · UNICEF · World Bank · OpenStreetMap')}</span>
       </div>
     </footer>
   )

@@ -6,6 +6,7 @@ import UnderstandingPage from './components/UnderstandingPage'
 import type { Region } from './data/mauritania-regions'
 import { MAURITANIA_VILLAGES, type Village } from './data/mauritania-villages'
 import type { WilayaStats } from './lib/geo'
+import { useI18n } from './lib/i18n'
 import { computeAllScores } from './lib/score'
 import { evaluateAllVillages, topPriorities } from './lib/villages'
 
@@ -23,6 +24,7 @@ const ALL_KINDS = [
 type View = 'landing' | 'understanding' | 'map'
 
 export default function App() {
+  const { t } = useI18n()
   // Vue par défaut = landing page. L'utilisateur entre dans la carte via un CTA.
   const [view, setView] = useState<View>('landing')
 
@@ -198,23 +200,23 @@ export default function App() {
         <button
           onClick={() => setView('landing')}
           className="absolute top-4 left-4 z-20 bg-slate-900/80 backdrop-blur-md text-white text-xs font-medium px-3.5 py-2 rounded-full border border-white/15 hover:bg-slate-900 hover:border-white/30 transition shadow-lg"
-          title="Retour à la page d'accueil"
+          title={t("Retour à la page d'accueil")}
         >
-          ← MINAI
+          {t('← MINAI')}
         </button>
 
         {/* Bouton hamburger mobile pour ouvrir la sidebar — coin haut-droit */}
         <button
           onClick={() => setSidebarOpen(true)}
           className="md:hidden absolute top-4 right-4 z-20 bg-slate-900/80 backdrop-blur-md text-white text-xs font-medium px-3.5 py-2 rounded-full border border-white/15 hover:bg-slate-900 transition shadow-lg flex items-center gap-2"
-          title="Ouvrir le panneau"
+          title={t('Ouvrir le panneau')}
         >
           <span className="relative block w-4 h-3">
             <span className="absolute left-0 top-0 h-0.5 w-4 bg-white rounded-full" />
             <span className="absolute left-0 top-1.5 h-0.5 w-4 bg-white rounded-full" />
             <span className="absolute left-0 top-3 h-0.5 w-4 bg-white rounded-full" />
           </span>
-          Panneau
+          {t('Panneau')}
         </button>
 
         <MapView

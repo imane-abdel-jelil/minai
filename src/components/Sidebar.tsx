@@ -1,6 +1,7 @@
 import { MAURITANIA_REGIONS, type Region, getScoreColor, getScoreLabel } from '../data/mauritania-regions'
 import type { Village } from '../data/mauritania-villages'
 import type { WilayaStats } from '../lib/geo'
+import { useI18n } from '../lib/i18n'
 import { computeNationalScore, type ComputedScore } from '../lib/score'
 import {
   recommendedDelay,
@@ -85,6 +86,7 @@ export default function Sidebar({
   onSelectVillage,
   onCloseMobile,
 }: Props) {
+  const { t } = useI18n()
   const visibleKinds = KIND_ORDER.filter((k) => (kindCounts[k] ?? 0) > 0)
   const totalShown = visibleKinds.reduce(
     (s, k) => s + (kindFilters[k] !== false ? kindCounts[k] || 0 : 0),
@@ -111,14 +113,13 @@ export default function Sidebar({
         <div>
           <h1 className="text-2xl font-bold">MINAI</h1>
           <p className="text-xs opacity-70 leading-tight">
-            Cartographie de l’accès à l’eau · Mauritanie
+            {t('Cartographie de l’accès à l’eau · Mauritanie')}
           </p>
         </div>
-        {/* Bouton fermer — mobile uniquement */}
         {onCloseMobile && (
           <button
             onClick={onCloseMobile}
-            aria-label="Fermer le panneau"
+            aria-label={t('Fermer le panneau')}
             className="md:hidden -mt-1 -mr-1 w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition text-white"
           >
             <span className="text-lg leading-none">×</span>
@@ -126,9 +127,6 @@ export default function Sidebar({
         )}
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          1. RECOMMANDATION MINAI — le cœur du produit
-          ═══════════════════════════════════════════════════════════════ */}
       {topPriority ? (
         <RecommendationCard
           evaluation={topPriority}
@@ -138,17 +136,14 @@ export default function Sidebar({
         />
       ) : (
         <section className="rounded-lg p-4 bg-cyan-500/10 border border-cyan-300/30 text-sm opacity-70 italic">
-          Calcul des priorités en cours…
+          {t('Calcul des priorités en cours…')}
         </section>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════
-          2. TOP PRIORITÉS — liste des 3 villages les plus urgents
-          ═══════════════════════════════════════════════════════════════ */}
       {priorities.length > 0 && (
         <section>
           <h2 className="text-sm uppercase tracking-wide opacity-70 mb-2 flex items-center gap-2">
-            🔥 <span>Zones prioritaires aujourd’hui</span>
+            🔥 <span>{t('Zones prioritaires aujourd’hui')}</span>
           </h2>
           <ol className="space-y-2">
             {priorities.map((e, i) => {
@@ -191,7 +186,7 @@ export default function Sidebar({
                         onClick={() => onTargetConvoy(e.village)}
                         className="text-[11px] px-2 py-0.5 rounded bg-water-900/60 hover:bg-water-900/80 transition"
                       >
-                        🚛 Tracer le convoi
+                        {t('🚛 Tracer le convoi')}
                       </button>
                     </div>
                   </div>
@@ -213,13 +208,13 @@ export default function Sidebar({
                 {selectedVillage.name}
               </h2>
               <p className="text-xs opacity-70">
-                Wilaya : {regionName(selectedVillage.wilayaId)}
+                {t('Wilaya :')} {regionName(selectedVillage.wilayaId)}
               </p>
             </div>
             <button
               onClick={() => onSelectVillage(null)}
               className="text-xs opacity-60 hover:opacity-100"
-              title="Fermer"
+              title={t('Fermer le panneau')}
             >
               ✕
             </button>
@@ -231,27 +226,27 @@ export default function Sidebar({
               style={{ background: statusColor(selectedVillageEval.status) }}
             />
             <span className="font-semibold">
-              {statusLabel(selectedVillageEval.status)}
+              {t(statusLabel(selectedVillageEval.status))}
             </span>
             <span className="ml-auto text-xs opacity-70">
-              Niveau d’urgence
+              {t('Niveau d’urgence')}
             </span>
           </div>
 
           <dl className="text-sm space-y-1">
             <Row
-              label="Population"
-              value={`${selectedVillage.population.toLocaleString('fr-FR')} habitants`}
+              label={t('Population')}
+              value={`${selectedVillage.population.toLocaleString('fr-FR')} ${t('habitants')}`}
             />
             <Row
-              label="Distance au point d’eau"
+              label={t('Distance au point d’eau')}
               value={
                 Number.isFinite(selectedVillageEval.distanceToWaterKm)
                   ? `${selectedVillageEval.distanceToWaterKm.toFixed(1)} km`
-                  : 'inconnue'
+                  : '—'
               }
             />
-            <Row label="Dernière intervention" value="Non renseignée" />
+            <Row label={t('Dernière intervention')} value={t('Non renseignée')} />
           </dl>
 
           <p
@@ -261,7 +256,7 @@ export default function Sidebar({
               color: statusColor(selectedVillageEval.status),
             }}
           >
-            Intervention recommandée {recommendedDelay(selectedVillageEval.status)}.
+            {t('Intervention recommandée')} {t(recommendedDelay(selectedVillageEval.status))}.
           </p>
 
           {convoyTarget?.id !== selectedVillage.id && (
@@ -269,32 +264,26 @@ export default function Sidebar({
               onClick={() => onTargetConvoy(selectedVillage)}
               className="mt-3 w-full bg-cyan-500/30 hover:bg-cyan-500/50 transition rounded py-2 text-sm font-medium"
             >
-              🚛 Cibler ce village pour le prochain convoi
+              {t('🚛 Cibler ce village pour le prochain convoi')}
             </button>
           )}
         </section>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════
-          4. VUE NATIONALE
-          ═══════════════════════════════════════════════════════════════ */}
       <section>
-        <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Vue nationale</h2>
+        <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">{t('Vue nationale')}</h2>
         <div className="grid grid-cols-2 gap-3">
-          <Stat label="Pop. rurale" value={totalRural.toLocaleString('fr-FR')} />
-          <Stat label="Score moyen" value={`${avgScore}/100`} />
-          <Stat label="En zone critique" value={criticalPeople.toLocaleString('fr-FR')} accent="bg-red-500/30" />
-          <Stat label="Villages suivis" value={priorities.length > 0 ? '38+' : '…'} accent="bg-cyan-500/20" />
+          <Stat label={t('Pop. rurale')} value={totalRural.toLocaleString('fr-FR')} />
+          <Stat label={t('Score moyen')} value={`${avgScore}/100`} />
+          <Stat label={t('En zone critique')} value={criticalPeople.toLocaleString('fr-FR')} accent="bg-red-500/30" />
+          <Stat label={t('Villages suivis')} value={priorities.length > 0 ? '38+' : '…'} accent="bg-cyan-500/20" />
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          5. WILAYA SÉLECTIONNÉE (vue secondaire)
-          ═══════════════════════════════════════════════════════════════ */}
       {selectedRegion && (
         <details className="rounded-lg p-3 bg-water-700/30">
           <summary className="cursor-pointer text-sm font-semibold">
-            {selectedRegion.name} (vue wilaya)
+            {selectedRegion.name}
           </summary>
           <div className="mt-3 space-y-1 text-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -306,42 +295,39 @@ export default function Sidebar({
                 }}
               />
               <span className="font-semibold">
-                Score {selectedScore?.score ?? selectedRegion.waterAccessScore}/100
+                {selectedScore?.score ?? selectedRegion.waterAccessScore}/100
               </span>
               <span className="text-xs opacity-70">
                 — {selectedScore?.label ?? getScoreLabel(selectedRegion.waterAccessScore)}
               </span>
             </div>
-            <Row label="Population totale" value={selectedRegion.population.toLocaleString('fr-FR')} />
-            <Row label="Population rurale" value={selectedRegion.ruralPopulation.toLocaleString('fr-FR')} />
+            <Row label={t('Population')} value={selectedRegion.population.toLocaleString('fr-FR')} />
+            <Row label={t('Pop. rurale')} value={selectedRegion.ruralPopulation.toLocaleString('fr-FR')} />
             {wilayaStats[selectedRegion.id] && (
-              <Row label="Points d’eau (OSM)" value={wilayaStats[selectedRegion.id].total.toLocaleString('fr-FR')} />
+              <Row label={t('Points d’eau (OSM)')} value={wilayaStats[selectedRegion.id].total.toLocaleString('fr-FR')} />
             )}
           </div>
         </details>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════
-          6. COUCHES (toggle visibilité)
-          ═══════════════════════════════════════════════════════════════ */}
       <section className="rounded-lg bg-water-700/40 p-3 space-y-3">
         <ToggleRow
-          title="Villages"
-          subtitle="Localités évaluées (statut Critique / Risque / OK)"
+          title={t('Villages')}
+          subtitle={t('Localités évaluées (statut Critique / Risque / OK)')}
           checked={showVillages}
           onChange={onToggleVillages}
         />
         <Divider />
         <ToggleRow
-          title="Frontières des wilayas"
-          subtitle="13 régions administratives, colorées par score"
+          title={t('Frontières des wilayas')}
+          subtitle={t('13 régions administratives, colorées par score')}
           checked={showWilayas}
           onChange={onToggleWilayas}
         />
         <Divider />
         <ToggleRow
-          title="Points d’eau (OSM)"
-          subtitle="Puits, forages, fontaines, sources"
+          title={t('Points d’eau (OSM)')}
+          subtitle={t('Puits, forages, fontaines, sources')}
           checked={showWaterPoints}
           onChange={onToggleWaterPoints}
         />
@@ -351,30 +337,25 @@ export default function Sidebar({
           7. LÉGENDE STATUT VILLAGE
           ═══════════════════════════════════════════════════════════════ */}
       <section>
-        <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">Statut village</h2>
+        <h2 className="text-sm uppercase tracking-wide opacity-60 mb-2">{t('Statut village')}</h2>
         <ul className="space-y-1 text-sm">
-          <LegendVillage status="critical" desc="distance > 5 km au point d’eau le plus proche" />
-          <LegendVillage status="risk"     desc="distance entre 2 et 5 km" />
-          <LegendVillage status="ok"       desc="distance ≤ 2 km" />
+          <LegendVillage status="critical" desc={t('distance > 5 km au point d’eau le plus proche')} />
+          <LegendVillage status="risk"     desc={t('distance entre 2 et 5 km')} />
+          <LegendVillage status="ok"       desc={t('distance ≤ 2 km')} />
         </ul>
         <details className="mt-2 text-[11px] opacity-60">
-          <summary className="cursor-pointer hover:opacity-100">Méthodologie</summary>
+          <summary className="cursor-pointer hover:opacity-100">{t('Méthodologie')}</summary>
           <p className="mt-2 leading-snug">
-            Pour chaque village, on calcule la distance au point d’eau OSM le
-            plus proche. Le statut est défini selon des seuils opérationnels
-            sahéliens. La priorité est pondérée par la population du village.
+            {t('Pour chaque village, on calcule la distance au point d’eau OSM le plus proche. Le statut est défini selon des seuils opérationnels sahéliens. La priorité est pondérée par la population du village.')}
           </p>
         </details>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════
-          8. FILTRES PAR TYPE DE POINT D'EAU
-          ═══════════════════════════════════════════════════════════════ */}
       {showWaterPoints && visibleKinds.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-sm uppercase tracking-wide opacity-60">
-              Filtres par type
+              {t('Filtres par type')}
             </h2>
             <div className="text-[10px] opacity-60 tabular-nums">
               {totalShown.toLocaleString('fr-FR')} / {totalAll.toLocaleString('fr-FR')}
@@ -387,7 +368,7 @@ export default function Sidebar({
               disabled={allEnabled}
               className="text-[11px] px-2 py-0.5 rounded bg-water-700/40 hover:bg-water-700/70 disabled:opacity-40 transition-colors"
             >
-              Tout
+              {t('Tout')}
             </button>
             <button
               type="button"
@@ -395,7 +376,7 @@ export default function Sidebar({
               disabled={noneEnabled}
               className="text-[11px] px-2 py-0.5 rounded bg-water-700/40 hover:bg-water-700/70 disabled:opacity-40 transition-colors"
             >
-              Aucun
+              {t('Aucun')}
             </button>
           </div>
           <ul className="space-y-1 text-sm">
@@ -422,7 +403,7 @@ export default function Sidebar({
                       }}
                     />
                     <span className="flex-1 truncate">
-                      {KIND_LABELS[kind] || kind}
+                      {t(KIND_LABELS[kind] || kind)}
                     </span>
                     <span className="text-xs opacity-70 tabular-nums">
                       {count.toLocaleString('fr-FR')}
@@ -436,8 +417,8 @@ export default function Sidebar({
       )}
 
       <footer className="mt-auto text-xs opacity-50">
-        Démo v0.4 · Villages curés + OSM Overpass.<br />
-        Sources : ANSADE · UNICEF/JMP · World Bank · OpenStreetMap.
+        {t('Démo v0.4 · Villages curés + OSM Overpass.')}<br />
+        {t('Sources : ANSADE · UNICEF/JMP · World Bank · OpenStreetMap.')}
       </footer>
     </aside>
   )
@@ -456,6 +437,7 @@ function RecommendationCard({
   onTarget: () => void
   onClear: () => void
 }) {
+  const { t } = useI18n()
   const { village, status, distanceToWaterKm } = evaluation
   return (
     <section
@@ -467,20 +449,20 @@ function RecommendationCard({
     >
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2">
-          🚛 <span>Recommandation MINAI</span>
+          {t('🚛 Recommandation MINAI')}
         </h2>
         {isTargeted && (
           <button
             onClick={onClear}
             className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 transition"
           >
-            Effacer
+            {t('Effacer')}
           </button>
         )}
       </div>
 
       <p className="text-[11px] opacity-70 mt-1 mb-3">
-        Prochaine intervention prioritaire selon les données disponibles.
+        {t('Prochaine intervention prioritaire selon les données disponibles.')}
       </p>
 
       <div className="text-base font-semibold leading-tight">
@@ -492,25 +474,25 @@ function RecommendationCard({
 
       <ul className="mt-3 space-y-1 text-sm">
         <RecommendationLine
-          label="Distance au point d’eau"
+          label={t('Distance au point d’eau')}
           value={
             Number.isFinite(distanceToWaterKm)
               ? `${distanceToWaterKm.toFixed(1)} km`
-              : 'inconnue'
+              : '—'
           }
         />
         <RecommendationLine
-          label="Population"
-          value={`${village.population.toLocaleString('fr-FR')} hab.`}
+          label={t('Population')}
+          value={`${village.population.toLocaleString('fr-FR')} ${t('habitants')}`}
         />
-        <RecommendationLine label="Approvisionnement récent" value="aucun renseigné" />
+        <RecommendationLine label={t('Approvisionnement récent')} value={t('aucun renseigné')} />
       </ul>
 
       <p
         className="mt-3 text-sm font-medium"
         style={{ color: statusColor(status) }}
       >
-        Intervention recommandée {recommendedDelay(status)}.
+        {t('Intervention recommandée')} {t(recommendedDelay(status))}.
       </p>
 
       <button
@@ -521,7 +503,7 @@ function RecommendationCard({
             : 'bg-cyan-500/30 hover:bg-cyan-500/50'
         }`}
       >
-        {isTargeted ? '✓ Convoi tracé sur la carte' : '🚛 Tracer le convoi sur la carte'}
+        {isTargeted ? t('✓ Convoi tracé sur la carte') : t('🚛 Tracer le convoi sur la carte')}
       </button>
     </section>
   )
@@ -537,6 +519,7 @@ function RecommendationLine({ label, value }: { label: string; value: string }) 
 }
 
 function StatusPill({ status }: { status: VillageStatus }) {
+  const { t } = useI18n()
   return (
     <span
       className="text-[10px] uppercase tracking-wide font-bold px-1.5 py-0.5 rounded"
@@ -545,7 +528,7 @@ function StatusPill({ status }: { status: VillageStatus }) {
         color: statusColor(status),
       }}
     >
-      {statusLabel(status)}
+      {t(statusLabel(status))}
     </span>
   )
 }
@@ -569,6 +552,7 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function LegendVillage({ status, desc }: { status: VillageStatus; desc: string }) {
+  const { t } = useI18n()
   return (
     <li className="flex items-start gap-2">
       <span
@@ -576,7 +560,7 @@ function LegendVillage({ status, desc }: { status: VillageStatus; desc: string }
         style={{ background: statusColor(status) }}
       />
       <span>
-        <span className="font-medium">{statusLabel(status)}</span>{' '}
+        <span className="font-medium">{t(statusLabel(status))}</span>{' '}
         <span className="opacity-70">— {desc}</span>
       </span>
     </li>
