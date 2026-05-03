@@ -80,6 +80,8 @@ export const TRANSLATIONS_EN: Record<string, string> = {
   'Marche quotidienne pour l’eau': 'Daily walk for water',
   'L’enfance face à la pompe': 'Childhood at the pump',
   'Le geste qu’on tient pour acquis': 'The gesture we take for granted',
+  'Accès à une eau non sécurisée': 'Unsafe water as the only option',
+  'Quand l’eau n’est pas disponible': 'When water is simply not available',
 
   // ─── HUMAN IMPACT (Landing) ────────────────────────────────────────────
   'Derrière chaque zone invisible,': 'Behind every invisible zone,',

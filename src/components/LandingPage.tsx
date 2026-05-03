@@ -25,7 +25,8 @@ const IMG = {
   smiling_water:     'https://images.pexels.com/photos/30629420/pexels-photo-30629420.jpeg?auto=compress&cs=tinysrgb&w=2000',
   women_carrying:    'https://images.pexels.com/photos/4511301/pexels-photo-4511301.jpeg?auto=compress&cs=tinysrgb&w=2000',
   woman_water_jugs:  'https://images.pexels.com/photos/30441497/pexels-photo-30441497.jpeg?auto=compress&cs=tinysrgb&w=1400',
-  child_drinking:    'https://images.pexels.com/photos/7165327/pexels-photo-7165327.jpeg?auto=compress&cs=tinysrgb&w=1400',
+  unsafe_water:      '/images/unsafe-water.jpg',
+  water_shortage:    '/images/water-shortage-mauritania.jpg',
   boy_pump:          'https://images.pexels.com/photos/11759837/pexels-photo-11759837.jpeg?auto=compress&cs=tinysrgb&w=1400',
 }
 
@@ -426,10 +427,10 @@ function ConsequencesGallery() {
   const items = [
     { src: IMG.woman_water_jugs, alt: "Femme rurale transportant des bidons d'eau",
       caption: t('Marche quotidienne pour l’eau') },
-    { src: IMG.boy_pump,          alt: 'Enfant utilisant une pompe à eau manuelle',
-      caption: t('L’enfance face à la pompe') },
-    { src: IMG.child_drinking,    alt: "Enfant buvant un verre d'eau",
-      caption: t('Le geste qu’on tient pour acquis') },
+    { src: IMG.unsafe_water,     alt: "Enfant collectant de l'eau d'une flaque dans un lit de rivière asséché",
+      caption: t('Accès à une eau non sécurisée') },
+    { src: IMG.water_shortage,   alt: 'Enfants mauritaniens transportant des jerrycans avec un âne dans un camp',
+      caption: t('Quand l’eau n’est pas disponible') },
   ]
   return (
     <section className="bg-white px-4 sm:px-6 py-24 md:py-32">
