@@ -427,9 +427,9 @@ function ConsequencesGallery() {
     { src: IMG.woman_water_jugs, alt: "Femme rurale transportant des bidons d'eau",
       caption: t('Marche quotidienne pour l’eau') },
     { src: IMG.boy_pump,          alt: 'Enfant utilisant une pompe à eau manuelle',
-      caption: t('L’enfance face à la pompe') },
+      caption: t('Accès à une eau non sécurisée') },
     { src: IMG.child_drinking,    alt: "Enfant buvant un verre d'eau",
-      caption: t('Le geste qu’on tient pour acquis') },
+      caption: t('Quand l’eau n’est pas disponible') },
   ]
   return (
     <section className="bg-white px-4 sm:px-6 py-24 md:py-32">
