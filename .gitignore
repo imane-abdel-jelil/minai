@@ -8,3 +8,7 @@ tsconfig.tsbuildinfo
 
 # Local helper scripts (Mac-only, not part of source)
 *.command
+
+# Screenshots à la racine (ne pas commiter)
+Screenshot *.png
+Screenshot *.jpg
