@@ -157,6 +157,46 @@ function guessFrench(arabicOrFrench) {
   return arabicOrFrench
 }
 
+/**
+ * Walk récursif sur n'importe quel objet JSON pour trouver toutes les URLs
+ * qui contiennent FeatureServer ou MapServer. Renvoie aussi le "path" dans
+ * le JSON pour aider à identifier de quoi il s'agit (village/eau/etc).
+ */
+function findArcGISUrls(obj, path = '$', acc = []) {
+  if (!obj) return acc
+  if (typeof obj === 'string') {
+    if (/FeatureServer|MapServer/i.test(obj) && /^https?:\/\//i.test(obj)) {
+      acc.push({ path, url: obj })
+    }
+    return acc
+  }
+  if (Array.isArray(obj)) {
+    obj.forEach((v, i) => findArcGISUrls(v, `${path}[${i}]`, acc))
+    return acc
+  }
+  if (typeof obj === 'object') {
+    for (const [k, v] of Object.entries(obj)) {
+      findArcGISUrls(v, `${path}.${k}`, acc)
+    }
+  }
+  return acc
+}
+
+/** Récupère les métadonnées d'un service (nom, description) pour mieux identifier */
+async function fetchServiceInfo(serviceUrl) {
+  try {
+    const url = serviceUrl.replace(/\/\d+\/?$/, '') + '?f=json' // root du service
+    const data = await fetchJson(url, 'metadata service')
+    return {
+      name: data.name || data.serviceDescription || 'sans nom',
+      description: data.description || '',
+      layers: data.layers || [],
+    }
+  } catch {
+    return null
+  }
+}
+
 /** Découvre les FeatureServers depuis le config JSON de l'Experience */
 async function discoverEndpoints() {
   console.log(`\n🔎  Découverte de l'Experience ${EXPERIENCE_ID}…`)
@@ -170,27 +210,44 @@ async function discoverEndpoints() {
     return null
   }
 
-  // Le config contient une section "dataSources" avec id → service URL
-  const dsList = config.dataSources || {}
-  const datasources = []
-  for (const [id, ds] of Object.entries(dsList)) {
-    if (ds.url) datasources.push({ id, label: ds.label || id, url: ds.url })
-    if (ds.layers) {
-      for (const layer of ds.layers) {
-        if (layer.url) datasources.push({
-          id: `${id}/${layer.id || layer.label}`,
-          label: layer.label || layer.id || id,
-          url: layer.url,
-        })
-      }
-    }
+  // Mode debug : sauvegarde le config brut pour inspection manuelle
+  if (process.env.DEBUG_CONFIG === '1') {
+    const debugPath = resolve(OUTPUT_DIR, 'ansade-experience-config.json')
+    await mkdir(OUTPUT_DIR, { recursive: true })
+    await writeFile(debugPath, JSON.stringify(config, null, 2), 'utf-8')
+    console.log(`    💾  Config brut écrit pour debug → ${debugPath}`)
   }
 
-  console.log(`    Trouvé ${datasources.length} datasources :`)
-  for (const ds of datasources) {
-    console.log(`    • ${ds.label.padEnd(40)} → ${ds.url}`)
+  // Walk récursif pour trouver toutes les URLs FeatureServer/MapServer
+  const allUrls = findArcGISUrls(config)
+  // Dédoublonner en gardant le 1er path trouvé
+  const seen = new Set()
+  const unique = []
+  for (const item of allUrls) {
+    if (seen.has(item.url)) continue
+    seen.add(item.url)
+    unique.push(item)
   }
-  return datasources
+
+  if (unique.length === 0) {
+    console.warn(`    ⚠︎  0 URL FeatureServer trouvée dans le config.`)
+    console.warn(`    Le config a quand même été récupéré (clés racine : ${Object.keys(config).slice(0, 10).join(', ')}).`)
+    console.warn(`    Probable : ArcGIS Experience charge ses datasources lazy (au runtime).`)
+    return null
+  }
+
+  console.log(`    Trouvé ${unique.length} URLs ArcGIS uniques dans le config :`)
+  unique.forEach((it, i) => {
+    console.log(`    ${String(i + 1).padStart(2)}. ${it.url}`)
+    console.log(`        path: ${it.path}`)
+  })
+
+  // Convertit au format attendu en aval (label = dernier segment du path utile)
+  return unique.map((it, i) => ({
+    id: `auto_${i}`,
+    label: it.path,
+    url: it.url,
+  }))
 }
 
 /** Cherche le datasource qui matche un set de mots-clés */
