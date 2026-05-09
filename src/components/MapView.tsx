@@ -361,8 +361,8 @@ export default function MapView({
       mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
-        // Pins TOP-30 (rouges), success stories (verts), et points drill-down sont tous cliquables
-        ...(showVillages && !selectedWilaya ? ['village-top', 'village-success'] : []),
+        // Pins TOP-30 (rouges) en vue nationale, dots drill-down sinon
+        ...(showVillages && !selectedWilaya ? ['village-top'] : []),
         ...(showVillages && selectedWilaya ? ['village-markers'] : []),
         ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
@@ -386,8 +386,7 @@ export default function MapView({
         }
         if (feature.layer && (
           feature.layer.id === 'village-markers' ||
-          feature.layer.id === 'village-top' ||
-          feature.layer.id === 'village-success'
+          feature.layer.id === 'village-top'
         )) {
           // Click village ANSADE (pin TOP-30 ou dot drill-down) →
           // ouvre le détail dans la sidebar. On reconstruit un objet
@@ -559,97 +558,13 @@ export default function MapView({
         </Source>
       )}
 
-      {/* ───── Villages prioritaires (TOP-30 + success) ─────
-           Source dédiée, fichier léger (~37 KB), chargé indépendamment
-           du gros villages-scored.geojson. → les pins s'affichent dès
-           le premier render, pas de lag réseau. */}
+      {/* ───── 30 villages prioritaires ─────
+           Petits points rouges discrets (sans labels, sans rings) pour
+           ne pas concurrencer visuellement les clusters d'eau bleus.
+           L'utilisateur clique pour découvrir le détail dans la sidebar. */}
       {showVillages && !selectedWilaya && priorities && (
         <Source id="priorities" type="geojson" data={priorities}>
-
-          {/* PINS VERTS "success stories" — villages OK + réseau AEP.
-              Effet bullseye 3-cercles. */}
-          <Layer
-            id="village-success-ring"
-            type="circle"
-            filter={['==', ['get', 'is_success_story'], 1]}
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                4, 14, 7, 19, 12, 28,
-              ],
-              'circle-color': '#16a34a',
-              'circle-opacity': 0.18,
-              'circle-stroke-color': '#16a34a',
-              'circle-stroke-width': 1.5,
-              'circle-stroke-opacity': 0.55,
-            }}
-          />
-          <Layer
-            id="village-success-halo"
-            type="circle"
-            filter={['==', ['get', 'is_success_story'], 1]}
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                4, 9, 7, 13, 12, 19,
-              ],
-              'circle-color': '#ffffff',
-              'circle-opacity': 1,
-            }}
-          />
-          <Layer
-            id="village-success"
-            type="circle"
-            filter={['==', ['get', 'is_success_story'], 1]}
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                4, 6, 7, 9, 12, 14,
-              ],
-              'circle-color': '#16a34a',
-              'circle-stroke-color': '#052e16',
-              'circle-stroke-width': 2,
-              'circle-opacity': 1,
-            }}
-          />
-          <Layer
-            id="village-success-label"
-            type="symbol"
-            filter={['==', ['get', 'is_success_story'], 1]}
-            layout={{
-              'text-field': ['get', 'nom_fr'],
-              'text-size': 11,
-              'text-offset': [0, 1.4],
-              'text-anchor': 'top',
-              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-              'text-allow-overlap': false,
-              'text-optional': true,
-            }}
-            paint={{
-              'text-color': '#bbf7d0',
-              'text-halo-color': '#052e16',
-              'text-halo-width': 1.8,
-            }}
-            minzoom={5}
-          />
-
-          {/* PINS TOP-30 — bullseye rouge légèrement plus grand. */}
-          <Layer
-            id="village-top-ring"
-            type="circle"
-            filter={['==', ['get', 'is_top_priority'], 1]}
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                4, 18, 7, 24, 12, 36,
-              ],
-              'circle-color': '#dc2626',
-              'circle-opacity': 0.20,
-              'circle-stroke-color': '#dc2626',
-              'circle-stroke-width': 2,
-              'circle-stroke-opacity': 0.7,
-            }}
-          />
+          {/* Halo blanc fin pour faire ressortir le rouge sur fond satellite */}
           <Layer
             id="village-top-halo"
             type="circle"
@@ -657,12 +572,13 @@ export default function MapView({
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
-                4, 12, 7, 16, 12, 24,
+                4, 6, 7, 8, 12, 12,
               ],
               'circle-color': '#ffffff',
-              'circle-opacity': 1,
+              'circle-opacity': 0.95,
             }}
           />
+          {/* Petit dot rouge saturé */}
           <Layer
             id="village-top"
             type="circle"
@@ -670,33 +586,13 @@ export default function MapView({
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
-                4, 8, 7, 12, 12, 18,
+                4, 4, 7, 6, 12, 9,
               ],
               'circle-color': '#dc2626',
-              'circle-stroke-color': '#450a0a',
-              'circle-stroke-width': 2.5,
+              'circle-stroke-color': '#7f1d1d',
+              'circle-stroke-width': 1,
               'circle-opacity': 1,
             }}
-          />
-          <Layer
-            id="village-top-label"
-            type="symbol"
-            filter={['==', ['get', 'is_top_priority'], 1]}
-            layout={{
-              'text-field': ['get', 'nom_fr'],
-              'text-size': 12,
-              'text-offset': [0, 1.6],
-              'text-anchor': 'top',
-              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-              'text-allow-overlap': false,
-              'text-optional': true,
-            }}
-            paint={{
-              'text-color': '#ffffff',
-              'text-halo-color': '#7f1d1d',
-              'text-halo-width': 2,
-            }}
-            minzoom={5}
           />
         </Source>
       )}
@@ -902,26 +798,18 @@ export default function MapView({
     </Map>
 
     {/* ───── Légende flottante (vue nationale uniquement) ─────
-         Petite carte translucide en bas-gauche qui explique la lecture
-         visuelle. Disparaît en mode drill-down. */}
+         Deux entrées, simple et net. Disparaît en mode drill-down. */}
     {!selectedWilaya && showVillages && (
-      <div className="absolute bottom-6 left-6 z-10 bg-slate-900/85 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl p-4 text-white text-xs max-w-[260px] pointer-events-none">
+      <div className="absolute bottom-6 left-6 z-10 bg-slate-900/85 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl p-4 text-white text-xs max-w-[240px] pointer-events-none">
         <div className="text-[10px] uppercase tracking-wider font-semibold text-white/60 mb-2">
           Lecture de la carte
         </div>
         <div className="space-y-2">
           <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 inline-block w-3 h-3 rounded-full bg-[#dc2626] border-2 border-white shadow ring-2 ring-[#7f1d1d]/50 shrink-0" />
+            <span className="mt-1 inline-block w-2.5 h-2.5 rounded-full bg-[#dc2626] border border-white shrink-0" />
             <div>
               <div className="font-semibold leading-tight">30 priorités urgentes</div>
               <div className="text-white/60 text-[11px] leading-tight">villages les plus éloignés d'un point d'eau</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 inline-block w-3 h-3 rounded-full bg-[#16a34a] border-2 border-white shadow shrink-0" />
-            <div>
-              <div className="font-semibold leading-tight">Villages desservis</div>
-              <div className="text-white/60 text-[11px] leading-tight">déjà sur le réseau d'eau potable (référence)</div>
             </div>
           </div>
           <div className="flex items-start gap-2.5">
