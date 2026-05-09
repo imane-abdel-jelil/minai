@@ -42,9 +42,42 @@ const OUTPUT_DIR = resolve(PROJECT_ROOT, 'public/data')
 
 const PAGE_SIZE = 2000 // ArcGIS plafond standard
 
-// Mots-clés pour identifier les couches dans le config
-const KEYWORDS_VILLAGES = ['localit', 'village', 'rgph', 'population']
-const KEYWORDS_POINTS_EAU = ['eau', 'forage', 'puit', 'water', 'borehole', 'well', 'حفر', 'بئر']
+// Mots-clés pour identifier les couches dans le metadata des services
+// (on n'utilise PAS le path/url qui contient des noms statistiques trompeurs
+//  comme "Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP")
+const KEYWORDS_VILLAGES = ['localit', 'localités', 'village', 'agglom']
+const KEYWORDS_POINTS_EAU = [
+  'forage', 'puit', 'borehole', 'well', 'point d\'eau', 'point eau',
+  'حفر', 'بئر', 'صونداج', 'مياه', 'eau ',  // noter l'espace : pour matcher 'point d'eau' pas 'taux d'eau'
+]
+
+// Services connus du dashboard ANSADE (basé sur l'inspection du config)
+// Ces noms sont stables dans le config, ils nous servent à cibler les bons services
+// au lieu de tomber sur des couches statistiques (Taux_*, Pourcentage_*, etc.)
+const SERVICE_LOCALITES = 'LOC_EXP_WFL1'
+const SERVICE_INFRASTRUCTURES = 'Infra_app_WFL1'
+
+// Patterns d'URLs à EXCLURE (ce sont des couches statistiques agrégées,
+// pas les données brutes qu'on veut)
+const EXCLUDE_PATTERNS = [
+  /\/Taux_/i,
+  /\/Pourcent/i,
+  /\/Standing_/i,
+  /\/Indice_/i,
+  /\/Quotient_/i,
+  /\/Espérance_/i,
+  /\/Rapport_/i,
+  /\/Répartition_/i,
+  /\/Carte_densité/i,
+  /\/Nombre_de_/i,
+  /\/Taille_moyenne/i,
+  /\/Population_de_/i,
+  /\/Population_en_/i,
+  /\/Population_hors_/i,
+  /\/Main_d_/i,
+  /\/nkt2/i,
+  /\/NKT_500/i,
+]
 
 // Schéma MINAI — clés cibles, et les variantes ANSADE possibles
 const VILLAGE_FIELDS = {
@@ -182,19 +215,64 @@ function findArcGISUrls(obj, path = '$', acc = []) {
   return acc
 }
 
-/** Récupère les métadonnées d'un service (nom, description) pour mieux identifier */
-async function fetchServiceInfo(serviceUrl) {
+/** Récupère les métadonnées d'une couche (nom, description, count) */
+async function fetchLayerMetadata(layerUrl) {
   try {
-    const url = serviceUrl.replace(/\/\d+\/?$/, '') + '?f=json' // root du service
-    const data = await fetchJson(url, 'metadata service')
+    const meta = await (await fetch(`${layerUrl}?f=json`, {
+      headers: { 'User-Agent': 'MINAI-ansade-fetch/1.0' },
+    })).json()
+    // count via /query?returnCountOnly=true
+    let count = null
+    try {
+      const c = await (await fetch(`${layerUrl}/query?where=1=1&returnCountOnly=true&f=json`, {
+        headers: { 'User-Agent': 'MINAI-ansade-fetch/1.0' },
+      })).json()
+      count = c.count
+    } catch { /* ignore */ }
     return {
-      name: data.name || data.serviceDescription || 'sans nom',
-      description: data.description || '',
-      layers: data.layers || [],
+      name: meta.name || meta.serviceDescription || '(sans nom)',
+      description: meta.description || '',
+      geometryType: meta.geometryType || '',
+      count,
     }
-  } catch {
-    return null
+  } catch (e) {
+    return { name: '(erreur)', description: String(e.message), geometryType: '', count: null }
   }
+}
+
+/** Mode INSPECT : interroge le metadata de chaque URL et imprime un tableau */
+async function inspectAllServices(datasources) {
+  console.log('\n📋  Inspection des couches (interroge le metadata de chacune)…\n')
+  console.log(
+    '#'.padStart(4) + '  ' +
+    'NOM DE LA COUCHE'.padEnd(45) + '  ' +
+    'GEO'.padEnd(10) + '  ' +
+    'COUNT'.padStart(8) + '  ' +
+    'URL'
+  )
+  console.log('─'.repeat(140))
+  // Limite à éviter de spammer l'API si très long
+  const limit = Math.min(datasources.length, 130)
+  for (let i = 0; i < limit; i++) {
+    const ds = datasources[i]
+    const meta = await fetchLayerMetadata(ds.url)
+    const name = (meta.name || '').slice(0, 44)
+    const geo = (meta.geometryType || '').replace('esriGeometry', '').slice(0, 9)
+    const count = meta.count != null ? meta.count.toLocaleString('fr-FR') : '?'
+    console.log(
+      String(i + 1).padStart(4) + '  ' +
+      name.padEnd(45) + '  ' +
+      geo.padEnd(10) + '  ' +
+      count.padStart(8) + '  ' +
+      ds.url
+    )
+  }
+  console.log('─'.repeat(140))
+  console.log('\n💡  Identifie ci-dessus les bonnes URLs (ex: une qui parle de localités/villages')
+  console.log('    avec geo=Point et count élevé pour les villages, et une qui parle de')
+  console.log('    points d\'eau / forages avec geo=Point pour l\'eau).\n')
+  console.log('    Puis relance avec :')
+  console.log('       ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URL="..." npm run fetch:ansade\n')
 }
 
 /** Découvre les FeatureServers depuis le config JSON de l'Experience */
@@ -280,6 +358,18 @@ async function main() {
   let villagesUrl  = process.env.ANSADE_VILLAGES_URL
   let pointsEauUrl = process.env.ANSADE_POINTS_EAU_URL
 
+  // Mode INSPECT : liste toutes les couches avec leurs vrais noms,
+  // puis quitte (ne tente pas de fetch).
+  if (process.env.INSPECT === '1') {
+    const datasources = await discoverEndpoints()
+    if (!datasources || datasources.length === 0) {
+      console.error('❌  Aucune URL ArcGIS trouvée dans le config.')
+      process.exit(1)
+    }
+    await inspectAllServices(datasources)
+    process.exit(0)
+  }
+
   if (!villagesUrl || !pointsEauUrl) {
     const datasources = await discoverEndpoints()
     if (datasources) {
@@ -290,12 +380,12 @@ async function main() {
 
   if (!villagesUrl || !pointsEauUrl) {
     console.error('\n❌  Impossible d\'identifier les FeatureServers automatiquement.')
-    console.error('    Trouve-les manuellement dans le dashboard :')
-    console.error('    1. Ouvre https://experience.arcgis.com/experience/' + EXPERIENCE_ID)
-    console.error('    2. F12 → Network → filtre "FeatureServer"')
-    console.error('    3. Recharge la page, note les URLs')
-    console.error('    4. Relance :')
-    console.error('       ANSADE_VILLAGES_URL="https://..." ANSADE_POINTS_EAU_URL="https://..." npm run fetch:ansade')
+    console.error('\n💡  Recommandation : lance le mode INSPECTION pour voir les vrais noms')
+    console.error('    de toutes les couches détectées :')
+    console.error('       INSPECT=1 npm run fetch:ansade')
+    console.error('\n    Puis identifie les bonnes URLs (count élevé + geometryType=Point)')
+    console.error('    et relance avec :')
+    console.error('       ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URL="..." npm run fetch:ansade')
     process.exit(1)
   }
 
