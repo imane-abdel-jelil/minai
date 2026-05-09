@@ -459,6 +459,59 @@ async function main() {
     process.exit(0)
   }
 
+  // Mode DIAGNOSE : pour chaque URL fournie en env var, affiche le schéma
+  // (noms des champs et alias FR) + 1 feature exemple. Sert à identifier
+  // les vrais noms de colonnes ANSADE quand le mapping retourne vide.
+  if (process.env.DIAGNOSE === '1') {
+    const urls = []
+    if (villagesUrl) urls.push({ label: 'VILLAGES', url: villagesUrl })
+    for (const u of pointsEauUrls) urls.push({ label: 'POINTS_EAU', url: u })
+
+    if (urls.length === 0) {
+      console.error('❌  Pas d\'URL fournie. Utilise ANSADE_VILLAGES_URL / ANSADE_POINTS_EAU_URLS.')
+      process.exit(1)
+    }
+
+    for (const { label, url } of urls) {
+      console.log(`\n🔬  DIAGNOSE — ${label}`)
+      console.log(`    ${url}`)
+      // Schéma de la couche
+      try {
+        const meta = await (await fetch(`${url}?f=json`, {
+          headers: { 'User-Agent': 'MINAI-ansade-fetch/1.0' },
+        })).json()
+        console.log(`    Couche : ${meta.name || '(sans nom)'}`)
+        console.log(`    Champs (${(meta.fields || []).length}) :`)
+        for (const f of meta.fields || []) {
+          const alias = f.alias && f.alias !== f.name ? `  alias='${f.alias}'` : ''
+          console.log(`       • ${(f.name || '').padEnd(28)}  ${(f.type || '').replace('esriFieldType', '').padEnd(10)}${alias}`)
+        }
+      } catch (e) {
+        console.log(`    ⚠︎  schéma KO : ${e.message}`)
+      }
+      // 1 feature exemple
+      try {
+        const sample = await (await fetch(
+          `${url}/query?where=1=1&outFields=*&outSR=4326&f=geojson&resultRecordCount=1`,
+          { headers: { 'User-Agent': 'MINAI-ansade-fetch/1.0' } }
+        )).json()
+        const f = sample.features?.[0]
+        if (f) {
+          console.log(`    Exemple de feature (1 record) :`)
+          console.log(`       properties:`)
+          for (const [k, v] of Object.entries(f.properties || {})) {
+            const sval = String(v).slice(0, 60)
+            console.log(`         ${k.padEnd(28)} = ${sval}`)
+          }
+        }
+      } catch (e) {
+        console.log(`    ⚠︎  feature exemple KO : ${e.message}`)
+      }
+    }
+    console.log('\n✨  DIAGNOSE terminé. Copie-colle moi cette sortie pour ajuster le mapping.\n')
+    process.exit(0)
+  }
+
   if (!villagesUrl || pointsEauUrls.length === 0) {
     const datasources = await discoverEndpoints()
     if (datasources) {
