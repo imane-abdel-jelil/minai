@@ -240,39 +240,68 @@ async function fetchLayerMetadata(layerUrl) {
   }
 }
 
-/** Mode INSPECT : interroge le metadata de chaque URL et imprime un tableau */
+/** Mode INSPECT : interroge le metadata, filtre, groupe, et imprime
+ *  uniquement les couches susceptibles d'être villages ou points d'eau.
+ *  Sauvegarde aussi le tableau complet en CSV pour référence. */
 async function inspectAllServices(datasources) {
-  console.log('\n📋  Inspection des couches (interroge le metadata de chacune)…\n')
-  console.log(
-    '#'.padStart(4) + '  ' +
-    'NOM DE LA COUCHE'.padEnd(45) + '  ' +
-    'GEO'.padEnd(10) + '  ' +
-    'COUNT'.padStart(8) + '  ' +
-    'URL'
-  )
-  console.log('─'.repeat(140))
-  // Limite à éviter de spammer l'API si très long
-  const limit = Math.min(datasources.length, 130)
-  for (let i = 0; i < limit; i++) {
+  console.log(`\n📋  Inspection de ${datasources.length} couches (récupération metadata)…`)
+  process.stdout.write('    ')
+  const enriched = []
+  for (let i = 0; i < datasources.length; i++) {
     const ds = datasources[i]
     const meta = await fetchLayerMetadata(ds.url)
-    const name = (meta.name || '').slice(0, 44)
-    const geo = (meta.geometryType || '').replace('esriGeometry', '').slice(0, 9)
-    const count = meta.count != null ? meta.count.toLocaleString('fr-FR') : '?'
-    console.log(
-      String(i + 1).padStart(4) + '  ' +
-      name.padEnd(45) + '  ' +
-      geo.padEnd(10) + '  ' +
-      count.padStart(8) + '  ' +
-      ds.url
-    )
+    enriched.push({ ...ds, ...meta })
+    if (i % 10 === 9) process.stdout.write('.')
   }
-  console.log('─'.repeat(140))
-  console.log('\n💡  Identifie ci-dessus les bonnes URLs (ex: une qui parle de localités/villages')
-  console.log('    avec geo=Point et count élevé pour les villages, et une qui parle de')
-  console.log('    points d\'eau / forages avec geo=Point pour l\'eau).\n')
-  console.log('    Puis relance avec :')
-  console.log('       ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URL="..." npm run fetch:ansade\n')
+  process.stdout.write('\n')
+
+  // Sauvegarde CSV complète pour référence
+  const csvPath = resolve(OUTPUT_DIR, 'ansade-layers-full.csv')
+  await mkdir(OUTPUT_DIR, { recursive: true })
+  const csvLines = ['idx;name;geometryType;count;url']
+  enriched.forEach((e, i) => {
+    const safe = (s) => String(s ?? '').replace(/;/g, ',').replace(/\n/g, ' ')
+    csvLines.push(`${i + 1};${safe(e.name)};${safe(e.geometryType)};${e.count ?? ''};${e.url}`)
+  })
+  await writeFile(csvPath, csvLines.join('\n'), 'utf-8')
+  console.log(`    💾  Tableau complet sauvegardé → ${csvPath}\n`)
+
+  // Filtrage : uniquement Point + count >= 50 (villages et points d'eau sont des Points
+  // et ont forcément des centaines/milliers de records)
+  const filtered = enriched.filter(
+    (e) => /Point/i.test(e.geometryType || '') && (e.count ?? 0) >= 50
+  )
+
+  // Tri par count décroissant
+  filtered.sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
+
+  console.log('🎯  Couches Point avec count ≥ 50, triées par count décroissant :\n')
+  console.log(
+    '#'.padStart(3) + '  ' +
+    'COUNT'.padStart(8) + '  ' +
+    'NOM DE LA COUCHE'.padEnd(50) + '  ' +
+    'URL'
+  )
+  console.log('─'.repeat(160))
+  filtered.forEach((e, i) => {
+    const name = (e.name || '').slice(0, 49)
+    const count = (e.count ?? 0).toLocaleString('fr-FR')
+    console.log(
+      String(i + 1).padStart(3) + '  ' +
+      count.padStart(8) + '  ' +
+      name.padEnd(50) + '  ' +
+      e.url
+    )
+  })
+  console.log('─'.repeat(160))
+
+  console.log('\n💡  Recommandation :')
+  console.log('   • VILLAGES = la ligne avec count très élevé (≈ 6000-15000) qui parle de')
+  console.log('     "Localité", "LOC", "Localités", "Agglomérations".')
+  console.log('   • POINTS D\'EAU = une ligne dans Infra_app_WFL1 qui parle de "forage",')
+  console.log('     "puits", "حفر", "بئر", "صونداج", "مياه".')
+  console.log('\n   Identifie les 2 URLs et relance :')
+  console.log('     ANSADE_VILLAGES_URL="<url1>" ANSADE_POINTS_EAU_URL="<url2>" npm run fetch:ansade\n')
 }
 
 /** Découvre les FeatureServers depuis le config JSON de l'Experience */

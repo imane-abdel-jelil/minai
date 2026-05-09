@@ -1,0 +1,393 @@
+
+> minai@0.1.0 fetch:ansade
+> node scripts/fetch-ansade.mjs
+
+🇲🇷  MINAI — extraction ANSADE (RGPH-5)
+─────────────────────────────────────────
+
+🔎  Découverte de l'Experience 2ded1160faac4295861634a47ff18d03…
+  → config Experience
+    Trouvé 123 URLs ArcGIS uniques dans le config :
+     1. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/LOC_EXP_WFL1/FeatureServer/30
+        path: $.dataSources.dataSource_19.childDataSourceJsons.53c804df961b485f92c4aad33ca82bf7.url
+     2. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_19.childDataSourceJsons.b55338d282934b32aa10006bf320cb7c.url
+     3. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_19.childDataSourceJsons.f4218b85780642e1be33b9323c656222.url
+     4. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/3
+        path: $.dataSources.dataSource_19.childDataSourceJsons.c3b797111337456096f28b188fc66908.url
+     5. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/LOC_EXP_WFL1/FeatureServer/31
+        path: $.dataSources.dataSource_19.childDataSourceJsons.5c9362d7448445de8738c36f80a259c7.url
+     6. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_256.childDataSourceJsons.d4048348072e47f7b886150a27df5dec.url
+     7. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_256.childDataSourceJsons.505a32d498f04a73bc72ffde0b007291.url
+     8. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_256.childDataSourceJsons.9261ec3ab25f43b3b2224a41ae78edbe.url
+     9. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_258.childDataSourceJsons.146c4b5d4fe04fb49659d41698e88428.url
+    10. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_258.childDataSourceJsons.dd544bea50694a008bf998e8f3f9d4f7.url
+    11. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_258.childDataSourceJsons.2baffe2d4c204edda1b22b722d33903d.url
+    12. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/3
+        path: $.dataSources.dataSource_259.childDataSourceJsons.f6e7296d6a5f495a8e6127d8e652d465.url
+    13. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_259.childDataSourceJsons.627a8aee9242496d9b7e14b6cd18c5cc.url
+    14. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/6
+        path: $.dataSources.dataSource_259.childDataSourceJsons.90c9c4dcfea64707b3e04e830b2b2db9.url
+    15. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_260.childDataSourceJsons.ef1fc26acaa3468f9937ffc1adc4ba53.url
+    16. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_260.childDataSourceJsons.52060e37aa16471790574cddd1f0963f.url
+    17. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_260.childDataSourceJsons.9971ef1e12534dedabbd350d031ccd3a.url
+    18. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Indice_Synthétique_de_Fécondité_3_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_261.childDataSourceJsons.15f7da9578654bafa671f664b432dfd6.url
+    19. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Quotient_de_mortalité_infanto_juvénile_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_262.childDataSourceJsons.e43867c3be1f409aaee9dfca31b3f43e.url
+    20. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Espérance_de_vie_à_la_naissance___WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_263.childDataSourceJsons.e3fb2f1a71f644899ce1d2622f333fd8.url
+    21. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/3
+        path: $.dataSources.dataSource_264.childDataSourceJsons.55d0eae860234e2aa103c64e07a42c95.url
+    22. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_264.childDataSourceJsons.b5d4d14b9f0b489da3506057f602106b.url
+    23. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_264.childDataSourceJsons.1fe9ac94f228419e856691b34b5a2ef0.url
+    24. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_265.childDataSourceJsons.0a8e24e98c684c7987a4bced3b3fcfe1.url
+    25. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_265.childDataSourceJsons.beddfba24dbd4049af2f8899015c3ef2.url
+    26. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_265.childDataSourceJsons.59f4101f523c4df097a986efe575d213.url
+    27. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_266.childDataSourceJsons.18da10205775461aae7c553849e2d2d2.url
+    28. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_266.childDataSourceJsons.4013efddadc04556bfb482369cb5e04c.url
+    29. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_266.childDataSourceJsons.e0a6b8a366234beb80664f0f8884c679.url
+    30. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_267.childDataSourceJsons.151836b8ef97451c8f82f7affeeededc.url
+    31. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_267.childDataSourceJsons.e4ae59d9cdee415f8bf2ceac580bd0cf.url
+    32. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_267.childDataSourceJsons.7ef3a14dde454939b492dbdb3c5b3fcb.url
+    33. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_268.childDataSourceJsons.f729a6d0893e4dbd9ff2662d876e13c7.url
+    34. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_268.childDataSourceJsons.0a7fc187245042ee83e43205320dffdd.url
+    35. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_268.childDataSourceJsons.b8b5c8a51f6948c29801f00adc8c2c5d.url
+    36. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_269.childDataSourceJsons.a97fc5332e1f4a228ce1766bab9569f7.url
+    37. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_269.childDataSourceJsons.c3b29550676f41f7840e84306aed1cbd.url
+    38. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_269.childDataSourceJsons.3a7c4d5940084bbcad2381d84ce9478a.url
+    39. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_270.childDataSourceJsons.84bb1b9c01284de6b2c336ccc5f324de.url
+    40. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_270.childDataSourceJsons.12f97881d74d4636a3e6e7f0ac9aed3e.url
+    41. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_270.childDataSourceJsons.b0cecede74794275b94f00d66a595079.url
+    42. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/8
+        path: $.dataSources.dataSource_271.childDataSourceJsons.428dc2ccb0e341daaf04c69fc0c29d35.url
+    43. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_271.childDataSourceJsons.1926e5ec2ee24a1b919b3cd9c7ff2033.url
+    44. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/10
+        path: $.dataSources.dataSource_271.childDataSourceJsons.7f77d99d75e741aca15d6f475e35cd85.url
+    45. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/7
+        path: $.dataSources.dataSource_271.childDataSourceJsons.5ddd51d86a194781975706a0236ca843.url
+    46. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/5
+        path: $.dataSources.dataSource_271.childDataSourceJsons.00b8910b2f0f44f6ae3a7a128670141e.url
+    47. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/6
+        path: $.dataSources.dataSource_271.childDataSourceJsons.577bdb4c3cf04e70866260f42bd8ee07.url
+    48. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/8
+        path: $.dataSources.dataSource_272.childDataSourceJsons.3e4bb0bb31204f6291b1ba9d96101f2a.url
+    49. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/12
+        path: $.dataSources.dataSource_272.childDataSourceJsons.7c7ae6316a104534becac26f2b293eb8.url
+    50. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/10
+        path: $.dataSources.dataSource_272.childDataSourceJsons.6a43c043975142359ee6f21a2d0ea77b.url
+    51. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/7
+        path: $.dataSources.dataSource_272.childDataSourceJsons.7e15ff4cea984cdc8c8f53822b8b2f71.url
+    52. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/5
+        path: $.dataSources.dataSource_272.childDataSourceJsons.05ee391c12444e83a30f6b0431eeffe9.url
+    53. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/6
+        path: $.dataSources.dataSource_272.childDataSourceJsons.69af7edc97a049019388514e0b6d9dc6.url
+    54. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/8
+        path: $.dataSources.dataSource_273.childDataSourceJsons.b2b45ec089f244628da0db8924bc59a5.url
+    55. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/9
+        path: $.dataSources.dataSource_273.childDataSourceJsons.8e04f8dbb2244679925aaf517c0cb6ce.url
+    56. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/10
+        path: $.dataSources.dataSource_273.childDataSourceJsons.8280f59971a64621a837f3bd5195fd14.url
+    57. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/5
+        path: $.dataSources.dataSource_274.childDataSourceJsons.c491d7b7610a4d80a99857ac15c7ecba.url
+    58. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/6
+        path: $.dataSources.dataSource_274.childDataSourceJsons.c02ccf01d5f74b17b84b55ec808885a8.url
+    59. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/7
+        path: $.dataSources.dataSource_274.childDataSourceJsons.ea0a93d9075b45728939f514e0d5bcdb.url
+    60. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/8
+        path: $.dataSources.dataSource_274.childDataSourceJsons.0e88c274d93a484881ccfff2e362185e.url
+    61. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_275.childDataSourceJsons.3fd6f31bc4924a0aa44660fedb19bccb.url
+    62. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_275.childDataSourceJsons.b732febeacec415fbcbe5890646a6cc5.url
+    63. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_275.childDataSourceJsons.cc6d5b4c22274318b5b472b740326616.url
+    64. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_276.childDataSourceJsons.020a7ced698047118e00d173dff43119.url
+    65. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_276.childDataSourceJsons.d9b8dd0b6ba34289ba8d146961b6da0f.url
+    66. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_276.childDataSourceJsons.963bf9b26f9c4916bc8cf3921762c756.url
+    67. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_277.childDataSourceJsons.736e253f1f6c493da2e73b37e8025cff.url
+    68. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_277.childDataSourceJsons.f08d7cb153624708bade14ff082cb8fb.url
+    69. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_277.childDataSourceJsons.07ef485e47a242ad857c7cb8c2f44879.url
+    70. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_278.childDataSourceJsons.0bece7bd0f5f4c87bbe4042607ff7369.url
+    71. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_278.childDataSourceJsons.df1552bc7bf4433ea8bb0f6c19cd78b0.url
+    72. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_278.childDataSourceJsons.14d1288a647a4e4db477ab691699ea1e.url
+    73. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_279.childDataSourceJsons.c3a66ddc7f1a4c26ac1091bffc9033cf.url
+    74. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_279.childDataSourceJsons.5c2e5b354ee54bc2bbfc5c41b44e9d8f.url
+    75. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_279.childDataSourceJsons.54be3db591f740cfac92933f525b1ed8.url
+    76. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_personnes_souffrant_maladies_chroniques_9_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_280.childDataSourceJsons.34be940e94c4401a9fe22519fb9967ec.url
+    77. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_des_ménages_ayant_au_moins_un_membre_avec_assurance_maladie_9_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_281.childDataSourceJsons.833fdb30addd44b2a7035298fda42f57.url
+    78. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_282.childDataSourceJsons.5a1c3abf292a46669c37bf1882f843de.url
+    79. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_282.childDataSourceJsons.db5de0c604924e739ca44af3d538d6f9.url
+    80. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_282.childDataSourceJsons.02d7dcf4d11f49d99428821aa241bae2.url
+    81. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_283.childDataSourceJsons.39a956a169d24d129598055b762a8223.url
+    82. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_283.childDataSourceJsons.cc24197d2b374ab2a5b164f540d9aa7b.url
+    83. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_283.childDataSourceJsons.4eb4ca1a409f4149aa9cc9bc332973da.url
+    84. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_286.childDataSourceJsons.d666c92157934de4b7303cfd2ed6693a.url
+    85. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/1
+        path: $.dataSources.dataSource_286.childDataSourceJsons.f76ff9fc8d6741229f68e142abecd484.url
+    86. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/2
+        path: $.dataSources.dataSource_286.childDataSourceJsons.f3fbe052f45a4a03b4e2f8454c11b0f9.url
+    87. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_287.childDataSourceJsons.ea8fdeb80c6c4f8c90b971317fe6e73e.url
+    88. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/16
+        path: $.dataSources.dataSource_287.childDataSourceJsons.92cd6ca6499d443cbe902f2548caf6bf.url
+    89. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/15
+        path: $.dataSources.dataSource_287.childDataSourceJsons.6fbe6de95bc84f7cb8460ea21ec50c44.url
+    90. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/24
+        path: $.dataSources.dataSource_287.childDataSourceJsons.4e7e6b44be10463faeccff4635af2bfa.url
+    91. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/12
+        path: $.dataSources.dataSource_287.childDataSourceJsons.f4d0faf7a7504b0bb89f076aaefdce42.url
+    92. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/14
+        path: $.dataSources.dataSource_287.childDataSourceJsons.6d212463f9174291a38b9aa508e539e1.url
+    93. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/28
+        path: $.dataSources.dataSource_287.childDataSourceJsons.86267455e1cb4a5c927dd93f9202c8f9.url
+    94. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/27
+        path: $.dataSources.dataSource_287.childDataSourceJsons.31671eac14824d81891c98d1890ee1d9.url
+    95. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/26
+        path: $.dataSources.dataSource_287.childDataSourceJsons.df5384c26fc64dac9311423f19cfad61.url
+    96. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/25
+        path: $.dataSources.dataSource_287.childDataSourceJsons.b5082b458a634a7fa04248111d4bc4e3.url
+    97. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/22
+        path: $.dataSources.dataSource_287.childDataSourceJsons.22215616416342a8a053f5e97a570a40.url
+    98. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/17
+        path: $.dataSources.dataSource_287.childDataSourceJsons.93cd475535054ddd9af4b80da2d83da1.url
+    99. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_288.childDataSourceJsons.6e93239a26064d70b1be0ffbf24382d1.url
+    100. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/16
+        path: $.dataSources.dataSource_288.childDataSourceJsons.718779a0ca034740b28d316504b5753e.url
+    101. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/15
+        path: $.dataSources.dataSource_288.childDataSourceJsons.fd3d12925a2d45c5b13cf6442e247a3f.url
+    102. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/24
+        path: $.dataSources.dataSource_288.childDataSourceJsons.10f1f1211cf84d50a1766330904547c7.url
+    103. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/12
+        path: $.dataSources.dataSource_288.childDataSourceJsons.94bc5b55c8794da7aed5a6c15692d82a.url
+    104. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/14
+        path: $.dataSources.dataSource_288.childDataSourceJsons.5f4c52c632d946089ba7026644ede36e.url
+    105. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/28
+        path: $.dataSources.dataSource_288.childDataSourceJsons.8a95df739e8e40d48c21a8680fbc4d8f.url
+    106. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/27
+        path: $.dataSources.dataSource_288.childDataSourceJsons.09b958c9416f4e7d8fbdb4a236512408.url
+    107. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/26
+        path: $.dataSources.dataSource_288.childDataSourceJsons.bb5961eda25649718fa5e097948e90ec.url
+    108. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/25
+        path: $.dataSources.dataSource_288.childDataSourceJsons.f5dd533c2d1f4171b667d06b00cef4b3.url
+    109. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/22
+        path: $.dataSources.dataSource_288.childDataSourceJsons.8c7df1209fc24b198efe72642f3f2507.url
+    110. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/30
+        path: $.dataSources.dataSource_288.childDataSourceJsons.39d51834b02a4a5c82f6035544afe89b.url
+    111. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/13
+        path: $.dataSources.dataSource_289.childDataSourceJsons.98d57945b82d47d098325b57b6649676.url
+    112. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/12
+        path: $.dataSources.dataSource_289.childDataSourceJsons.b730fd7d75dc4001b9eae64b9baea094.url
+    113. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/11
+        path: $.dataSources.dataSource_289.childDataSourceJsons.5ede54cef2df47649f82f47f9933e8b1.url
+    114. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/8
+        path: $.dataSources.dataSource_289.childDataSourceJsons.8424ec74e4ef4151923a26ba536a73c1.url
+    115. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/16
+        path: $.dataSources.dataSource_289.childDataSourceJsons.5b1d583d8c1f439084d3b889824f43d6.url
+    116. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/15
+        path: $.dataSources.dataSource_289.childDataSourceJsons.fdf87c4a13b44a50bad325bab558834c.url
+    117. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/9
+        path: $.dataSources.dataSource_289.childDataSourceJsons.e6654c6c218b4db5a577359434bc7b2d.url
+    118. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_289.childDataSourceJsons.1ecda093b3bb4354aeed30b03a0d27e6.url
+    119. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_Application2_WFL1/FeatureServer/0
+        path: $.dataSources.dataSource_289.childDataSourceJsons.477180886a2a4502a541c7c53a49f1cf.url
+    120. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/8
+        path: $.dataSources.dataSource_289.childDataSourceJsons.cf108d1333704337943dfa495a356b08.url
+    121. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/9
+        path: $.dataSources.dataSource_289.childDataSourceJsons.d994d61fe89e405f8636f9cf44fedc5b.url
+    122. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/10
+        path: $.dataSources.dataSource_289.childDataSourceJsons.cc5efaeadfa3495a885db82645a072b4.url
+    123. https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/31
+        path: $.dataSources.dataSource_289.childDataSourceJsons.16f163b6ae7d4ec2aed9fdd74cb59726.url
+
+📋  Inspection des couches (interroge le metadata de chacune)…
+
+   #  NOM DE LA COUCHE                               GEO            COUNT  URL
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+   1  Localités                                      Point          8 447  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/LOC_EXP_WFL1/FeatureServer/30
+   2  Limite Commune                                 Polygon          238  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/1
+   3  Limite moughataa                               Polygon           63  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/2
+   4  Limite wilaya                                  Polygon           15  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/3
+   5  Infrastructures                                              30 295  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/LOC_EXP_WFL1/FeatureServer/31
+   6  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/0
+   7  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/1
+   8  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/2
+   9  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/0
+  10  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/1
+  11  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/2
+  12  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/3
+  13  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/0
+  14  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/6
+  15  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/0
+  16  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/1
+  17  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/2
+  18  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Indice_Synthétique_de_Fécondité_3_WFL1/FeatureServer/1
+  19  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Quotient_de_mortalité_infanto_juvénile_WFL1/FeatureServer/0
+  20  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Espérance_de_vie_à_la_naissance___WFL1/FeatureServer/0
+  21  Etat_Mat_par_wilaya                            Polygon           15  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/3
+  22  Etat_Mat_par_moughataa                         Polygon           63  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/1
+  23  Etat_Mat_par_COMMUNE                           Polygon          238  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/0
+  24  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/0
+  25  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/1
+  26  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/2
+  27  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/0
+  28  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/1
+  29  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/2
+  30  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/0
+  31  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/1
+  32  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/2
+  33  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/0
+  34  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/1
+  35  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/2
+  36  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/0
+  37  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/1
+  38  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/2
+  39  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/0
+  40  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/1
+  41  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/2
+  42  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/8
+  43  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/2
+  44  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/10
+  45  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/7
+  46  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/5
+  47  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/6
+  48  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/8
+  49  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/12
+  50  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/10
+  51  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/7
+  52  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/5
+  53  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/6
+  54  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/8
+  55  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/9
+  56  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/10
+  57  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/5
+  58  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/6
+  59  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/7
+  60  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/8
+  61  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/0
+  62  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/1
+  63  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/2
+  64  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/0
+  65  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/1
+  66  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/2
+  67  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/0
+  68  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/1
+  69  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/2
+  70  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/0
+  71  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/1
+  72  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/2
+  73  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/0
+  74  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/1
+  75  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/2
+  76  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_personnes_souffrant_maladies_chroniques_9_WFL1/FeatureServer/0
+  77  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_des_ménages_ayant_au_moins_un_membre_avec_assurance_maladie_9_WFL1/FeatureServer/0
+  78  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/0
+  79  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/1
+  80  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/2
+  81  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/0
+  82  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/1
+  83  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/2
+  84  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/0
+  85  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/1
+  86  (sans nom)                                                        ?  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/2
+  87  Jardin d'enfant                                Point            178  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/0
+  88  E. Primaire                                    Point            205  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/16
+  89  Collége                                        Point             24  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/15
+  90  Lycée                                          Point             40  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/24
+  91  E/C/I Professionnel                            Point             71  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/12
+  92  Université                                     Point             14  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/14
+  93  Poste de Santé                                 Point             27  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/28
+  94  Centre de Santé                                Point             26  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/27
+  95  Clinique parapublique                          Point              6  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/26
+  96  Hôpital                                        Point              8  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/25
+  97  Limites_moughataa                              Polygon            9  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/22
+  98  Population par Quadrillage 100 x100 m          Polygon       19 495  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/17
+  99  Jardin d'enfant                                Point            178  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/0
+ 100  E. Primaire                                    Point            205  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/16
+ 101  Collége                                        Point             24  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/15
+ 102  Lycée                                          Point             40  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/24
+ 103  E/C/I Professionnel                            Point             71  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/12
+ 104  Université                                     Point             14  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/14
+ 105  Poste de Santé                                 Point             27  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/28
+ 106  Centre de Santé                                Point             26  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/27
+ 107  Clinique parapublique                          Point              6  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/26
+ 108  Hôpital                                        Point              8  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/25
+ 109  Limites_moughataa                              Polygon            9  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/22
+ 110  Population par Quadrillage 500 m x500 m        Polygon        1 200  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/30
+ 111  Education                                      Point          3 967  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/13
+ 112   Jardin d'enfant                               Point            286  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/12
+ 113  Ecole Coranique Mahadra                        Point          7 187  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/11
+ 114  Santé                                          Point            980  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/8
+ 115  Mosquée                                        Point         11 231  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/16
+ 116  Parc de vaccination                            Point            444  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/15
+ 117  Puit couvert                                   Point          4 153  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/9
+ 118   Forage et sondage                             Point          2 048  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/0
+ 119  LocalitesMRT                                   Polygon        8 447  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_Application2_WFL1/FeatureServer/0
+ 120  Limite commune                                 Polygon          238  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/8
+ 121  Limite moughataa                               Polygon           63  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/9
+ 122  Limite wilaya                                  Polygon           15  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/10
+ 123  Infrastructures                                              30 296  https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/31
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+💡  Identifie ci-dessus les bonnes URLs (ex: une qui parle de localités/villages
+    avec geo=Point et count élevé pour les villages, et une qui parle de
+    points d'eau / forages avec geo=Point pour l'eau).
+
+    Puis relance avec :
+       ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URL="..." npm run fetch:ansade
+
