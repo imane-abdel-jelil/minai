@@ -94,7 +94,10 @@ const VILLAGE_FIELDS = {
 const POINTS_EAU_FIELDS = {
   code_localite: ['CODE_LOCALITE', 'code_loc', 'CODE_LOC'],
   nom:           ['NOM', 'NOM_OUVRAGE', 'NOM_FR', 'nom'],
-  type:          ['TYPE_OUVRAGE', 'TYPE', 'NATURE', 'type', 'نوع'],
+  // __layer_name est ajouté par le fetcher quand on fusionne plusieurs
+  // couches (ex: 'Puit couvert', 'Forage et sondage'). Sert de fallback
+  // si la couche elle-même n'a pas de champ type.
+  type:          ['TYPE_OUVRAGE', 'TYPE', 'NATURE', 'type', 'نوع', '__layer_name'],
   wilaya:        ['WILAYA', 'WILAYA_FR', 'NOM_WILAYA', 'wilaya'],
   moughataa:     ['MOUGHATAA', 'MOUGHATAA_FR', 'NOM_MOUGHATAA', 'moughataa'],
   commune:       ['COMMUNE', 'COMMUNE_FR', 'NOM_COMMUNE', 'commune'],
@@ -317,7 +320,8 @@ async function inspectAllServices(datasources) {
   }
 
   const villagesPick = filtered.find(isVillageCandidate)
-  const waterPick    = filtered.find(isWaterCandidate)
+  // On prend TOUS les candidats eau (forages, puits, sondages) pour les fusionner
+  const waterPicks = filtered.filter(isWaterCandidate)
 
   console.log('\n🎯  Auto-recommandation :')
   if (villagesPick) {
@@ -325,22 +329,26 @@ async function inspectAllServices(datasources) {
   } else {
     console.log(`   ✗ Villages   → introuvable automatiquement`)
   }
-  if (waterPick) {
-    console.log(`   ✓ Pts d'eau  → ${waterPick.name} (${waterPick.count?.toLocaleString('fr-FR') ?? '?'} records)`)
+  if (waterPicks.length > 0) {
+    const totalWater = waterPicks.reduce((s, w) => s + (w.count ?? 0), 0)
+    console.log(`   ✓ Pts d'eau  → ${waterPicks.length} couches fusionnées (${totalWater.toLocaleString('fr-FR')} records au total) :`)
+    waterPicks.forEach((w) => console.log(`       • ${w.name} (${w.count?.toLocaleString('fr-FR') ?? '?'})`))
   } else {
     console.log(`   ✗ Pts d'eau  → introuvable automatiquement (peut-être nommé en arabe)`)
   }
 
-  if (villagesPick && waterPick) {
+  if (villagesPick && waterPicks.length > 0) {
+    const waterUrls = waterPicks.map((w) => w.url).join(',')
     console.log('\n📋  Commande prête à copier-coller pour lancer le fetch :\n')
-    console.log(`ANSADE_VILLAGES_URL='${villagesPick.url}' ANSADE_POINTS_EAU_URL='${waterPick.url}' npm run fetch:ansade`)
+    console.log(`ANSADE_VILLAGES_URL='${villagesPick.url}' ANSADE_POINTS_EAU_URLS='${waterUrls}' npm run fetch:ansade`)
     console.log('')
+    console.log("   (Note : ANSADE_POINTS_EAU_URLS au pluriel = liste séparée par virgules)\n")
   } else {
     console.log('\n💡  Identifie manuellement dans le tableau ci-dessus :')
     console.log('   • VILLAGES   = nom contenant "Localité"/"LOC_EXP", count ≥ ~5000')
     console.log('   • PTS D\'EAU  = nom contenant "forage"/"puit"/"حفر"/"بئر", dans Infra_app_WFL1')
     console.log('   Puis :')
-    console.log('     ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URL="..." npm run fetch:ansade\n')
+    console.log('     ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URLS="url1,url2" npm run fetch:ansade\n')
   }
 }
 
@@ -430,8 +438,14 @@ async function main() {
   console.log('─────────────────────────────────────────')
 
   // 1. URLs : variables d'env > découverte automatique
+  // Pour les points d'eau on accepte SOIT une URL (singulier) SOIT plusieurs
+  // séparées par virgules (pluriel — pour fusionner forages+puits+etc.)
   let villagesUrl  = process.env.ANSADE_VILLAGES_URL
-  let pointsEauUrl = process.env.ANSADE_POINTS_EAU_URL
+  const pointsEauUrlSingle = process.env.ANSADE_POINTS_EAU_URL
+  const pointsEauUrlsMulti = process.env.ANSADE_POINTS_EAU_URLS
+  let pointsEauUrls = pointsEauUrlsMulti
+    ? pointsEauUrlsMulti.split(',').map((u) => u.trim()).filter(Boolean)
+    : (pointsEauUrlSingle ? [pointsEauUrlSingle] : [])
 
   // Mode INSPECT : liste toutes les couches avec leurs vrais noms,
   // puis quitte (ne tente pas de fetch).
@@ -445,28 +459,48 @@ async function main() {
     process.exit(0)
   }
 
-  if (!villagesUrl || !pointsEauUrl) {
+  if (!villagesUrl || pointsEauUrls.length === 0) {
     const datasources = await discoverEndpoints()
     if (datasources) {
-      villagesUrl  = villagesUrl  || findEndpoint(datasources, KEYWORDS_VILLAGES)
-      pointsEauUrl = pointsEauUrl || findEndpoint(datasources, KEYWORDS_POINTS_EAU)
+      villagesUrl = villagesUrl || findEndpoint(datasources, KEYWORDS_VILLAGES)
+      if (pointsEauUrls.length === 0) {
+        const auto = findEndpoint(datasources, KEYWORDS_POINTS_EAU)
+        if (auto) pointsEauUrls = [auto]
+      }
     }
   }
 
-  if (!villagesUrl || !pointsEauUrl) {
+  if (!villagesUrl || pointsEauUrls.length === 0) {
     console.error('\n❌  Impossible d\'identifier les FeatureServers automatiquement.')
     console.error('\n💡  Recommandation : lance le mode INSPECTION pour voir les vrais noms')
     console.error('    de toutes les couches détectées :')
     console.error('       INSPECT=1 npm run fetch:ansade')
     console.error('\n    Puis identifie les bonnes URLs (count élevé + geometryType=Point)')
     console.error('    et relance avec :')
-    console.error('       ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URL="..." npm run fetch:ansade')
+    console.error('       ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URLS="url1,url2" npm run fetch:ansade')
     process.exit(1)
   }
 
   // 2. Fetch
   const villagesRaw = await fetchAllFeatures(villagesUrl, 'villages')
-  const pointsEauRaw = await fetchAllFeatures(pointsEauUrl, "points d'eau")
+
+  // Pour les points d'eau on fetch chaque URL et on tagge chaque feature
+  // avec le nom de sa couche d'origine (= type d'ouvrage).
+  console.log(`\n📡  ${pointsEauUrls.length} couche(s) de points d'eau à fusionner`)
+  const pointsEauRaw = []
+  for (const url of pointsEauUrls) {
+    const meta = await fetchLayerMetadata(url)
+    const layerLabel = meta.name || `couche ${url.split('/').pop()}`
+    const features = await fetchAllFeatures(url, layerLabel)
+    // Injecte le nom de la couche dans les properties pour pouvoir le mapper
+    // ensuite vers le champ 'type' du schéma MINAI.
+    for (const f of features) {
+      f.properties = f.properties || f.attributes || {}
+      f.properties.__layer_name = layerLabel
+    }
+    pointsEauRaw.push(...features)
+  }
+  console.log(`    ✔︎ ${pointsEauRaw.length} points d'eau au total (toutes couches confondues)`)
 
   // 3. Mapping vers schéma MINAI
   console.log('\n🧹  Nettoyage et mapping des champs…')
