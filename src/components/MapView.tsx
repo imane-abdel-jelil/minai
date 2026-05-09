@@ -384,6 +384,11 @@ export default function MapView({
         registerDropletIcon(map, 'cluster-sm', '#06b6d4')
         registerDropletIcon(map, 'cluster-md', '#0ea5e9')
         registerDropletIcon(map, 'cluster-lg', '#0284c7')
+        // Surveille les erreurs Mapbox pour diagnostiquer les pertes de
+        // tuiles (network, token, rate-limit) — visibles dans la console.
+        map.on('error', (err) => {
+          console.warn('Mapbox error:', err?.error?.message ?? err)
+        })
       }}
       onClick={(e: MapLayerMouseEvent) => {
         const feature = e.features?.[0]
@@ -690,29 +695,10 @@ export default function MapView({
                   'circle-opacity': 0.95,
                 }}
               />
-              {/* Overlay highlight pour le village sélectionné — couche
-                  séparée filtrée par id pour éviter de re-cloner les
-                  8447 features à chaque clic. */}
-              {selectedVillage && (
-                <Layer
-                  id="village-selected-highlight"
-                  type="circle"
-                  filter={[
-                    '==',
-                    ['to-string', ['get', 'code_localite']],
-                    String(selectedVillage.id),
-                  ] as never}
-                  paint={{
-                    'circle-radius': [
-                      'interpolate', ['linear'], ['zoom'],
-                      5, 7, 8, 9, 12, 14,
-                    ],
-                    'circle-color': 'rgba(0,0,0,0)',
-                    'circle-stroke-color': '#ffffff',
-                    'circle-stroke-width': 3,
-                  }}
-                />
-              )}
+              {/* Highlight retiré : la couche overlay avec filter Mapbox
+                  pouvait causer des erreurs silencieuses qui faisaient
+                  disparaître les tuiles satellite. La sidebar suffit
+                  pour confirmer la sélection à l'utilisateur. */}
               <Layer
                 id="village-drill-label"
                 type="symbol"
