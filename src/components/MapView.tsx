@@ -461,14 +461,14 @@ export default function MapView({
           clusterRadius={45}
           clusterMaxZoom={12}
         >
-          {/* Clusters → gouttes bleues avec compteur. Taille réduite et
-              minzoom relevé pour ne plus dominer la vue nationale et
-              laisser respirer les pins TOP-30 / success stories. */}
+          {/* Clusters → gouttes bleues avec compteur. Visibles dès la vue
+              nationale mais discrets pour ne pas écraser les pins de
+              priorité (rouges) et de référence (verts). */}
           <Layer
             id="water-clusters"
             type="symbol"
             filter={['has', 'point_count']}
-            minzoom={6}
+            minzoom={4}
             layout={{
               'icon-image': [
                 'step',
@@ -480,9 +480,9 @@ export default function MapView({
               'icon-size': [
                 'step',
                 ['get', 'point_count'],
-                0.28, 20,
-                0.38, 100,
-                0.5,
+                0.22, 20,
+                0.32, 100,
+                0.42,
               ],
               'icon-allow-overlap': true,
               'icon-ignore-placement': true,
@@ -493,9 +493,9 @@ export default function MapView({
               'text-size': [
                 'step',
                 ['get', 'point_count'],
-                9, 20,
-                11, 100,
-                13,
+                8, 20,
+                10, 100,
+                12,
               ],
               'text-anchor': 'center',
               'text-offset': [0, -1.0],
@@ -503,7 +503,7 @@ export default function MapView({
               'text-ignore-placement': true,
             }}
             paint={{
-              'icon-opacity': 0.85,
+              'icon-opacity': 0.8,
               'text-color': '#ffffff',
               'text-halo-color': '#0c4a6e',
               'text-halo-width': 1.4,
@@ -550,53 +550,16 @@ export default function MapView({
       {showVillages && villagesEnriched && (
         <Source id="villages" type="geojson" data={villagesEnriched}>
 
-          {/* 1) HEATMAP — visible en vue nationale, fade au zoom proche.
-                Filtre uniquement les critical pour ne pas faire chauffer
-                les zones OK/risk. Pondéré par priority_score pour que
-                les vrais hotspots ressortent. Opacité abaissée pour
-                que les pins TOP-30 ressortent par-dessus. */}
-          {!selectedWilaya && (
-            <Layer
-              id="village-heatmap"
-              type="heatmap"
-              filter={['==', ['get', 'status'], 'critical']}
-              paint={{
-                'heatmap-weight': [
-                  'interpolate', ['linear'], ['get', 'priority_score'],
-                  0, 0,
-                  500_000, 0.5,
-                  5_000_000, 1,
-                ],
-                'heatmap-intensity': [
-                  'interpolate', ['linear'], ['zoom'],
-                  4, 0.8,
-                  9, 2,
-                ],
-                'heatmap-color': [
-                  'interpolate', ['linear'], ['heatmap-density'],
-                  0,    'rgba(0,0,0,0)',
-                  0.15, 'rgba(254,202,202,0.30)',
-                  0.40, 'rgba(252,165,165,0.45)',
-                  0.70, 'rgba(239,68,68,0.60)',
-                  1.00, 'rgba(185,28,28,0.75)',
-                ],
-                'heatmap-radius': [
-                  'interpolate', ['linear'], ['zoom'],
-                  4, 14,
-                  7, 28,
-                  10, 50,
-                ],
-                'heatmap-opacity': [
-                  'interpolate', ['linear'], ['zoom'],
-                  4, 0.65,
-                  7, 0.45,
-                  9, 0,         // fade out — laisse la place aux dots
-                ],
-              }}
-            />
-          )}
+          {/* HEATMAP retirée : créait un nuage rouge éparpillé qui
+              encombrait visuellement la vue nationale. La carte
+              s'appuie maintenant uniquement sur :
+                • polygones wilayas colorés par score (gradient orange→rouge)
+                • 30 pins TOP-30 (priorités urgentes)
+                • 24 pins success (référence positive)
+                • clusters d'eau bleus (infrastructure existante)
+              C'est plus net et plus institutionnel. */}
 
-          {/* 2a) PINS VERTS "success stories" — villages OK + réseau AEP.
+          {/* 1) PINS VERTS "success stories" — villages OK + réseau AEP.
                 Effet bullseye 3-cercles : anneau translucide externe +
                 halo blanc + dot saturé. Visibles à 100% sur n'importe
                 quel fond (heatmap, satellite, polygones). */}
@@ -669,7 +632,7 @@ export default function MapView({
             </>
           )}
 
-          {/* 2b) PINS TOP-30 — toujours visibles en vue nationale.
+          {/* 2) PINS TOP-30 — toujours visibles en vue nationale.
                 Effet bullseye 3-cercles, plus grand que les verts pour
                 hiérarchiser : priorité absolue = pin le plus visible
                 de toute la carte. */}
@@ -744,6 +707,7 @@ export default function MapView({
 
           {/* 3) DOTS DRILL-DOWN — visibles UNIQUEMENT quand une wilaya
                 est sélectionnée (tous statuts apparaissent). */}
+          {/* (l'effet est déclenché par le clic sur une wilaya, voir App.tsx) */}
           {selectedWilaya && (
             <>
               <Layer
@@ -940,10 +904,7 @@ export default function MapView({
 
     {/* ───── Légende flottante (vue nationale uniquement) ─────
          Petite carte translucide en bas-gauche qui explique la lecture
-         visuelle de la carte : pins rouges = priorités urgentes,
-         pins verts = villages déjà desservis (référence), heatmap =
-         densité de la pénurie. Disparaît en mode drill-down pour
-         laisser place aux dots colorés par statut. */}
+         visuelle. Disparaît en mode drill-down. */}
     {!selectedWilaya && showVillages && (
       <div className="absolute bottom-6 left-6 z-10 bg-slate-900/85 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl p-4 text-white text-xs max-w-[260px] pointer-events-none">
         <div className="text-[10px] uppercase tracking-wider font-semibold text-white/60 mb-2">
@@ -965,10 +926,12 @@ export default function MapView({
             </div>
           </div>
           <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 inline-block w-3 h-3 rounded-sm bg-gradient-to-br from-red-300/60 to-red-700/80 shrink-0" />
+            <span className="mt-0.5 inline-block w-4 h-5 shrink-0 flex items-center justify-center">
+              <span className="block w-3 h-4 rounded-b-full bg-gradient-to-b from-cyan-300 to-cyan-700 border border-white/70" />
+            </span>
             <div>
-              <div className="font-semibold leading-tight">Densité de la pénurie</div>
-              <div className="text-white/60 text-[11px] leading-tight">3 190 villages critiques cumulés</div>
+              <div className="font-semibold leading-tight">Points d'eau (cluster)</div>
+              <div className="text-white/60 text-[11px] leading-tight">infrastructure existante par zone</div>
             </div>
           </div>
         </div>
