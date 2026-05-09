@@ -4,6 +4,15 @@
 
 @import 'mapbox-gl/dist/mapbox-gl.css';
 
+/* Force un fond brun-terre Sahel sur le conteneur Mapbox. Si pour
+   une raison quelconque les tuiles satellite ne se chargent pas
+   (rate-limit, lenteur réseau, glitch de re-render), l'utilisateur
+   voit du brun cohérent au lieu du body noir uniforme. */
+.mapboxgl-map,
+.mapboxgl-canvas-container {
+  background-color: #3a2f24 !important;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;

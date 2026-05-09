@@ -240,7 +240,7 @@ export default function App() {
         />
       )}
 
-      <main className="flex-1 relative">
+      <main className="flex-1 relative bg-amber-900">
         {/* Bouton retour landing — coin haut-gauche */}
         <button
           onClick={() => setView('landing')}
