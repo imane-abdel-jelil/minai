@@ -389,17 +389,11 @@ export default function MapView({
       // populations rurales) et zoom plus serré pour mieux remplir le viewport.
       initialViewState={{ longitude: -11, latitude: 19.5, zoom: 5.1 }}
       mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
-      // backgroundColor explicite sur le conteneur pour qu'on ne voie
-      // jamais le body transparent à travers, même pendant un re-tile
-      // ou un re-render React.
-      style={{ width: '100%', height: '100%', backgroundColor: '#2a2520' }}
+      style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
-        // En vue nationale : TOP-30 (rouges), success (verts), ET tous les
-        // villages dès qu'ils apparaissent (zoom 6+). En drill-down : la
-        // couche dédiée à la wilaya.
-        ...(showVillages && !selectedWilaya
-          ? ['village-top', 'village-success', 'village-all-dots']
-          : []),
+        // Pins TOP-30 (rouges) + success (verts) en vue nationale,
+        // dots drill-down sinon.
+        ...(showVillages && !selectedWilaya ? ['village-top', 'village-success'] : []),
         ...(showVillages && selectedWilaya ? ['village-markers'] : []),
         ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
@@ -425,8 +419,7 @@ export default function MapView({
         if (feature.layer && (
           feature.layer.id === 'village-markers' ||
           feature.layer.id === 'village-top' ||
-          feature.layer.id === 'village-success' ||
-          feature.layer.id === 'village-all-dots'
+          feature.layer.id === 'village-success'
         )) {
           // Click village ANSADE (pin TOP-30, success, ou dot drill-down)
           // → ouvre le détail dans la sidebar. On reconstruit un objet
@@ -705,34 +698,11 @@ export default function MapView({
         </Source>
       )}
 
-      {/* ───── Villages — source globale 8447 features ─────
-           Affiche TOUS les villages dès le zoom 6+ (cliquables pour
-           ouvrir le popup), et zoome plus fort en drill-down wilaya. */}
+      {/* ───── Villages drill-down (TOUS les villages d'une wilaya) ─────
+           Source qui charge le gros fichier (8 Mo) — utilisé seulement
+           quand une wilaya est sélectionnée. Lazy-load par défaut. */}
       {showVillages && villagesEnriched && (
         <Source id="villages" type="geojson" data={villagesEnriched}>
-          {/* Couche 'tous villages' visible à partir du zoom 6 (sans
-              drill-down) pour que l'utilisateur puisse cliquer N'IMPORTE
-              QUEL village et voir ses infos. Petit dot coloré par statut. */}
-          {!selectedWilaya && (
-            <Layer
-              id="village-all-dots"
-              type="circle"
-              minzoom={6}
-              paint={{
-                'circle-radius': [
-                  'interpolate', ['linear'], ['zoom'],
-                  6, 1.8, 8, 3, 12, 6,
-                ],
-                'circle-color': ['get', 'color'],
-                'circle-stroke-color': '#ffffff',
-                'circle-stroke-width': [
-                  'interpolate', ['linear'], ['zoom'],
-                  6, 0.5, 10, 1.2,
-                ],
-                'circle-opacity': 0.92,
-              }}
-            />
-          )}
           {/* Dots drill-down : tous les villages d'une wilaya */}
           {selectedWilaya && (
             <>
