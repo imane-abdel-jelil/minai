@@ -30,8 +30,10 @@ function normName(s: string): string {
     .replace(/[^a-z]/g, '')
 }
 
-/** Trouve le wilayaId MINAI à partir d'un nom ANSADE */
-function findWilayaId(ansadeWilaya: string | undefined | null): string | null {
+/** Trouve le wilayaId MINAI à partir d'un nom ANSADE.
+ *  Exporté pour réutilisation dans MapView (enrichissement des
+ *  features du fichier priorities côté client). */
+export function findWilayaId(ansadeWilaya: string | undefined | null): string | null {
   if (!ansadeWilaya) return null
   const target = normName(ansadeWilaya)
   // Cas spécial Nouakchott : ANSADE découpe en 3 (Nord/Sud/Ouest), MINAI a un seul NKC

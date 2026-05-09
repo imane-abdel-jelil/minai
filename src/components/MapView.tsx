@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent, type MapRef } from 'react-map-gl'
 import { MAURITANIA_REGIONS, type Region } from '../data/mauritania-regions'
 import type { Village } from '../data/mauritania-villages'
+import { findWilayaId } from '../lib/ansade-villages'
 import { countPointsByWilaya, type WilayaStats } from '../lib/geo'
 import type { ComputedScore } from '../lib/score'
 import type { VillageEval } from '../lib/villages'
@@ -172,8 +173,25 @@ export default function MapView({
   useEffect(() => {
     fetch('/data/villages-priorities.geojson')
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data) setPriorities(data)
+      .then((data: GeoJSON.FeatureCollection | null) => {
+        if (!data) return
+        // Enrichit chaque feature avec wilayaId — sinon le clic sur un
+        // pin construit un village avec wilayaId='' qui empêche
+        // l'affichage correct du panneau dans la sidebar.
+        const enriched: GeoJSON.FeatureCollection = {
+          ...data,
+          features: data.features.map((f) => {
+            const props = f.properties || {}
+            return {
+              ...f,
+              properties: {
+                ...props,
+                wilayaId: findWilayaId(props.wilaya as string | null) ?? '',
+              },
+            }
+          }),
+        }
+        setPriorities(enriched)
       })
       .catch((e) => console.warn('Pas de fichier priorités :', e))
   }, [])
@@ -236,22 +254,13 @@ export default function MapView({
 
   // ─── Villages ANSADE — pré-enrichis par ansade-villages.ts ────────────
   // villagesGeojson contient déjà 8447 features avec status, color,
-  // wilayaId injectés. On annote juste isSelected pour highlight visuel.
-  const villagesEnriched = useMemo<GeoJSON.FeatureCollection | null>(() => {
-    if (!villagesGeojson) return null
-    const selectedId = selectedVillage?.id ? String(selectedVillage.id) : null
-    return {
-      ...villagesGeojson,
-      features: villagesGeojson.features.map((f) => {
-        const props = f.properties || {}
-        const id = String(props.code_localite ?? '')
-        return {
-          ...f,
-          properties: { ...props, isSelected: id === selectedId ? 1 : 0 },
-        }
-      }),
-    }
-  }, [villagesGeojson, selectedVillage])
+  // wilayaId injectés. On l'utilise tel quel SANS le re-cloner à chaque
+  // selectedVillage : sinon Mapbox réuploadait 8 Mo à chaque clic et
+  // la couche disparaissait quelques centaines de ms (effet 'écran bleu'
+  // sur les villages côtiers où le fond satellite est de l'eau).
+  // Le highlight du village sélectionné est géré par une couche overlay
+  // filtrée séparément (voir village-selected-highlight ci-dessous).
+  const villagesEnriched = villagesGeojson
 
   // (Le filtrage des couches village est maintenant géré inline dans
   //  les filter={['==', ...]} de chaque Layer ci-dessous, en fonction
@@ -389,19 +398,44 @@ export default function MapView({
           feature.layer.id === 'village-top' ||
           feature.layer.id === 'village-success'
         )) {
-          // Click village ANSADE (pin TOP-30 ou dot drill-down) →
-          // ouvre le détail dans la sidebar. On reconstruit un objet
+          // Click village ANSADE (pin TOP-30, success, ou dot drill-down)
+          // → ouvre le détail dans la sidebar. On reconstruit un objet
           // Village à partir des properties du feature.
-          const p = feature.properties || {}
-          const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
-          const village: Village = {
-            id: String(p.code_localite ?? ''),
-            name: (p.nom_fr as string) || '(sans nom)',
-            wilayaId: (p.wilayaId as string) || '',
-            center: coords,
-            population: Number(p.population_total) || 0,
+          try {
+            const p = feature.properties || {}
+            const geom = feature.geometry as GeoJSON.Point
+            // Garde-fous coordonnées : si pour une raison X les coords
+            // sont invalides, on n'ouvre pas le panneau (évite plantage
+            // de Mapbox sur un selectedVillage avec center=NaN).
+            if (
+              !geom || geom.type !== 'Point' ||
+              !Array.isArray(geom.coordinates) ||
+              geom.coordinates.length < 2 ||
+              !Number.isFinite(geom.coordinates[0]) ||
+              !Number.isFinite(geom.coordinates[1])
+            ) {
+              console.warn('Village clic ignoré : géométrie invalide', feature)
+              return
+            }
+            const coords = geom.coordinates as [number, number]
+            // wilayaId : essaie d'abord la prop directe, sinon résout
+            // depuis le nom de wilaya ANSADE (cas du fichier priorities
+            // qui n'a que le texte 'Hodh Chargui' / 'Adrar' / etc.)
+            const wilayaId =
+              (p.wilayaId as string) ||
+              findWilayaId(p.wilaya as string | null) ||
+              ''
+            const village: Village = {
+              id: String(p.code_localite ?? ''),
+              name: (p.nom_fr as string) || '(sans nom)',
+              wilayaId,
+              center: coords,
+              population: Number(p.population_total) || 0,
+            }
+            onVillageClick(village)
+          } catch (err) {
+            console.error('Erreur clic village :', err, feature)
           }
-          onVillageClick(village)
         } else if (feature.layer && feature.layer.id === 'wilaya-fill') {
           const id = feature.properties.regionId as string | null
           if (id) {
@@ -651,19 +685,34 @@ export default function MapView({
                     5, 3.5, 8, 5, 12, 9,
                   ],
                   'circle-color': ['get', 'color'],
-                  'circle-stroke-color': [
-                    'case',
-                    ['==', ['get', 'isSelected'], 1],
-                    '#ffffff',
-                    ['get', 'color'],
-                  ],
-                  'circle-stroke-width': [
-                    'case',
-                    ['==', ['get', 'isSelected'], 1], 3, 1,
-                  ],
+                  'circle-stroke-color': ['get', 'color'],
+                  'circle-stroke-width': 1,
                   'circle-opacity': 0.95,
                 }}
               />
+              {/* Overlay highlight pour le village sélectionné — couche
+                  séparée filtrée par id pour éviter de re-cloner les
+                  8447 features à chaque clic. */}
+              {selectedVillage && (
+                <Layer
+                  id="village-selected-highlight"
+                  type="circle"
+                  filter={[
+                    '==',
+                    ['to-string', ['get', 'code_localite']],
+                    String(selectedVillage.id),
+                  ] as never}
+                  paint={{
+                    'circle-radius': [
+                      'interpolate', ['linear'], ['zoom'],
+                      5, 7, 8, 9, 12, 14,
+                    ],
+                    'circle-color': 'rgba(0,0,0,0)',
+                    'circle-stroke-color': '#ffffff',
+                    'circle-stroke-width': 3,
+                  }}
+                />
+              )}
               <Layer
                 id="village-drill-label"
                 type="symbol"
