@@ -295,13 +295,53 @@ async function inspectAllServices(datasources) {
   })
   console.log('─'.repeat(160))
 
-  console.log('\n💡  Recommandation :')
-  console.log('   • VILLAGES = la ligne avec count très élevé (≈ 6000-15000) qui parle de')
-  console.log('     "Localité", "LOC", "Localités", "Agglomérations".')
-  console.log('   • POINTS D\'EAU = une ligne dans Infra_app_WFL1 qui parle de "forage",')
-  console.log('     "puits", "حفر", "بئر", "صونداج", "مياه".')
-  console.log('\n   Identifie les 2 URLs et relance :')
-  console.log('     ANSADE_VILLAGES_URL="<url1>" ANSADE_POINTS_EAU_URL="<url2>" npm run fetch:ansade\n')
+  // ─── AUTO-RECOMMANDATION ─────────────────────────────────────────────
+  // Heuristiques pour deviner les bonnes couches sans intervention humaine.
+  const isVillageCandidate = (e) => {
+    const n = (e.name || '').toLowerCase()
+    const u = (e.url || '').toLowerCase()
+    return (
+      /localit|loc_exp|village|agglom|carte_localit/.test(n + u) &&
+      // Exclure les couches d'agrégation (commune/moughataa qui ont 50-200 records)
+      (e.count ?? 0) >= 1000
+    )
+  }
+  const isWaterCandidate = (e) => {
+    const n = (e.name || '').toLowerCase()
+    const u = (e.url || '').toLowerCase()
+    // Mots-clés positifs eau/forage/puits, en français + arabe
+    const positive = /forage|puit|borehole|well|hydraul|water|sondage|nappe|حفر|بئر|صونداج|مياه/.test(n + u)
+    // Exclure les couches statistiques (taux, pourcentage)
+    const negative = /taux|pourcent|%|menag|approvisionn|electric|toilette/.test(n + u)
+    return positive && !negative
+  }
+
+  const villagesPick = filtered.find(isVillageCandidate)
+  const waterPick    = filtered.find(isWaterCandidate)
+
+  console.log('\n🎯  Auto-recommandation :')
+  if (villagesPick) {
+    console.log(`   ✓ Villages   → ${villagesPick.name} (${villagesPick.count?.toLocaleString('fr-FR') ?? '?'} records)`)
+  } else {
+    console.log(`   ✗ Villages   → introuvable automatiquement`)
+  }
+  if (waterPick) {
+    console.log(`   ✓ Pts d'eau  → ${waterPick.name} (${waterPick.count?.toLocaleString('fr-FR') ?? '?'} records)`)
+  } else {
+    console.log(`   ✗ Pts d'eau  → introuvable automatiquement (peut-être nommé en arabe)`)
+  }
+
+  if (villagesPick && waterPick) {
+    console.log('\n📋  Commande prête à copier-coller pour lancer le fetch :\n')
+    console.log(`ANSADE_VILLAGES_URL='${villagesPick.url}' ANSADE_POINTS_EAU_URL='${waterPick.url}' npm run fetch:ansade`)
+    console.log('')
+  } else {
+    console.log('\n💡  Identifie manuellement dans le tableau ci-dessus :')
+    console.log('   • VILLAGES   = nom contenant "Localité"/"LOC_EXP", count ≥ ~5000')
+    console.log('   • PTS D\'EAU  = nom contenant "forage"/"puit"/"حفر"/"بئر", dans Infra_app_WFL1')
+    console.log('   Puis :')
+    console.log('     ANSADE_VILLAGES_URL="..." ANSADE_POINTS_EAU_URL="..." npm run fetch:ansade\n')
+  }
 }
 
 /** Découvre les FeatureServers depuis le config JSON de l'Experience */
