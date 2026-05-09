@@ -509,15 +509,18 @@ export default function MapView({
               'text-halo-width': 1.4,
             }}
           />
-          {/* Points individuels — petits cercles, seulement quand on zoome proche */}
+          {/* Points individuels — apparaissent dès le zoom 6 pour montrer
+              que les clusters cachent de vraies installations.
+              Tous petits, pour ne pas concurrencer les pins de priorité. */}
           <Layer
             id="water-unclustered"
             type="circle"
             filter={['!', ['has', 'point_count']]}
-            minzoom={8}
+            minzoom={6}
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
+                6, 2,
                 8, 3,
                 12, 5,
                 16, 8,
