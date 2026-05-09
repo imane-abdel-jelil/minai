@@ -461,12 +461,14 @@ export default function MapView({
           clusterRadius={45}
           clusterMaxZoom={12}
         >
-          {/* Clusters → grosses gouttes bleues avec compteur dedans */}
+          {/* Clusters → gouttes bleues avec compteur. Taille réduite et
+              minzoom relevé pour ne plus dominer la vue nationale et
+              laisser respirer les pins TOP-30 / success stories. */}
           <Layer
             id="water-clusters"
             type="symbol"
             filter={['has', 'point_count']}
-            minzoom={5}
+            minzoom={6}
             layout={{
               'icon-image': [
                 'step',
@@ -478,9 +480,9 @@ export default function MapView({
               'icon-size': [
                 'step',
                 ['get', 'point_count'],
-                0.4, 20,
-                0.55, 100,
-                0.7,
+                0.28, 20,
+                0.38, 100,
+                0.5,
               ],
               'icon-allow-overlap': true,
               'icon-ignore-placement': true,
@@ -491,9 +493,9 @@ export default function MapView({
               'text-size': [
                 'step',
                 ['get', 'point_count'],
-                10, 20,
-                12, 100,
-                16,
+                9, 20,
+                11, 100,
+                13,
               ],
               'text-anchor': 'center',
               'text-offset': [0, -1.0],
@@ -501,6 +503,7 @@ export default function MapView({
               'text-ignore-placement': true,
             }}
             paint={{
+              'icon-opacity': 0.85,
               'text-color': '#ffffff',
               'text-halo-color': '#0c4a6e',
               'text-halo-width': 1.4,
@@ -594,11 +597,27 @@ export default function MapView({
           )}
 
           {/* 2a) PINS VERTS "success stories" — villages OK + réseau AEP.
-                Pédagogie : montre le contraste avec les rouges, ce qui aide
-                l'utilisateur à comprendre l'enjeu. Posés AVANT les rouges
-                pour que les rouges ressortent quand ils se chevauchent. */}
+                Effet bullseye 3-cercles : anneau translucide externe +
+                halo blanc + dot saturé. Visibles à 100% sur n'importe
+                quel fond (heatmap, satellite, polygones). */}
           {!selectedWilaya && (
             <>
+              <Layer
+                id="village-success-ring"
+                type="circle"
+                filter={['==', ['get', 'is_success_story'], 1]}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    4, 14, 7, 19, 12, 28,
+                  ],
+                  'circle-color': '#16a34a',
+                  'circle-opacity': 0.18,
+                  'circle-stroke-color': '#16a34a',
+                  'circle-stroke-width': 1.5,
+                  'circle-stroke-opacity': 0.55,
+                }}
+              />
               <Layer
                 id="village-success-halo"
                 type="circle"
@@ -606,10 +625,10 @@ export default function MapView({
                 paint={{
                   'circle-radius': [
                     'interpolate', ['linear'], ['zoom'],
-                    4, 8, 7, 11, 12, 16,
+                    4, 9, 7, 13, 12, 19,
                   ],
                   'circle-color': '#ffffff',
-                  'circle-opacity': 0.85,
+                  'circle-opacity': 1,
                 }}
               />
               <Layer
@@ -619,74 +638,18 @@ export default function MapView({
                 paint={{
                   'circle-radius': [
                     'interpolate', ['linear'], ['zoom'],
-                    4, 5, 7, 7, 12, 11,
+                    4, 6, 7, 9, 12, 14,
                   ],
                   'circle-color': '#16a34a',
-                  'circle-stroke-color': '#14532d',
-                  'circle-stroke-width': 1.5,
-                  'circle-opacity': 0.95,
+                  'circle-stroke-color': '#052e16',
+                  'circle-stroke-width': 2,
+                  'circle-opacity': 1,
                 }}
               />
               <Layer
                 id="village-success-label"
                 type="symbol"
                 filter={['==', ['get', 'is_success_story'], 1]}
-                layout={{
-                  'text-field': ['get', 'nom_fr'],
-                  'text-size': 10,
-                  'text-offset': [0, 1.2],
-                  'text-anchor': 'top',
-                  'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                  'text-allow-overlap': false,
-                  'text-optional': true,
-                }}
-                paint={{
-                  'text-color': '#dcfce7',
-                  'text-halo-color': '#14532d',
-                  'text-halo-width': 1.5,
-                }}
-                minzoom={5}
-              />
-            </>
-          )}
-
-          {/* 2b) PINS TOP-30 — toujours visibles en vue nationale, ancrent
-                la lecture par-dessus la heatmap. Posés APRÈS les verts
-                pour que les rouges aient priorité visuelle (priorité = urgence). */}
-          {!selectedWilaya && (
-            <>
-              <Layer
-                id="village-top-halo"
-                type="circle"
-                filter={['==', ['get', 'is_top_priority'], 1]}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    4, 11, 7, 15, 12, 22,
-                  ],
-                  'circle-color': '#ffffff',
-                  'circle-opacity': 0.95,
-                }}
-              />
-              <Layer
-                id="village-top"
-                type="circle"
-                filter={['==', ['get', 'is_top_priority'], 1]}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    4, 7, 7, 10, 12, 16,
-                  ],
-                  'circle-color': '#dc2626',
-                  'circle-stroke-color': '#7f1d1d',
-                  'circle-stroke-width': 2,
-                  'circle-opacity': 1,
-                }}
-              />
-              <Layer
-                id="village-top-label"
-                type="symbol"
-                filter={['==', ['get', 'is_top_priority'], 1]}
                 layout={{
                   'text-field': ['get', 'nom_fr'],
                   'text-size': 11,
@@ -697,9 +660,82 @@ export default function MapView({
                   'text-optional': true,
                 }}
                 paint={{
+                  'text-color': '#bbf7d0',
+                  'text-halo-color': '#052e16',
+                  'text-halo-width': 1.8,
+                }}
+                minzoom={5}
+              />
+            </>
+          )}
+
+          {/* 2b) PINS TOP-30 — toujours visibles en vue nationale.
+                Effet bullseye 3-cercles, plus grand que les verts pour
+                hiérarchiser : priorité absolue = pin le plus visible
+                de toute la carte. */}
+          {!selectedWilaya && (
+            <>
+              <Layer
+                id="village-top-ring"
+                type="circle"
+                filter={['==', ['get', 'is_top_priority'], 1]}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    4, 18, 7, 24, 12, 36,
+                  ],
+                  'circle-color': '#dc2626',
+                  'circle-opacity': 0.20,
+                  'circle-stroke-color': '#dc2626',
+                  'circle-stroke-width': 2,
+                  'circle-stroke-opacity': 0.7,
+                }}
+              />
+              <Layer
+                id="village-top-halo"
+                type="circle"
+                filter={['==', ['get', 'is_top_priority'], 1]}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    4, 12, 7, 16, 12, 24,
+                  ],
+                  'circle-color': '#ffffff',
+                  'circle-opacity': 1,
+                }}
+              />
+              <Layer
+                id="village-top"
+                type="circle"
+                filter={['==', ['get', 'is_top_priority'], 1]}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    4, 8, 7, 12, 12, 18,
+                  ],
+                  'circle-color': '#dc2626',
+                  'circle-stroke-color': '#450a0a',
+                  'circle-stroke-width': 2.5,
+                  'circle-opacity': 1,
+                }}
+              />
+              <Layer
+                id="village-top-label"
+                type="symbol"
+                filter={['==', ['get', 'is_top_priority'], 1]}
+                layout={{
+                  'text-field': ['get', 'nom_fr'],
+                  'text-size': 12,
+                  'text-offset': [0, 1.6],
+                  'text-anchor': 'top',
+                  'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                  'text-allow-overlap': false,
+                  'text-optional': true,
+                }}
+                paint={{
                   'text-color': '#ffffff',
                   'text-halo-color': '#7f1d1d',
-                  'text-halo-width': 1.8,
+                  'text-halo-width': 2,
                 }}
                 minzoom={5}
               />
