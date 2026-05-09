@@ -1,0 +1,124 @@
+idx;name;geometryType;count;url
+1;Localités;esriGeometryPoint;8447;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/LOC_EXP_WFL1/FeatureServer/30
+2;Limite Commune;esriGeometryPolygon;238;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/1
+3;Limite moughataa;esriGeometryPolygon;63;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/2
+4;Limite wilaya;esriGeometryPolygon;15;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Localité_App_WFL1/FeatureServer/3
+5;Infrastructures;;30295;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/LOC_EXP_WFL1/FeatureServer/31
+6;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/0
+7;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/1
+8;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Répartition_de_la_population_selon__Wilaya_Moughataa_Commune__1_WFL1/FeatureServer/2
+9;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/0
+10;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/1
+11;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Rapport_de_masculinité_1_WFL1/FeatureServer/2
+12;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/3
+13;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/0
+14;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_de_10_ans_et_plus_2_WFL1/FeatureServer/6
+15;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/0
+16;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/1
+17;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_du_primaire_de_6_11_ans_1_WFL1/FeatureServer/2
+18;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Indice_Synthétique_de_Fécondité_3_WFL1/FeatureServer/1
+19;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Quotient_de_mortalité_infanto_juvénile_WFL1/FeatureServer/0
+20;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Espérance_de_vie_à_la_naissance___WFL1/FeatureServer/0
+21;Etat_Mat_par_wilaya;esriGeometryPolygon;15;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/3
+22;Etat_Mat_par_moughataa;esriGeometryPolygon;63;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/1
+23;Etat_Mat_par_COMMUNE;esriGeometryPolygon;238;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_densité_de_la_population1_WFL1/FeatureServer/0
+24;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/0
+25;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/1
+26;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_brut_de_scolarisation_au_primaire_WFL1/FeatureServer/2
+27;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/0
+28;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/1
+29;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_Analphabétisme_des_10_ans_et_plus_WFL1/FeatureServer/2
+30;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/0
+31;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/1
+32;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_d_analphabétisme_des_15_ans_et_plus_WFL1/FeatureServer/2
+33;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/0
+34;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/1
+35;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_en_âge_de_travailler__14_64_ans___WFL1/FeatureServer/2
+36;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/0
+37;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/1
+38;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Main_d_œuvre__14_64_ans____WFL1/FeatureServer/2
+39;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/0
+40;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/1
+41;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Population_hors_main_d_œuvre__14_64_ans__1_WFL1/FeatureServer/2
+42;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/8
+43;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/2
+44;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/10
+45;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/7
+46;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/5
+47;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Nombre_de_Ménage_WFL1/FeatureServer/6
+48;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/8
+49;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/12
+50;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/10
+51;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/7
+52;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/5
+53;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taille_moyenne_des_ménages_3_WFL1/FeatureServer/6
+54;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/8
+55;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/9
+56;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménage_résidant_dans_des_habitats_précaires_4_WFL1/FeatureServer/10
+57;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/5
+58;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/6
+59;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/7
+60;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Standing_de_logement_WFL1/FeatureServer/8
+61;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/0
+62;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/1
+63;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_utilisant_du_combustible_solide_pour_la_cuisson__charbon___bois__WFL1/FeatureServer/2
+64;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/0
+65;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/1
+66;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Taux_de_ménages_approvisionnés_en_eau_potable_par_le_réseau_AEP____WFL1/FeatureServer/2
+67;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/0
+68;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/1
+69;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_une_source_d_eau_amélioré_____1_WFL1/FeatureServer/2
+70;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/0
+71;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/1
+72;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_de_ménages_utilisant_le_réseau_d_électricité_pour_l_éclairage_WFL1/FeatureServer/2
+73;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/0
+74;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/1
+75;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_de_toilette_améliorées_1_WFL1/FeatureServer/2
+76;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_personnes_souffrant_maladies_chroniques_9_WFL1/FeatureServer/0
+77;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_des_ménages_ayant_au_moins_un_membre_avec_assurance_maladie_9_WFL1/FeatureServer/0
+78;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/0
+79;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/1
+80;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_éliminant_leurs_ordures_ménagères_dans_la_rue_WFL1/FeatureServer/2
+81;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/0
+82;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/1
+83;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcent_ménages_utilisant_des_toilettes_partagées_WFL1/FeatureServer/2
+84;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/0
+85;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/1
+86;(sans nom);;;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Pourcentage_ménages_sans_toilettes5555_WFL1/FeatureServer/2
+87;Jardin d'enfant;esriGeometryPoint;178;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/0
+88;E. Primaire;esriGeometryPoint;205;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/16
+89;Collége;esriGeometryPoint;24;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/15
+90;Lycée;esriGeometryPoint;40;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/24
+91;E/C/I Professionnel;esriGeometryPoint;71;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/12
+92;Université ;esriGeometryPoint;14;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/14
+93;Poste de Santé;esriGeometryPoint;27;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/28
+94;Centre de Santé;esriGeometryPoint;26;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/27
+95;Clinique parapublique;esriGeometryPoint;6;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/26
+96;Hôpital;esriGeometryPoint;8;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/25
+97;Limites_moughataa;esriGeometryPolygon;9;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/22
+98;Population par Quadrillage 100 x100 m;esriGeometryPolygon;19495;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/nkt2_WFL1/FeatureServer/17
+99;Jardin d'enfant;esriGeometryPoint;178;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/0
+100;E. Primaire;esriGeometryPoint;205;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/16
+101;Collége;esriGeometryPoint;24;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/15
+102;Lycée;esriGeometryPoint;40;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/24
+103;E/C/I Professionnel;esriGeometryPoint;71;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/12
+104;Université ;esriGeometryPoint;14;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/14
+105;Poste de Santé;esriGeometryPoint;27;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/28
+106;Centre de Santé;esriGeometryPoint;26;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/27
+107;Clinique parapublique;esriGeometryPoint;6;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/26
+108;Hôpital;esriGeometryPoint;8;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/25
+109;Limites_moughataa;esriGeometryPolygon;9;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/22
+110;Population par Quadrillage 500 m x500 m;esriGeometryPolygon;1200;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/NKT_500_WFL1/FeatureServer/30
+111;Education;esriGeometryPoint;3967;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/13
+112; Jardin d'enfant;esriGeometryPoint;286;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/12
+113;Ecole Coranique Mahadra;esriGeometryPoint;7187;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/11
+114;Santé;esriGeometryPoint;980;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/8
+115;Mosquée;esriGeometryPoint;11231;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/16
+116;Parc de vaccination;esriGeometryPoint;444;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/15
+117;Puit couvert;esriGeometryPoint;4153;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/9
+118; Forage et sondage;esriGeometryPoint;2048;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/0
+119;LocalitesMRT;esriGeometryPolygon;8447;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_Application2_WFL1/FeatureServer/0
+120;Limite commune;esriGeometryPolygon;238;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/8
+121;Limite moughataa;esriGeometryPolygon;63;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/9
+122;Limite wilaya;esriGeometryPolygon;15;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Carte_Infrastructures_App_WFL1/FeatureServer/10
+123;Infrastructures;;30296;https://services3.arcgis.com/EmyeHZHvQA4wWHJo/arcgis/rest/services/Infra_app_WFL1/FeatureServer/31

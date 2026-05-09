@@ -343,11 +343,17 @@ async function discoverEndpoints() {
     return null
   }
 
-  console.log(`    Trouvé ${unique.length} URLs ArcGIS uniques dans le config :`)
-  unique.forEach((it, i) => {
-    console.log(`    ${String(i + 1).padStart(2)}. ${it.url}`)
-    console.log(`        path: ${it.path}`)
-  })
+  // En mode INSPECT, on ne liste pas la découverte verbeuse — on affichera
+  // seulement le tableau filtré dans inspectAllServices(). Sinon, on liste tout.
+  if (process.env.INSPECT === '1') {
+    console.log(`    Trouvé ${unique.length} URLs ArcGIS — analyse en cours…`)
+  } else {
+    console.log(`    Trouvé ${unique.length} URLs ArcGIS uniques dans le config :`)
+    unique.forEach((it, i) => {
+      console.log(`    ${String(i + 1).padStart(2)}. ${it.url}`)
+      console.log(`        path: ${it.path}`)
+    })
+  }
 
   // Convertit au format attendu en aval (label = dernier segment du path utile)
   return unique.map((it, i) => ({
