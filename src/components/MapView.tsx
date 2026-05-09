@@ -313,21 +313,11 @@ export default function MapView({
     }
   }, [convoyTarget])
 
-  // Quand une wilaya est cliquée (drill-down), on cadre doucement la
-  // wilaya avec easeTo (plus léger que flyTo + tuile pré-chargées).
-  // On garde un zoom modéré (5.8) proche du zoom initial 5.1 pour
-  // minimiser le nombre de tuiles à recharger — sinon Mapbox affiche
-  // un fond bleu uniforme le temps que les nouvelles tuiles satellite
-  // arrivent (effet 'écran bleu' sur réseaux lents).
-  useEffect(() => {
-    if (!selectedWilaya || !mapRef.current) return
-    const map = mapRef.current
-    map.easeTo({
-      center: selectedWilaya.center,
-      zoom: 5.8,
-      duration: 600,
-    })
-  }, [selectedWilaya])
+  // easeTo désactivé : tout mouvement de caméra force Mapbox à
+  // recharger des tuiles, ce qui peut faire apparaître le fond du body
+  // pendant la transition. La carte reste statique au clic d'une wilaya
+  // ou d'un village. L'utilisateur peut zoomer manuellement avec la
+  // molette de la souris ou les boutons +/- de la NavigationControl.
 
   // Quand un convoi est tracé, on cadre la carte pour que origine + cible
   // soient toutes les deux visibles, avec un peu de marge.
@@ -381,7 +371,11 @@ export default function MapView({
       // populations rurales) et zoom plus serré pour mieux remplir le viewport.
       initialViewState={{ longitude: -11, latitude: 19.5, zoom: 5.1 }}
       mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
-      style={{ width: '100%', height: '100%' }}
+      // backgroundColor explicite : si pour une raison quelconque les
+      // tuiles satellite ne se chargent pas (rate-limit Mapbox, lenteur
+      // réseau), on voit cette couleur au lieu du body — ce qui permet
+      // d'identifier précisément où vient le problème.
+      style={{ width: '100%', height: '100%', backgroundColor: '#3a2f24' }}
       interactiveLayerIds={[
         // Pins TOP-30 (rouges) + success (verts) en vue nationale,
         // dots drill-down sinon.
