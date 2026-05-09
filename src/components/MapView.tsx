@@ -703,6 +703,7 @@ function MapView({
               dot coloré sur fond satellite ou polygone wilaya. */}
           <Layer
             id="priority-halo"
+            source="priorities"
             type="circle"
             filter={priorityHaloFilter}
             paint={{
@@ -718,6 +719,7 @@ function MapView({
               au-dessus quand ils se chevauchent : urgence > référence). */}
           <Layer
             id="village-success"
+            source="priorities"
             type="circle"
             filter={successFilter}
             paint={{
@@ -734,6 +736,7 @@ function MapView({
           {/* Pins rouges TOP-30 (priorité visuelle absolue). */}
           <Layer
             id="village-top"
+            source="priorities"
             type="circle"
             filter={topFilter}
             paint={{
@@ -760,18 +763,21 @@ function MapView({
             <>
               <Layer
                 id="village-drill-halo"
+                source="villages"
                 type="circle"
                 filter={drillFilter ?? undefined}
                 paint={DRILL_HALO_PAINT}
               />
               <Layer
                 id="village-markers"
+                source="villages"
                 type="circle"
                 filter={drillFilter ?? undefined}
                 paint={DRILL_MARKERS_PAINT}
               />
               <Layer
                 id="village-drill-label"
+                source="villages"
                 type="symbol"
                 filter={drillFilter ?? undefined}
                 layout={DRILL_LABEL_LAYOUT}
