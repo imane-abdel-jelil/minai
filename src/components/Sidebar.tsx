@@ -37,7 +37,9 @@ interface Props {
   convoyTarget: Village | null
   onTargetConvoy: (v: Village) => void
   onClearConvoy: () => void
-  onSelectVillage: (v: Village | null) => void
+  /** Optionnel 2ème argument : VillageEval pour rendu instantané du panneau
+   *  (sinon il faut attendre que villageEvals soit peuplé via le gros fichier). */
+  onSelectVillage: (v: Village | null, ev?: VillageEval | null) => void
   /** Fermeture de la sidebar sur mobile (drawer) */
   onCloseMobile?: () => void
 }
@@ -176,7 +178,7 @@ export default function Sidebar({
                     }`}
                   >
                     <button
-                      onClick={() => onSelectVillage(e.village)}
+                      onClick={() => onSelectVillage(e.village, e)}
                       className="w-full text-left p-2.5 flex items-start gap-2.5"
                     >
                       <span

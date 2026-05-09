@@ -16,7 +16,10 @@ const CONVOY_ORIGIN_NAME = 'Nouakchott'
 
 interface Props {
   onRegionClick: (region: Region | null) => void
-  onVillageClick: (village: Village | null) => void
+  /** Optionnel 2ème argument : VillageEval construit à partir des
+   *  feature.properties au clic. Permet d'afficher le panneau village
+   *  sans attendre que le gros fichier 8 Mo soit chargé. */
+  onVillageClick: (village: Village | null, ev?: VillageEval | null) => void
   selectedVillage: Village | null
   /** Wilaya en mode drill-down (clic wilaya). Null = vue nationale (priorités). */
   selectedWilaya: Region | null
@@ -437,7 +440,25 @@ export default function MapView({
               center: coords,
               population: Number(p.population_total) || 0,
             }
-            onVillageClick(village)
+            // Construit l'eval directement depuis les properties
+            // (toutes pré-calculées par compute-village-scores.mjs).
+            // Le panneau s'affiche IMMÉDIATEMENT, sans attendre que
+            // le gros fichier de 8 Mo soit chargé.
+            const status = (p.status as VillageEval['status']) || 'ok'
+            const distanceToWaterKm = Number(p.distance_to_water_km) || 0
+            const priorityScore = Number(p.priority_score) || 0
+            const nearestWaterPoint: [number, number] | null =
+              p.nearest_water_lng != null && p.nearest_water_lat != null
+                ? [Number(p.nearest_water_lng), Number(p.nearest_water_lat)]
+                : null
+            const ev: VillageEval = {
+              village,
+              status,
+              distanceToWaterKm,
+              priorityScore,
+              nearestWaterPoint,
+            }
+            onVillageClick(village, ev)
           } catch (err) {
             console.error('Erreur clic village :', err, feature)
           }

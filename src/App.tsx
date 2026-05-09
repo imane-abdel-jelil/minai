@@ -100,11 +100,32 @@ export default function App() {
   // Top 3 villages les plus urgents — basé sur priority_score ANSADE pré-calculé
   const priorities = useMemo(() => topPrioritiesAnsade(villageEvals, 3), [villageEvals])
 
-  // Évaluation du village sélectionné (lookup dans la liste)
+  // Eval directement extraite des feature properties au clic (instant —
+  // pas besoin d'attendre que les 8447 villages du gros fichier soient
+  // chargés). Le lookup dans villageEvals reste en fallback pour le
+  // cas où l'utilisateur sélectionne un village sans passer par le clic
+  // map (ex: liste priorités sidebar).
+  const [selectedEvalDirect, setSelectedEvalDirect] = useState<VillageEval | null>(null)
+
   const selectedVillageEval = useMemo(() => {
     if (!selectedVillage) return null
+    // 1) Si le clic vient de fournir un eval qui correspond → on l'utilise
+    if (selectedEvalDirect && selectedEvalDirect.village.id === selectedVillage.id) {
+      return selectedEvalDirect
+    }
+    // 2) Sinon fallback : lookup dans la liste complète (8447 villages)
     return villageEvals.find((e) => e.village.id === selectedVillage.id) ?? null
-  }, [selectedVillage, villageEvals])
+  }, [selectedVillage, selectedEvalDirect, villageEvals])
+
+  // Handler unique : met à jour à la fois le village ET l'eval directe.
+  // Appelé depuis MapView (clic pin) et depuis Sidebar (liste priorités).
+  const handleVillageSelect = useCallback(
+    (v: Village | null, ev: VillageEval | null = null) => {
+      setSelectedVillage(v)
+      setSelectedEvalDirect(ev)
+    },
+    []
+  )
 
   const enterMap = () => {
     setView('map')
@@ -203,9 +224,7 @@ export default function App() {
             if (window.innerWidth < 768) setSidebarOpen(false)
           }}
           onClearConvoy={() => setConvoyTarget(null)}
-          onSelectVillage={(v) => {
-            setSelectedVillage(v)
-          }}
+          onSelectVillage={handleVillageSelect}
           onCloseMobile={() => setSidebarOpen(false)}
         />
       </aside>
@@ -248,7 +267,7 @@ export default function App() {
             // Click wilaya = drill-down : zoom + show all its villages
             setSelectedWilaya(r)
           }}
-          onVillageClick={setSelectedVillage}
+          onVillageClick={handleVillageSelect}
           selectedVillage={selectedVillage}
           selectedWilaya={selectedWilaya}
           showWaterPoints={showWaterPoints}
