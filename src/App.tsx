@@ -3,6 +3,7 @@ import MapView from './components/MapView'
 import Sidebar from './components/Sidebar'
 import LandingPage from './components/LandingPage'
 import UnderstandingPage from './components/UnderstandingPage'
+import VillageInfoOverlay from './components/VillageInfoOverlay'
 import type { Region } from './data/mauritania-regions'
 import type { Village } from './data/mauritania-villages'
 import { loadAnsadeVillages, topPrioritiesAnsade } from './lib/ansade-villages'
@@ -119,15 +120,12 @@ export default function App() {
 
   // Handler unique : met à jour à la fois le village ET l'eval directe.
   // Appelé depuis MapView (clic pin) et depuis Sidebar (liste priorités).
-  // Sur mobile, on ouvre aussi la sidebar pour que l'utilisateur voie
-  // tout de suite les infos (sinon elle reste cachée derrière la carte).
+  // L'overlay flottant <VillageInfoOverlay> s'affiche directement au
+  // clic — pas besoin d'ouvrir la sidebar.
   const handleVillageSelect = useCallback(
     (v: Village | null, ev: VillageEval | null = null) => {
       setSelectedVillage(v)
       setSelectedEvalDirect(ev)
-      if (v && typeof window !== 'undefined' && window.innerWidth < 768) {
-        setSidebarOpen(true)
-      }
     },
     []
   )
@@ -285,6 +283,15 @@ export default function App() {
           villageEvals={villageEvals}
           villagesGeojson={villagesGeojson}
           convoyTarget={convoyTarget}
+        />
+
+        {/* Overlay village flottant — affiche les infos directement
+            au-dessus de la carte (indépendant de Mapbox et de la sidebar).
+            Stable, pas de re-render de la carte au mount/unmount. */}
+        <VillageInfoOverlay
+          village={selectedVillage}
+          ev={selectedVillageEval}
+          onClose={() => handleVillageSelect(null)}
         />
       </main>
     </div>
