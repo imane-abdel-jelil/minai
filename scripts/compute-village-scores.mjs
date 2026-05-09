@@ -33,6 +33,7 @@ const DATA_DIR  = resolve(ROOT, 'public/data')
 const VILLAGES_IN  = resolve(DATA_DIR, 'villages.geojson')
 const WATER_IN     = resolve(DATA_DIR, 'points_eau.geojson')
 const VILLAGES_OUT = resolve(DATA_DIR, 'villages-scored.geojson')
+const PRIORITIES_OUT = resolve(DATA_DIR, 'villages-priorities.geojson')
 
 // ─── Distance haversine ────────────────────────────────────────────────────
 function toRad(d) { return (d * Math.PI) / 180 }
@@ -250,6 +251,20 @@ async function main() {
   console.log('\n💾  Écriture du fichier scoré…')
   await writeFile(VILLAGES_OUT, JSON.stringify(villages, null, 2), 'utf-8')
   console.log(`    ${VILLAGES_OUT}`)
+
+  // ─── Petit fichier dédié aux 54 priorités (TOP-30 + success) ────────
+  // Chargé en priorité par MapView pour afficher les pins TOUT DE SUITE,
+  // indépendamment du gros fichier scoré (14 Mo) qui peut traîner sur
+  // un réseau lent ou échouer à se charger.
+  const prioritiesFC = {
+    type: 'FeatureCollection',
+    features: villages.features.filter(
+      (f) => f.properties.is_top_priority === 1 || f.properties.is_success_story === 1,
+    ),
+  }
+  await writeFile(PRIORITIES_OUT, JSON.stringify(prioritiesFC), 'utf-8')
+  console.log(`    ${PRIORITIES_OUT}`)
+  console.log(`    (${prioritiesFC.features.length} features dans le bundle léger)`)
 
   console.log('\n✨  Terminé.')
 }

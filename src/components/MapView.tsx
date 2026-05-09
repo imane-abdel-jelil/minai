@@ -163,6 +163,20 @@ export default function MapView({
   const [waterPopup, setWaterPopup] = useState<WaterPointPopup | null>(null)
   const [waterPoints, setWaterPoints] = useState<GeoJSON.FeatureCollection | null>(null)
   const [wilayasGeo, setWilayasGeo] = useState<GeoJSON.FeatureCollection | null>(null)
+  // Petit fichier (~37 KB) qui contient JUSTE les 54 pins de priorités
+  // (30 critiques + 24 success stories). Indépendant du gros fichier
+  // villages-scored.geojson (8 Mo) qui peut traîner ou échouer sur un
+  // réseau lent. → garantit que les pins s'affichent TOUT DE SUITE.
+  const [priorities, setPriorities] = useState<GeoJSON.FeatureCollection | null>(null)
+
+  useEffect(() => {
+    fetch('/data/villages-priorities.geojson')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) setPriorities(data)
+      })
+      .catch((e) => console.warn('Pas de fichier priorités :', e))
+  }, [])
 
   // Charger les points d'eau réels depuis public/data/water-points.geojson
   useEffect(() => {
@@ -545,172 +559,154 @@ export default function MapView({
         </Source>
       )}
 
-      {/* ───── Villages ANSADE — 3 couches en hiérarchie visuelle ─────
-           1. Heatmap   : densité des criticals (zoom out — vue d'ensemble)
-           2. Pins TOP30: ancres visuelles sur les priorités absolues
-           3. Dots drill: tous les villages d'une wilaya (zoom in / drill-down)
-      */}
+      {/* ───── Villages prioritaires (TOP-30 + success) ─────
+           Source dédiée, fichier léger (~37 KB), chargé indépendamment
+           du gros villages-scored.geojson. → les pins s'affichent dès
+           le premier render, pas de lag réseau. */}
+      {showVillages && !selectedWilaya && priorities && (
+        <Source id="priorities" type="geojson" data={priorities}>
+
+          {/* PINS VERTS "success stories" — villages OK + réseau AEP.
+              Effet bullseye 3-cercles. */}
+          <Layer
+            id="village-success-ring"
+            type="circle"
+            filter={['==', ['get', 'is_success_story'], 1]}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 14, 7, 19, 12, 28,
+              ],
+              'circle-color': '#16a34a',
+              'circle-opacity': 0.18,
+              'circle-stroke-color': '#16a34a',
+              'circle-stroke-width': 1.5,
+              'circle-stroke-opacity': 0.55,
+            }}
+          />
+          <Layer
+            id="village-success-halo"
+            type="circle"
+            filter={['==', ['get', 'is_success_story'], 1]}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 9, 7, 13, 12, 19,
+              ],
+              'circle-color': '#ffffff',
+              'circle-opacity': 1,
+            }}
+          />
+          <Layer
+            id="village-success"
+            type="circle"
+            filter={['==', ['get', 'is_success_story'], 1]}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 6, 7, 9, 12, 14,
+              ],
+              'circle-color': '#16a34a',
+              'circle-stroke-color': '#052e16',
+              'circle-stroke-width': 2,
+              'circle-opacity': 1,
+            }}
+          />
+          <Layer
+            id="village-success-label"
+            type="symbol"
+            filter={['==', ['get', 'is_success_story'], 1]}
+            layout={{
+              'text-field': ['get', 'nom_fr'],
+              'text-size': 11,
+              'text-offset': [0, 1.4],
+              'text-anchor': 'top',
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-allow-overlap': false,
+              'text-optional': true,
+            }}
+            paint={{
+              'text-color': '#bbf7d0',
+              'text-halo-color': '#052e16',
+              'text-halo-width': 1.8,
+            }}
+            minzoom={5}
+          />
+
+          {/* PINS TOP-30 — bullseye rouge légèrement plus grand. */}
+          <Layer
+            id="village-top-ring"
+            type="circle"
+            filter={['==', ['get', 'is_top_priority'], 1]}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 18, 7, 24, 12, 36,
+              ],
+              'circle-color': '#dc2626',
+              'circle-opacity': 0.20,
+              'circle-stroke-color': '#dc2626',
+              'circle-stroke-width': 2,
+              'circle-stroke-opacity': 0.7,
+            }}
+          />
+          <Layer
+            id="village-top-halo"
+            type="circle"
+            filter={['==', ['get', 'is_top_priority'], 1]}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 12, 7, 16, 12, 24,
+              ],
+              'circle-color': '#ffffff',
+              'circle-opacity': 1,
+            }}
+          />
+          <Layer
+            id="village-top"
+            type="circle"
+            filter={['==', ['get', 'is_top_priority'], 1]}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 8, 7, 12, 12, 18,
+              ],
+              'circle-color': '#dc2626',
+              'circle-stroke-color': '#450a0a',
+              'circle-stroke-width': 2.5,
+              'circle-opacity': 1,
+            }}
+          />
+          <Layer
+            id="village-top-label"
+            type="symbol"
+            filter={['==', ['get', 'is_top_priority'], 1]}
+            layout={{
+              'text-field': ['get', 'nom_fr'],
+              'text-size': 12,
+              'text-offset': [0, 1.6],
+              'text-anchor': 'top',
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-allow-overlap': false,
+              'text-optional': true,
+            }}
+            paint={{
+              'text-color': '#ffffff',
+              'text-halo-color': '#7f1d1d',
+              'text-halo-width': 2,
+            }}
+            minzoom={5}
+          />
+        </Source>
+      )}
+
+      {/* ───── Villages drill-down (TOUS les villages d'une wilaya) ─────
+           Source qui charge le gros fichier (8 Mo) — utilisé seulement
+           quand une wilaya est sélectionnée. Lazy-load par défaut. */}
       {showVillages && villagesEnriched && (
         <Source id="villages" type="geojson" data={villagesEnriched}>
-
-          {/* HEATMAP retirée : créait un nuage rouge éparpillé qui
-              encombrait visuellement la vue nationale. La carte
-              s'appuie maintenant uniquement sur :
-                • polygones wilayas colorés par score (gradient orange→rouge)
-                • 30 pins TOP-30 (priorités urgentes)
-                • 24 pins success (référence positive)
-                • clusters d'eau bleus (infrastructure existante)
-              C'est plus net et plus institutionnel. */}
-
-          {/* 1) PINS VERTS "success stories" — villages OK + réseau AEP.
-                Effet bullseye 3-cercles : anneau translucide externe +
-                halo blanc + dot saturé. Visibles à 100% sur n'importe
-                quel fond (heatmap, satellite, polygones). */}
-          {!selectedWilaya && (
-            <>
-              <Layer
-                id="village-success-ring"
-                type="circle"
-                filter={['==', ['get', 'is_success_story'], 1]}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    4, 14, 7, 19, 12, 28,
-                  ],
-                  'circle-color': '#16a34a',
-                  'circle-opacity': 0.18,
-                  'circle-stroke-color': '#16a34a',
-                  'circle-stroke-width': 1.5,
-                  'circle-stroke-opacity': 0.55,
-                }}
-              />
-              <Layer
-                id="village-success-halo"
-                type="circle"
-                filter={['==', ['get', 'is_success_story'], 1]}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    4, 9, 7, 13, 12, 19,
-                  ],
-                  'circle-color': '#ffffff',
-                  'circle-opacity': 1,
-                }}
-              />
-              <Layer
-                id="village-success"
-                type="circle"
-                filter={['==', ['get', 'is_success_story'], 1]}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    4, 6, 7, 9, 12, 14,
-                  ],
-                  'circle-color': '#16a34a',
-                  'circle-stroke-color': '#052e16',
-                  'circle-stroke-width': 2,
-                  'circle-opacity': 1,
-                }}
-              />
-              <Layer
-                id="village-success-label"
-                type="symbol"
-                filter={['==', ['get', 'is_success_story'], 1]}
-                layout={{
-                  'text-field': ['get', 'nom_fr'],
-                  'text-size': 11,
-                  'text-offset': [0, 1.4],
-                  'text-anchor': 'top',
-                  'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                  'text-allow-overlap': false,
-                  'text-optional': true,
-                }}
-                paint={{
-                  'text-color': '#bbf7d0',
-                  'text-halo-color': '#052e16',
-                  'text-halo-width': 1.8,
-                }}
-                minzoom={5}
-              />
-            </>
-          )}
-
-          {/* 2) PINS TOP-30 — toujours visibles en vue nationale.
-                Effet bullseye 3-cercles, plus grand que les verts pour
-                hiérarchiser : priorité absolue = pin le plus visible
-                de toute la carte. */}
-          {!selectedWilaya && (
-            <>
-              <Layer
-                id="village-top-ring"
-                type="circle"
-                filter={['==', ['get', 'is_top_priority'], 1]}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    4, 18, 7, 24, 12, 36,
-                  ],
-                  'circle-color': '#dc2626',
-                  'circle-opacity': 0.20,
-                  'circle-stroke-color': '#dc2626',
-                  'circle-stroke-width': 2,
-                  'circle-stroke-opacity': 0.7,
-                }}
-              />
-              <Layer
-                id="village-top-halo"
-                type="circle"
-                filter={['==', ['get', 'is_top_priority'], 1]}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    4, 12, 7, 16, 12, 24,
-                  ],
-                  'circle-color': '#ffffff',
-                  'circle-opacity': 1,
-                }}
-              />
-              <Layer
-                id="village-top"
-                type="circle"
-                filter={['==', ['get', 'is_top_priority'], 1]}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    4, 8, 7, 12, 12, 18,
-                  ],
-                  'circle-color': '#dc2626',
-                  'circle-stroke-color': '#450a0a',
-                  'circle-stroke-width': 2.5,
-                  'circle-opacity': 1,
-                }}
-              />
-              <Layer
-                id="village-top-label"
-                type="symbol"
-                filter={['==', ['get', 'is_top_priority'], 1]}
-                layout={{
-                  'text-field': ['get', 'nom_fr'],
-                  'text-size': 12,
-                  'text-offset': [0, 1.6],
-                  'text-anchor': 'top',
-                  'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                  'text-allow-overlap': false,
-                  'text-optional': true,
-                }}
-                paint={{
-                  'text-color': '#ffffff',
-                  'text-halo-color': '#7f1d1d',
-                  'text-halo-width': 2,
-                }}
-                minzoom={5}
-              />
-            </>
-          )}
-
-          {/* 3) DOTS DRILL-DOWN — visibles UNIQUEMENT quand une wilaya
-                est sélectionnée (tous statuts apparaissent). */}
-          {/* (l'effet est déclenché par le clic sur une wilaya, voir App.tsx) */}
+          {/* Dots drill-down : tous les villages d'une wilaya */}
           {selectedWilaya && (
             <>
               <Layer
