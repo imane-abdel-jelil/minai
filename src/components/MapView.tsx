@@ -337,6 +337,7 @@ export default function MapView({
   }
 
   return (
+    <>
     <Map
       ref={mapRef}
       mapboxAccessToken={MAPBOX_TOKEN}
@@ -346,8 +347,8 @@ export default function MapView({
       mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
-        // Pins TOP-30 et points drill-down sont tous deux cliquables
-        ...(showVillages && !selectedWilaya ? ['village-top'] : []),
+        // Pins TOP-30 (rouges), success stories (verts), et points drill-down sont tous cliquables
+        ...(showVillages && !selectedWilaya ? ['village-top', 'village-success'] : []),
         ...(showVillages && selectedWilaya ? ['village-markers'] : []),
         ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
@@ -369,7 +370,11 @@ export default function MapView({
           setWaterPopup(null)
           return
         }
-        if (feature.layer && (feature.layer.id === 'village-markers' || feature.layer.id === 'village-top')) {
+        if (feature.layer && (
+          feature.layer.id === 'village-markers' ||
+          feature.layer.id === 'village-top' ||
+          feature.layer.id === 'village-success'
+        )) {
           // Click village ANSADE (pin TOP-30 ou dot drill-down) →
           // ouvre le détail dans la sidebar. On reconstruit un objet
           // Village à partir des properties du feature.
@@ -545,7 +550,8 @@ export default function MapView({
           {/* 1) HEATMAP — visible en vue nationale, fade au zoom proche.
                 Filtre uniquement les critical pour ne pas faire chauffer
                 les zones OK/risk. Pondéré par priority_score pour que
-                les vrais hotspots ressortent. */}
+                les vrais hotspots ressortent. Opacité abaissée pour
+                que les pins TOP-30 ressortent par-dessus. */}
           {!selectedWilaya && (
             <Layer
               id="village-heatmap"
@@ -560,35 +566,93 @@ export default function MapView({
                 ],
                 'heatmap-intensity': [
                   'interpolate', ['linear'], ['zoom'],
-                  4, 1,
-                  9, 2.5,
+                  4, 0.8,
+                  9, 2,
                 ],
                 'heatmap-color': [
                   'interpolate', ['linear'], ['heatmap-density'],
                   0,    'rgba(0,0,0,0)',
-                  0.15, 'rgba(254,202,202,0.35)',
-                  0.40, 'rgba(252,165,165,0.55)',
-                  0.70, 'rgba(239,68,68,0.75)',
-                  1.00, 'rgba(185,28,28,0.92)',
+                  0.15, 'rgba(254,202,202,0.30)',
+                  0.40, 'rgba(252,165,165,0.45)',
+                  0.70, 'rgba(239,68,68,0.60)',
+                  1.00, 'rgba(185,28,28,0.75)',
                 ],
                 'heatmap-radius': [
                   'interpolate', ['linear'], ['zoom'],
-                  4, 16,
-                  7, 32,
-                  10, 60,
+                  4, 14,
+                  7, 28,
+                  10, 50,
                 ],
                 'heatmap-opacity': [
                   'interpolate', ['linear'], ['zoom'],
-                  4, 0.85,
-                  7, 0.6,
+                  4, 0.65,
+                  7, 0.45,
                   9, 0,         // fade out — laisse la place aux dots
                 ],
               }}
             />
           )}
 
-          {/* 2) PINS TOP-30 — toujours visibles en vue nationale, ancrent
-                la lecture par-dessus la heatmap. */}
+          {/* 2a) PINS VERTS "success stories" — villages OK + réseau AEP.
+                Pédagogie : montre le contraste avec les rouges, ce qui aide
+                l'utilisateur à comprendre l'enjeu. Posés AVANT les rouges
+                pour que les rouges ressortent quand ils se chevauchent. */}
+          {!selectedWilaya && (
+            <>
+              <Layer
+                id="village-success-halo"
+                type="circle"
+                filter={['==', ['get', 'is_success_story'], 1]}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    4, 8, 7, 11, 12, 16,
+                  ],
+                  'circle-color': '#ffffff',
+                  'circle-opacity': 0.85,
+                }}
+              />
+              <Layer
+                id="village-success"
+                type="circle"
+                filter={['==', ['get', 'is_success_story'], 1]}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    4, 5, 7, 7, 12, 11,
+                  ],
+                  'circle-color': '#16a34a',
+                  'circle-stroke-color': '#14532d',
+                  'circle-stroke-width': 1.5,
+                  'circle-opacity': 0.95,
+                }}
+              />
+              <Layer
+                id="village-success-label"
+                type="symbol"
+                filter={['==', ['get', 'is_success_story'], 1]}
+                layout={{
+                  'text-field': ['get', 'nom_fr'],
+                  'text-size': 10,
+                  'text-offset': [0, 1.2],
+                  'text-anchor': 'top',
+                  'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                  'text-allow-overlap': false,
+                  'text-optional': true,
+                }}
+                paint={{
+                  'text-color': '#dcfce7',
+                  'text-halo-color': '#14532d',
+                  'text-halo-width': 1.5,
+                }}
+                minzoom={5}
+              />
+            </>
+          )}
+
+          {/* 2b) PINS TOP-30 — toujours visibles en vue nationale, ancrent
+                la lecture par-dessus la heatmap. Posés APRÈS les verts
+                pour que les rouges aient priorité visuelle (priorité = urgence). */}
           {!selectedWilaya && (
             <>
               <Layer
@@ -598,10 +662,10 @@ export default function MapView({
                 paint={{
                   'circle-radius': [
                     'interpolate', ['linear'], ['zoom'],
-                    4, 9, 7, 12, 12, 18,
+                    4, 11, 7, 15, 12, 22,
                   ],
                   'circle-color': '#ffffff',
-                  'circle-opacity': 0.9,
+                  'circle-opacity': 0.95,
                 }}
               />
               <Layer
@@ -611,11 +675,11 @@ export default function MapView({
                 paint={{
                   'circle-radius': [
                     'interpolate', ['linear'], ['zoom'],
-                    4, 6, 7, 8, 12, 13,
+                    4, 7, 7, 10, 12, 16,
                   ],
                   'circle-color': '#dc2626',
                   'circle-stroke-color': '#7f1d1d',
-                  'circle-stroke-width': 1.5,
+                  'circle-stroke-width': 2,
                   'circle-opacity': 1,
                 }}
               />
@@ -635,7 +699,7 @@ export default function MapView({
                 paint={{
                   'text-color': '#ffffff',
                   'text-halo-color': '#7f1d1d',
-                  'text-halo-width': 1.6,
+                  'text-halo-width': 1.8,
                 }}
                 minzoom={5}
               />
@@ -837,5 +901,46 @@ export default function MapView({
         </Popup>
       )}
     </Map>
+
+    {/* ───── Légende flottante (vue nationale uniquement) ─────
+         Petite carte translucide en bas-gauche qui explique la lecture
+         visuelle de la carte : pins rouges = priorités urgentes,
+         pins verts = villages déjà desservis (référence), heatmap =
+         densité de la pénurie. Disparaît en mode drill-down pour
+         laisser place aux dots colorés par statut. */}
+    {!selectedWilaya && showVillages && (
+      <div className="absolute bottom-6 left-6 z-10 bg-slate-900/85 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl p-4 text-white text-xs max-w-[260px] pointer-events-none">
+        <div className="text-[10px] uppercase tracking-wider font-semibold text-white/60 mb-2">
+          Lecture de la carte
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 inline-block w-3 h-3 rounded-full bg-[#dc2626] border-2 border-white shadow ring-2 ring-[#7f1d1d]/50 shrink-0" />
+            <div>
+              <div className="font-semibold leading-tight">30 priorités urgentes</div>
+              <div className="text-white/60 text-[11px] leading-tight">villages les plus éloignés d'un point d'eau</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 inline-block w-3 h-3 rounded-full bg-[#16a34a] border-2 border-white shadow shrink-0" />
+            <div>
+              <div className="font-semibold leading-tight">Villages desservis</div>
+              <div className="text-white/60 text-[11px] leading-tight">déjà sur le réseau d'eau potable (référence)</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-2.5">
+            <span className="mt-0.5 inline-block w-3 h-3 rounded-sm bg-gradient-to-br from-red-300/60 to-red-700/80 shrink-0" />
+            <div>
+              <div className="font-semibold leading-tight">Densité de la pénurie</div>
+              <div className="text-white/60 text-[11px] leading-tight">3 190 villages critiques cumulés</div>
+            </div>
+          </div>
+        </div>
+        <div className="text-[10px] text-white/40 mt-3 pt-2 border-t border-white/10">
+          Cliquez sur une wilaya pour explorer tous ses villages.
+        </div>
+      </div>
+    )}
+    </>
   )
 }

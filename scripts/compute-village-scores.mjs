@@ -201,6 +201,52 @@ async function main() {
   })
   console.log(`    … (${TOP_N - 10} autres)`)
 
+  // ─── Flag is_success_story pour les pins verts pédagogiques ────────
+  // On affiche aussi quelques villages OK + branchés sur le réseau AEP
+  // pour que l'utilisateur comprenne le contraste rouge / vert :
+  // "voilà ce que l'on veut atteindre, et voilà ce qui manque".
+  // Sélection : par wilaya, on prend les villages OK les mieux desservis
+  // (réseau AEP + grosse population) — max 2 par wilaya pour la
+  // diversité géographique. Total cap à SUCCESS_N.
+  const SUCCESS_N = 24
+  const successCandidates = villages.features
+    .filter(
+      (f) =>
+        f.properties.status === 'ok' &&
+        f.properties.reseau_aep === 'Oui' &&
+        Number(f.properties.population_total) > 0
+    )
+    .sort(
+      (a, b) =>
+        (Number(b.properties.population_total) || 0) -
+        (Number(a.properties.population_total) || 0)
+    )
+  const perWilaya = new Map()
+  const successIds = new Set()
+  for (const f of successCandidates) {
+    if (successIds.size >= SUCCESS_N) break
+    const w = f.properties.wilaya || '?'
+    const c = perWilaya.get(w) || 0
+    if (c >= 2) continue
+    perWilaya.set(w, c + 1)
+    successIds.add(f.properties.code_localite)
+  }
+  for (const f of villages.features) {
+    f.properties.is_success_story = successIds.has(f.properties.code_localite) ? 1 : 0
+  }
+  console.log(`\n🟢  ${successIds.size} villages "success stories" (OK + réseau AEP, max 2/wilaya) :`)
+  villages.features
+    .filter((f) => f.properties.is_success_story === 1)
+    .slice(0, 8)
+    .forEach((f, i) => {
+      const p = f.properties
+      console.log(
+        `    ${String(i + 1).padStart(2)}. ${(p.nom_fr || '').padEnd(28)} ` +
+        `pop ${String(p.population_total).padStart(6)}  ` +
+        `${p.wilaya}`
+      )
+    })
+
   console.log('\n💾  Écriture du fichier scoré…')
   await writeFile(VILLAGES_OUT, JSON.stringify(villages, null, 2), 'utf-8')
   console.log(`    ${VILLAGES_OUT}`)
