@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { memo, useState, useMemo, useEffect, useRef } from 'react'
 import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent, type MapRef } from 'react-map-gl'
 import { MAURITANIA_REGIONS, type Region } from '../data/mauritania-regions'
 import type { Village } from '../data/mauritania-villages'
@@ -20,7 +20,6 @@ interface Props {
    *  feature.properties au clic. Permet d'afficher le panneau village
    *  sans attendre que le gros fichier 8 Mo soit chargé. */
   onVillageClick: (village: Village | null, ev?: VillageEval | null) => void
-  selectedVillage: Village | null
   /** Wilaya en mode drill-down (clic wilaya). Null = vue nationale (priorités). */
   selectedWilaya: Region | null
   showWaterPoints: boolean
@@ -147,10 +146,9 @@ function findRegion(name: string): Region | undefined {
   )
 }
 
-export default function MapView({
+function MapView({
   onRegionClick,
   onVillageClick,
-  selectedVillage,
   selectedWilaya,
   showWaterPoints,
   showWilayas,
@@ -955,3 +953,9 @@ export default function MapView({
     </>
   )
 }
+
+// React.memo : MapView ne re-render QUE si ses props changent vraiment.
+// Comme selectedVillage n'est plus une prop (l'overlay est dans App.tsx),
+// cliquer un village ne re-render plus du tout MapView → Mapbox ne
+// touche pas au canvas → plus jamais d'écran 'noir' au clic village.
+export default memo(MapView)

@@ -130,6 +130,19 @@ export default function App() {
     []
   )
 
+  // Memoize tous les callbacks inline pour MapView. Si on les laisse
+  // inline, ils sont recréés à chaque render et React.memo sur MapView
+  // ne sert à rien → MapView re-render à chaque clic → re-render des
+  // 8447 features Mapbox → canvas vide → écran 'noir'.
+  const handleRegionClick = useCallback((r: Region | null) => {
+    setSelectedRegion(r)
+    setSelectedWilaya(r)
+  }, [])
+  const handleCloseOverlay = useCallback(
+    () => handleVillageSelect(null),
+    [handleVillageSelect],
+  )
+
   const enterMap = () => {
     setView('map')
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
@@ -265,13 +278,8 @@ export default function App() {
         </button>
 
         <MapView
-          onRegionClick={(r) => {
-            setSelectedRegion(r)
-            // Click wilaya = drill-down : zoom + show all its villages
-            setSelectedWilaya(r)
-          }}
+          onRegionClick={handleRegionClick}
           onVillageClick={handleVillageSelect}
-          selectedVillage={selectedVillage}
           selectedWilaya={selectedWilaya}
           showWaterPoints={showWaterPoints}
           showWilayas={showWilayas}
@@ -291,7 +299,7 @@ export default function App() {
         <VillageInfoOverlay
           village={selectedVillage}
           ev={selectedVillageEval}
-          onClose={() => handleVillageSelect(null)}
+          onClose={handleCloseOverlay}
         />
       </main>
     </div>
