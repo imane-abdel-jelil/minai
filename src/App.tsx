@@ -119,10 +119,15 @@ export default function App() {
 
   // Handler unique : met à jour à la fois le village ET l'eval directe.
   // Appelé depuis MapView (clic pin) et depuis Sidebar (liste priorités).
+  // Sur mobile, on ouvre aussi la sidebar pour que l'utilisateur voie
+  // tout de suite les infos (sinon elle reste cachée derrière la carte).
   const handleVillageSelect = useCallback(
     (v: Village | null, ev: VillageEval | null = null) => {
       setSelectedVillage(v)
       setSelectedEvalDirect(ev)
+      if (v && typeof window !== 'undefined' && window.innerWidth < 768) {
+        setSidebarOpen(true)
+      }
     },
     []
   )

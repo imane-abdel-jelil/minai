@@ -170,14 +170,6 @@ export default function MapView({
 }: Props) {
   const mapRef = useRef<MapRef | null>(null)
   const [waterPopup, setWaterPopup] = useState<WaterPointPopup | null>(null)
-  // Popup village ouvert directement sur la carte (style ANSADE) avec
-  // toutes les infos du village au clic — pas besoin de scroller la sidebar.
-  const [villagePopup, setVillagePopup] = useState<{
-    lng: number
-    lat: number
-    village: Village
-    ev: VillageEval
-  } | null>(null)
   const [waterPoints, setWaterPoints] = useState<GeoJSON.FeatureCollection | null>(null)
   const [wilayasGeo, setWilayasGeo] = useState<GeoJSON.FeatureCollection | null>(null)
   // Petit fichier (~37 KB) qui contient JUSTE les 54 pins de priorités
@@ -413,7 +405,6 @@ export default function MapView({
           onRegionClick(null)
           onVillageClick(null)
           setWaterPopup(null)
-          setVillagePopup(null)
           return
         }
         if (feature.layer && (
@@ -473,9 +464,7 @@ export default function MapView({
               priorityScore,
               nearestWaterPoint,
             }
-            // Popup directement sur la carte, comme l'expérience ANSADE
-            setVillagePopup({ lng: coords[0], lat: coords[1], village, ev })
-            // Met à jour aussi la sidebar (pour les utilisateurs desktop)
+            // Met à jour la sidebar avec les infos du village
             onVillageClick(village, ev)
           } catch (err) {
             console.error('Erreur clic village :', err, feature)
@@ -861,81 +850,9 @@ export default function MapView({
         </Source>
       )}
 
-      {/* ───── Popup village (style ANSADE) ─────
-           Affiche directement sur la carte les informations du village
-           cliqué : nom, wilaya, population, statut (couleur),
-           distance au point d'eau, délai d'intervention recommandé.
-           Reste ouvert jusqu'à ce que l'utilisateur ferme manuellement
-           ou clique ailleurs sur la carte. */}
-      {villagePopup && (
-        <Popup
-          longitude={villagePopup.lng}
-          latitude={villagePopup.lat}
-          anchor="bottom"
-          offset={14}
-          closeButton={true}
-          closeOnClick={false}
-          onClose={() => setVillagePopup(null)}
-          maxWidth="320px"
-          className="text-gray-900"
-        >
-          <div className="text-sm space-y-2 min-w-[240px]">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="font-bold text-base leading-tight">
-                  {villagePopup.village.name}
-                </div>
-                <div className="text-xs text-gray-500 mt-0.5">
-                  {(() => {
-                    const r = MAURITANIA_REGIONS.find(
-                      (x) => x.id === villagePopup.village.wilayaId,
-                    )
-                    return r?.name ?? villagePopup.village.wilayaId ?? '—'
-                  })()}
-                </div>
-              </div>
-              <span
-                className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded shrink-0 mt-1"
-                style={{
-                  background: `${statusColor(villagePopup.ev.status)}22`,
-                  color: statusColor(villagePopup.ev.status),
-                }}
-              >
-                {statusLabel(villagePopup.ev.status)}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-gray-200">
-              <div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider">
-                  Population
-                </div>
-                <div className="font-semibold">
-                  {villagePopup.village.population.toLocaleString('fr-FR')} hab.
-                </div>
-              </div>
-              <div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider">
-                  Point d'eau
-                </div>
-                <div className="font-semibold">
-                  {Number.isFinite(villagePopup.ev.distanceToWaterKm)
-                    ? `${villagePopup.ev.distanceToWaterKm.toFixed(1)} km`
-                    : '—'}
-                </div>
-              </div>
-            </div>
-            <div
-              className="text-xs px-2 py-1.5 rounded font-medium mt-1"
-              style={{
-                background: `${statusColor(villagePopup.ev.status)}15`,
-                color: statusColor(villagePopup.ev.status),
-              }}
-            >
-              Intervention {recommendedDelay(villagePopup.ev.status)}
-            </div>
-          </div>
-        </Popup>
-      )}
+      {/* Popup village retiré — les infos s'affichent dans la sidebar.
+           Le Popup Mapbox introduisait un re-render coûteux qui faisait
+           parfois disparaître la carte au clic. */}
 
       {waterPopup && (
         <Popup
