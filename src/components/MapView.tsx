@@ -239,15 +239,9 @@ export default function MapView({
     }
   }, [villagesGeojson, selectedVillage])
 
-  // Filtre Mapbox dynamique selon le mode :
-  //   - Vue nationale (selectedWilaya = null) : seuls les villages CRITIQUES
-  //   - Drill-down wilaya : tous les villages de cette wilaya
-  const villageFilter = useMemo(() => {
-    if (selectedWilaya) {
-      return ['==', ['get', 'wilayaId'], selectedWilaya.id]
-    }
-    return ['==', ['get', 'status'], 'critical']
-  }, [selectedWilaya])
+  // (Le filtrage des couches village est maintenant géré inline dans
+  //  les filter={['==', ...]} de chaque Layer ci-dessous, en fonction
+  //  du mode vue nationale (heatmap+pins) ou drill-down wilaya.)
 
   // ─── Convoi NGO simulé ────────────────────────────────────────────────────
   // Ligne droite de Nouakchott vers la wilaya cible. Visuellement subtil
@@ -352,7 +346,9 @@ export default function MapView({
       mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
-        ...(showVillages ? ['village-markers'] : []),
+        // Pins TOP-30 et points drill-down sont tous deux cliquables
+        ...(showVillages && !selectedWilaya ? ['village-top'] : []),
+        ...(showVillages && selectedWilaya ? ['village-markers'] : []),
         ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
       ]}
@@ -373,10 +369,10 @@ export default function MapView({
           setWaterPopup(null)
           return
         }
-        if (feature.layer && feature.layer.id === 'village-markers') {
-          // Click village ANSADE → ouvre le détail dans la sidebar.
-          // On reconstruit un objet Village compatible à partir des
-          // properties du feature (qui viennent de villages-scored.geojson).
+        if (feature.layer && (feature.layer.id === 'village-markers' || feature.layer.id === 'village-top')) {
+          // Click village ANSADE (pin TOP-30 ou dot drill-down) →
+          // ouvre le détail dans la sidebar. On reconstruit un objet
+          // Village à partir des properties du feature.
           const p = feature.properties || {}
           const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
           const village: Village = {
@@ -465,6 +461,7 @@ export default function MapView({
             id="water-clusters"
             type="symbol"
             filter={['has', 'point_count']}
+            minzoom={5}
             layout={{
               'icon-image': [
                 'step',
@@ -476,9 +473,9 @@ export default function MapView({
               'icon-size': [
                 'step',
                 ['get', 'point_count'],
-                0.55, 20,
-                0.78, 100,
-                1.0,
+                0.4, 20,
+                0.55, 100,
+                0.7,
               ],
               'icon-allow-overlap': true,
               'icon-ignore-placement': true,
@@ -489,8 +486,8 @@ export default function MapView({
               'text-size': [
                 'step',
                 ['get', 'point_count'],
-                12, 20,
-                14, 100,
+                10, 20,
+                12, 100,
                 16,
               ],
               'text-anchor': 'center',
@@ -537,74 +534,176 @@ export default function MapView({
         </Source>
       )}
 
-      {/* ---------- Villages ANSADE (statut Critique/Risque/OK — couche actionnable) ---------- */}
+      {/* ───── Villages ANSADE — 3 couches en hiérarchie visuelle ─────
+           1. Heatmap   : densité des criticals (zoom out — vue d'ensemble)
+           2. Pins TOP30: ancres visuelles sur les priorités absolues
+           3. Dots drill: tous les villages d'une wilaya (zoom in / drill-down)
+      */}
       {showVillages && villagesEnriched && (
         <Source id="villages" type="geojson" data={villagesEnriched}>
-          {/* Halo blanc pour la lisibilité sur fond satellite */}
-          <Layer
-            id="village-halo"
-            type="circle"
-            filter={villageFilter as never}
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                4, 5,
-                7, 7,
-                12, 11,
-              ],
-              'circle-color': '#ffffff',
-              'circle-opacity': 0.85,
-            }}
-          />
-          {/* Cercle plein coloré par statut */}
-          <Layer
-            id="village-markers"
-            type="circle"
-            filter={villageFilter as never}
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                4, 3.5,
-                7, 5,
-                12, 9,
-              ],
-              'circle-color': ['get', 'color'],
-              'circle-stroke-color': [
-                'case',
-                ['==', ['get', 'isSelected'], 1],
-                '#ffffff',
-                ['get', 'color'],
-              ],
-              'circle-stroke-width': [
-                'case',
-                ['==', ['get', 'isSelected'], 1],
-                3,
-                1,
-              ],
-              'circle-opacity': 0.95,
-            }}
-          />
-          {/* Nom du village — visible seulement à fort zoom pour pas saturer */}
-          <Layer
-            id="village-label"
-            type="symbol"
-            filter={villageFilter as never}
-            layout={{
-              'text-field': ['get', 'nom_fr'],
-              'text-size': 11,
-              'text-offset': [0, 1.2],
-              'text-anchor': 'top',
-              'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-              'text-allow-overlap': false,
-              'text-optional': true,
-            }}
-            paint={{
-              'text-color': '#ffffff',
-              'text-halo-color': '#0c4a6e',
-              'text-halo-width': 1.4,
-            }}
-            minzoom={7}
-          />
+
+          {/* 1) HEATMAP — visible en vue nationale, fade au zoom proche.
+                Filtre uniquement les critical pour ne pas faire chauffer
+                les zones OK/risk. Pondéré par priority_score pour que
+                les vrais hotspots ressortent. */}
+          {!selectedWilaya && (
+            <Layer
+              id="village-heatmap"
+              type="heatmap"
+              filter={['==', ['get', 'status'], 'critical']}
+              paint={{
+                'heatmap-weight': [
+                  'interpolate', ['linear'], ['get', 'priority_score'],
+                  0, 0,
+                  500_000, 0.5,
+                  5_000_000, 1,
+                ],
+                'heatmap-intensity': [
+                  'interpolate', ['linear'], ['zoom'],
+                  4, 1,
+                  9, 2.5,
+                ],
+                'heatmap-color': [
+                  'interpolate', ['linear'], ['heatmap-density'],
+                  0,    'rgba(0,0,0,0)',
+                  0.15, 'rgba(254,202,202,0.35)',
+                  0.40, 'rgba(252,165,165,0.55)',
+                  0.70, 'rgba(239,68,68,0.75)',
+                  1.00, 'rgba(185,28,28,0.92)',
+                ],
+                'heatmap-radius': [
+                  'interpolate', ['linear'], ['zoom'],
+                  4, 16,
+                  7, 32,
+                  10, 60,
+                ],
+                'heatmap-opacity': [
+                  'interpolate', ['linear'], ['zoom'],
+                  4, 0.85,
+                  7, 0.6,
+                  9, 0,         // fade out — laisse la place aux dots
+                ],
+              }}
+            />
+          )}
+
+          {/* 2) PINS TOP-30 — toujours visibles en vue nationale, ancrent
+                la lecture par-dessus la heatmap. */}
+          {!selectedWilaya && (
+            <>
+              <Layer
+                id="village-top-halo"
+                type="circle"
+                filter={['==', ['get', 'is_top_priority'], 1]}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    4, 9, 7, 12, 12, 18,
+                  ],
+                  'circle-color': '#ffffff',
+                  'circle-opacity': 0.9,
+                }}
+              />
+              <Layer
+                id="village-top"
+                type="circle"
+                filter={['==', ['get', 'is_top_priority'], 1]}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    4, 6, 7, 8, 12, 13,
+                  ],
+                  'circle-color': '#dc2626',
+                  'circle-stroke-color': '#7f1d1d',
+                  'circle-stroke-width': 1.5,
+                  'circle-opacity': 1,
+                }}
+              />
+              <Layer
+                id="village-top-label"
+                type="symbol"
+                filter={['==', ['get', 'is_top_priority'], 1]}
+                layout={{
+                  'text-field': ['get', 'nom_fr'],
+                  'text-size': 11,
+                  'text-offset': [0, 1.4],
+                  'text-anchor': 'top',
+                  'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                  'text-allow-overlap': false,
+                  'text-optional': true,
+                }}
+                paint={{
+                  'text-color': '#ffffff',
+                  'text-halo-color': '#7f1d1d',
+                  'text-halo-width': 1.6,
+                }}
+                minzoom={5}
+              />
+            </>
+          )}
+
+          {/* 3) DOTS DRILL-DOWN — visibles UNIQUEMENT quand une wilaya
+                est sélectionnée (tous statuts apparaissent). */}
+          {selectedWilaya && (
+            <>
+              <Layer
+                id="village-drill-halo"
+                type="circle"
+                filter={['==', ['get', 'wilayaId'], selectedWilaya.id] as never}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    5, 5, 8, 7, 12, 11,
+                  ],
+                  'circle-color': '#ffffff',
+                  'circle-opacity': 0.85,
+                }}
+              />
+              <Layer
+                id="village-markers"
+                type="circle"
+                filter={['==', ['get', 'wilayaId'], selectedWilaya.id] as never}
+                paint={{
+                  'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    5, 3.5, 8, 5, 12, 9,
+                  ],
+                  'circle-color': ['get', 'color'],
+                  'circle-stroke-color': [
+                    'case',
+                    ['==', ['get', 'isSelected'], 1],
+                    '#ffffff',
+                    ['get', 'color'],
+                  ],
+                  'circle-stroke-width': [
+                    'case',
+                    ['==', ['get', 'isSelected'], 1], 3, 1,
+                  ],
+                  'circle-opacity': 0.95,
+                }}
+              />
+              <Layer
+                id="village-drill-label"
+                type="symbol"
+                filter={['==', ['get', 'wilayaId'], selectedWilaya.id] as never}
+                layout={{
+                  'text-field': ['get', 'nom_fr'],
+                  'text-size': 10,
+                  'text-offset': [0, 1.1],
+                  'text-anchor': 'top',
+                  'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+                  'text-allow-overlap': false,
+                  'text-optional': true,
+                }}
+                paint={{
+                  'text-color': '#ffffff',
+                  'text-halo-color': '#0c4a6e',
+                  'text-halo-width': 1.4,
+                }}
+                minzoom={7}
+              />
+            </>
+          )}
         </Source>
       )}
 

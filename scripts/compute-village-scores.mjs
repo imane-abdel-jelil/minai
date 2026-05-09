@@ -177,6 +177,30 @@ async function main() {
   console.log(`    🟠 Risque     : ${riskCount.toLocaleString('fr-FR')}`)
   console.log(`    🔴 Critique   : ${critCount.toLocaleString('fr-FR')}`)
 
+  // ─── Flag is_top_priority pour les TOP-N villages les plus urgents ──
+  // Les pins individuels sur la carte n'affichent QUE ces villages
+  // (sinon : 3000+ points rouges = chaos visuel). Les autres
+  // critical/risk apparaissent uniquement en heatmap ou en drill-down.
+  const TOP_N = 30
+  const sortedByPriority = villages.features
+    .filter((f) => f.properties.status === 'critical')
+    .sort((a, b) => (b.properties.priority_score ?? 0) - (a.properties.priority_score ?? 0))
+  const topIds = new Set(sortedByPriority.slice(0, TOP_N).map((f) => f.properties.code_localite))
+  for (const f of villages.features) {
+    f.properties.is_top_priority = topIds.has(f.properties.code_localite) ? 1 : 0
+  }
+  console.log(`\n🔝  Top ${TOP_N} priorités absolues (priority_score décroissant) :`)
+  sortedByPriority.slice(0, 10).forEach((f, i) => {
+    const p = f.properties
+    console.log(
+      `    ${String(i + 1).padStart(2)}. ${(p.nom_fr || '').padEnd(28)} ` +
+      `pop ${String(p.population_total).padStart(6)}  ` +
+      `dist ${String(p.distance_to_water_km).padStart(5)} km  ` +
+      `${p.wilaya}`
+    )
+  })
+  console.log(`    … (${TOP_N - 10} autres)`)
+
   console.log('\n💾  Écriture du fichier scoré…')
   await writeFile(VILLAGES_OUT, JSON.stringify(villages, null, 2), 'utf-8')
   console.log(`    ${VILLAGES_OUT}`)
