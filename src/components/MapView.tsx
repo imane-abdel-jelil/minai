@@ -361,8 +361,8 @@ export default function MapView({
       mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
       style={{ width: '100%', height: '100%' }}
       interactiveLayerIds={[
-        // Pins TOP-30 (rouges) en vue nationale, dots drill-down sinon
-        ...(showVillages && !selectedWilaya ? ['village-top'] : []),
+        // Pins TOP-30 (rouges) + success (verts) en vue nationale, dots drill-down sinon
+        ...(showVillages && !selectedWilaya ? ['village-top', 'village-success'] : []),
         ...(showVillages && selectedWilaya ? ['village-markers'] : []),
         ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
@@ -386,7 +386,8 @@ export default function MapView({
         }
         if (feature.layer && (
           feature.layer.id === 'village-markers' ||
-          feature.layer.id === 'village-top'
+          feature.layer.id === 'village-top' ||
+          feature.layer.id === 'village-success'
         )) {
           // Click village ANSADE (pin TOP-30 ou dot drill-down) →
           // ouvre le détail dans la sidebar. On reconstruit un objet
@@ -558,17 +559,22 @@ export default function MapView({
         </Source>
       )}
 
-      {/* ───── 30 villages prioritaires ─────
-           Petits points rouges discrets (sans labels, sans rings) pour
-           ne pas concurrencer visuellement les clusters d'eau bleus.
-           L'utilisateur clique pour découvrir le détail dans la sidebar. */}
+      {/* ───── Villages prioritaires (30 rouges) + success (24 verts) ─────
+           Petits points discrets sans labels, sans rings — pour ne pas
+           concurrencer visuellement les clusters d'eau bleus. L'utilisateur
+           clique pour ouvrir le détail dans la sidebar. */}
       {showVillages && !selectedWilaya && priorities && (
         <Source id="priorities" type="geojson" data={priorities}>
-          {/* Halo blanc fin pour faire ressortir le rouge sur fond satellite */}
+          {/* Halo blanc commun (sous TOUS les pins) — fait ressortir le
+              dot coloré sur fond satellite ou polygone wilaya. */}
           <Layer
-            id="village-top-halo"
+            id="priority-halo"
             type="circle"
-            filter={['==', ['get', 'is_top_priority'], 1]}
+            filter={[
+              'any',
+              ['==', ['get', 'is_top_priority'], 1],
+              ['==', ['get', 'is_success_story'], 1],
+            ]}
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
@@ -578,7 +584,24 @@ export default function MapView({
               'circle-opacity': 0.95,
             }}
           />
-          {/* Petit dot rouge saturé */}
+          {/* Pins verts SUCCESS (posés en premier — les rouges passent
+              au-dessus quand ils se chevauchent : urgence > référence). */}
+          <Layer
+            id="village-success"
+            type="circle"
+            filter={['==', ['get', 'is_success_story'], 1]}
+            paint={{
+              'circle-radius': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 4, 7, 6, 12, 9,
+              ],
+              'circle-color': '#16a34a',
+              'circle-stroke-color': '#14532d',
+              'circle-stroke-width': 1,
+              'circle-opacity': 1,
+            }}
+          />
+          {/* Pins rouges TOP-30 (priorité visuelle absolue). */}
           <Layer
             id="village-top"
             type="circle"
@@ -798,9 +821,10 @@ export default function MapView({
     </Map>
 
     {/* ───── Légende flottante (vue nationale uniquement) ─────
-         Deux entrées, simple et net. Disparaît en mode drill-down. */}
+         Trois entrées : urgence / référence positive / infrastructure.
+         Disparaît en mode drill-down. */}
     {!selectedWilaya && showVillages && (
-      <div className="absolute bottom-6 left-6 z-10 bg-slate-900/85 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl p-4 text-white text-xs max-w-[240px] pointer-events-none">
+      <div className="absolute bottom-6 left-6 z-10 bg-slate-900/85 backdrop-blur-md border border-white/15 rounded-xl shadow-2xl p-4 text-white text-xs max-w-[260px] pointer-events-none">
         <div className="text-[10px] uppercase tracking-wider font-semibold text-white/60 mb-2">
           Lecture de la carte
         </div>
@@ -810,6 +834,13 @@ export default function MapView({
             <div>
               <div className="font-semibold leading-tight">30 priorités urgentes</div>
               <div className="text-white/60 text-[11px] leading-tight">villages les plus éloignés d'un point d'eau</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-2.5">
+            <span className="mt-1 inline-block w-2.5 h-2.5 rounded-full bg-[#16a34a] border border-white shrink-0" />
+            <div>
+              <div className="font-semibold leading-tight">Villages desservis</div>
+              <div className="text-white/60 text-[11px] leading-tight">déjà sur le réseau d'eau potable (référence)</div>
             </div>
           </div>
           <div className="flex items-start gap-2.5">
