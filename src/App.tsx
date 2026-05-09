@@ -237,7 +237,7 @@ export default function App() {
         />
       )}
 
-      <main className="flex-1 relative bg-[#1a1a1a]">
+      <main className="flex-1 relative">
         {/* Bouton retour landing — coin haut-gauche */}
         <button
           onClick={() => setView('landing')}
