@@ -305,14 +305,19 @@ export default function MapView({
     }
   }, [convoyTarget])
 
-  // Quand une wilaya est cliquée (drill-down), on zoom doucement dessus.
+  // Quand une wilaya est cliquée (drill-down), on cadre doucement la
+  // wilaya avec easeTo (plus léger que flyTo + tuile pré-chargées).
+  // On garde un zoom modéré (5.8) proche du zoom initial 5.1 pour
+  // minimiser le nombre de tuiles à recharger — sinon Mapbox affiche
+  // un fond bleu uniforme le temps que les nouvelles tuiles satellite
+  // arrivent (effet 'écran bleu' sur réseaux lents).
   useEffect(() => {
     if (!selectedWilaya || !mapRef.current) return
     const map = mapRef.current
-    map.flyTo({
+    map.easeTo({
       center: selectedWilaya.center,
-      zoom: 6.5,
-      duration: 1000,
+      zoom: 5.8,
+      duration: 600,
     })
   }, [selectedWilaya])
 
