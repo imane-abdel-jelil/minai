@@ -8,11 +8,8 @@ html, body, #root {
   height: 100%;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* Fond sand pour matcher la couleur dominante du Sahara mauritanien.
-     Si pour une raison X la carte se démonte momentanément, l'utilisateur
-     voit du sable (cohérent avec le contexte) plutôt qu'un bleu uniforme
-     qui paraît être un crash. */
-  background: #d4b78a;
+  /* Fond noir : neutre, ne distrait pas si une couche est transparente. */
+  background: #0a0a0a;
   color: #fff;
 }
 
