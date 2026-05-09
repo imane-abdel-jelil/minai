@@ -79,28 +79,41 @@ const EXCLUDE_PATTERNS = [
   /\/NKT_500/i,
 ]
 
-// Schéma MINAI — clés cibles, et les variantes ANSADE possibles
+// Schéma MINAI — clés cibles, et variantes ANSADE possibles
+// Noms exacts confirmés via mode DIAGNOSE sur LOC_EXP_WFL1/FeatureServer/30
+// et Infra_app_WFL1/FeatureServer/{0,9}
 const VILLAGE_FIELDS = {
-  code_localite:    ['CODE_LOCALITE', 'code_loc', 'code_localite', 'CODE_LOC', 'OBJECTID', 'CODE'],
-  nom_fr:           ['NOM_LOC_FR', 'NOM_LOCALITE', 'NOM_FR', 'nom_fr', 'LOCALITE', 'NOM_LOC', 'NOM'],
-  population_total: ['POPULATION', 'POP_TOTAL', 'POP', 'pop_total', 'POPULATION_TOTAL'],
-  population_femmes:['POP_FEM', 'POP_F', 'POP_FEMMES', 'pop_fem'],
-  population_hommes:['POP_HOM', 'POP_M', 'POP_H', 'POP_HOMMES', 'pop_hom'],
-  wilaya:           ['WILAYA', 'WILAYA_FR', 'NOM_WILAYA', 'wilaya'],
-  moughataa:        ['MOUGHATAA', 'MOUGHATAA_FR', 'NOM_MOUGHATAA', 'moughataa'],
-  commune:          ['COMMUNE', 'COMMUNE_FR', 'NOM_COMMUNE', 'commune'],
+  code_localite:    ['Code_Localités', 'CODE_LOCALITE', 'code_loc'],
+  nom_fr:           ['Nom_de_la_localité_FR_', 'NOM_LOC_FR', 'NOM_LOCALITE'],
+  nom_ar:           ['إسم_التجمع'],
+  population_total: ['Total', 'POPULATION', 'POP_TOTAL'],
+  population_femmes:['Femmes', 'POP_FEM', 'POP_F'],
+  population_hommes:['Hommes', 'POP_HOM', 'POP_M'],
+  wilaya:           ['Wilaya', 'WILAYA'],
+  wilaya_ar:        ['الولاية'],
+  moughataa:        ['Moughataa', 'MOUGHATAA'],
+  moughataa_ar:     ['المقاطعة'],
+  commune:          ['Commune', 'COMMUNE'],
+  commune_ar:       ['البلدية'],
+  // Bonus utiles côté MINAI : ANSADE flag déjà la présence d'eau / élec
+  reseau_aep:       ['RéseauxAEP'],
+  electricite:      ['Electricite1', 'Electricite'],
 }
 
 const POINTS_EAU_FIELDS = {
-  code_localite: ['CODE_LOCALITE', 'code_loc', 'CODE_LOC'],
-  nom:           ['NOM', 'NOM_OUVRAGE', 'NOM_FR', 'nom'],
-  // __layer_name est ajouté par le fetcher quand on fusionne plusieurs
-  // couches (ex: 'Puit couvert', 'Forage et sondage'). Sert de fallback
-  // si la couche elle-même n'a pas de champ type.
-  type:          ['TYPE_OUVRAGE', 'TYPE', 'NATURE', 'type', 'نوع', '__layer_name'],
-  wilaya:        ['WILAYA', 'WILAYA_FR', 'NOM_WILAYA', 'wilaya'],
-  moughataa:     ['MOUGHATAA', 'MOUGHATAA_FR', 'NOM_MOUGHATAA', 'moughataa'],
-  commune:       ['COMMUNE', 'COMMUNE_FR', 'NOM_COMMUNE', 'commune'],
+  code_localite:    ['Code_localité', 'CODE_LOCALITE'],
+  nom:              ['nom', 'NOM', 'NOM_OUVRAGE'],
+  // __layer_name (injecté par nous) = libellé FR de la couche source.
+  // On le prend EN PREMIER pour avoir un type lisible côté MINAI :
+  //   'Puit couvert' ou 'Forage et sondage' (au lieu de 'بئر محمي'/'حفر/صونداج')
+  type:             ['__layer_name', 'TYPE_OUVRAGE', 'TYPE'],
+  // On garde aussi la valeur arabe brute pour traçabilité
+  type_ar:          ['type', 'نوع'],
+  categorie:        ['Catégorie'],
+  nom_localite:     ['Nom_de_la_localité', 'NOM_LOCALITE'],
+  wilaya:           ['Wilaya', 'WILAYA'],
+  moughataa:        ['Moughataa', 'MOUGHATAA'],
+  commune:          ['Commune', 'COMMUNE'],
 }
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────
@@ -166,12 +179,14 @@ async function fetchAllFeatures(serviceUrl, label) {
   return all
 }
 
-/** Construit la table de correspondance types arabes → français */
+/** Construit la table de correspondance types arabes → français.
+ *  Préfère la valeur arabe brute (type_ar) à la version FR (type),
+ *  pour un vrai dictionnaire AR → FR. */
 function buildTypeMapping(pointsEauFeatures) {
   const seen = new Set()
   const mapping = {}
   for (const f of pointsEauFeatures) {
-    const t = f.properties?.type
+    const t = f.properties?.type_ar || f.properties?.type
     if (!t || seen.has(t)) continue
     seen.add(t)
     mapping[t] = guessFrench(t)
