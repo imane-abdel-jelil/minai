@@ -8,12 +8,7 @@ html, body, #root {
   height: 100%;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  /* Fond brun-terre Sahel discret pour ne jamais voir de teinte vive
-     (jaune vif, bleu, noir tranchant) si un re-render rendait un layout
-     vide pendant un instant. Le conteneur de la carte par-dessus a son
-     propre fond opaque qui couvre celui-ci en temps normal. */
-  background: #2a2520;
-  color: #fff;
+  color: #1a1a1a;
 }
 
 /* Scroll fluide pour les ancres de la nav (#problem, #solution, #impact, #partner) */
