@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLayerMouseEvent, type MapRef } from 'react-map-gl'
 import { MAURITANIA_REGIONS, type Region } from '../data/mauritania-regions'
-import { MAURITANIA_VILLAGES, type Village } from '../data/mauritania-villages'
+import type { Village } from '../data/mauritania-villages'
 import { countPointsByWilaya, type WilayaStats } from '../lib/geo'
 import type { ComputedScore } from '../lib/score'
-import { statusColor, statusLabel, type VillageEval } from '../lib/villages'
+import type { VillageEval } from '../lib/villages'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 
@@ -17,6 +17,8 @@ interface Props {
   onRegionClick: (region: Region | null) => void
   onVillageClick: (village: Village | null) => void
   selectedVillage: Village | null
+  /** Wilaya en mode drill-down (clic wilaya). Null = vue nationale (priorités). */
+  selectedWilaya: Region | null
   showWaterPoints: boolean
   showWilayas: boolean
   showVillages: boolean
@@ -25,6 +27,8 @@ interface Props {
   kindFilters: Record<string, boolean>
   computedScores: Record<string, ComputedScore>
   villageEvals: VillageEval[]
+  /** GeoJSON ANSADE pré-calculé (8447 villages) — null si pas encore chargé */
+  villagesGeojson: GeoJSON.FeatureCollection | null
   /** Village cible du convoi simulé (null = aucun convoi affiché) */
   convoyTarget: Village | null
 }
@@ -143,6 +147,7 @@ export default function MapView({
   onRegionClick,
   onVillageClick,
   selectedVillage,
+  selectedWilaya,
   showWaterPoints,
   showWilayas,
   showVillages,
@@ -151,6 +156,7 @@ export default function MapView({
   kindFilters,
   computedScores,
   villageEvals,
+  villagesGeojson,
   convoyTarget,
 }: Props) {
   const mapRef = useRef<MapRef | null>(null)
@@ -214,36 +220,34 @@ export default function MapView({
     onStatsReady(stats)
   }, [waterPoints, wilayasGeo, onStatsReady])
 
-  // ─── Villages enrichis ─────────────────────────────────────────────────────
-  // Chaque village reçoit son statut + couleur calculés en live.
-  const villagesGeoJSON = useMemo<GeoJSON.FeatureCollection>(() => {
-    // Lookup id → eval (objet au lieu de Map pour éviter le conflit de nom
-    // avec le composant <Map> importé de react-map-gl).
-    const byId: Record<string, VillageEval> = {}
-    for (const e of villageEvals) byId[e.village.id] = e
+  // ─── Villages ANSADE — pré-enrichis par ansade-villages.ts ────────────
+  // villagesGeojson contient déjà 8447 features avec status, color,
+  // wilayaId injectés. On annote juste isSelected pour highlight visuel.
+  const villagesEnriched = useMemo<GeoJSON.FeatureCollection | null>(() => {
+    if (!villagesGeojson) return null
+    const selectedId = selectedVillage?.id ? String(selectedVillage.id) : null
     return {
-      type: 'FeatureCollection',
-      features: MAURITANIA_VILLAGES.map((v) => {
-        const e = byId[v.id]
-        const status = e?.status ?? 'critical'
+      ...villagesGeojson,
+      features: villagesGeojson.features.map((f) => {
+        const props = f.properties || {}
+        const id = String(props.code_localite ?? '')
         return {
-          type: 'Feature',
-          geometry: { type: 'Point', coordinates: v.center },
-          properties: {
-            id: v.id,
-            name: v.name,
-            wilayaId: v.wilayaId,
-            population: v.population,
-            status,
-            color: statusColor(status),
-            statusLabel: statusLabel(status),
-            distanceKm: e?.distanceToWaterKm ?? null,
-            isSelected: selectedVillage?.id === v.id ? 1 : 0,
-          },
+          ...f,
+          properties: { ...props, isSelected: id === selectedId ? 1 : 0 },
         }
       }),
     }
-  }, [villageEvals, selectedVillage])
+  }, [villagesGeojson, selectedVillage])
+
+  // Filtre Mapbox dynamique selon le mode :
+  //   - Vue nationale (selectedWilaya = null) : seuls les villages CRITIQUES
+  //   - Drill-down wilaya : tous les villages de cette wilaya
+  const villageFilter = useMemo(() => {
+    if (selectedWilaya) {
+      return ['==', ['get', 'wilayaId'], selectedWilaya.id]
+    }
+    return ['==', ['get', 'status'], 'critical']
+  }, [selectedWilaya])
 
   // ─── Convoi NGO simulé ────────────────────────────────────────────────────
   // Ligne droite de Nouakchott vers la wilaya cible. Visuellement subtil
@@ -283,6 +287,17 @@ export default function MapView({
       ],
     }
   }, [convoyTarget])
+
+  // Quand une wilaya est cliquée (drill-down), on zoom doucement dessus.
+  useEffect(() => {
+    if (!selectedWilaya || !mapRef.current) return
+    const map = mapRef.current
+    map.flyTo({
+      center: selectedWilaya.center,
+      zoom: 6.5,
+      duration: 1000,
+    })
+  }, [selectedWilaya])
 
   // Quand un convoi est tracé, on cadre la carte pour que origine + cible
   // soient toutes les deux visibles, avec un peu de marge.
@@ -359,10 +374,19 @@ export default function MapView({
           return
         }
         if (feature.layer && feature.layer.id === 'village-markers') {
-          // Click village → ouvre le détail dans la sidebar
-          const id = feature.properties.id as string
-          const village = MAURITANIA_VILLAGES.find((v) => v.id === id)
-          if (village) onVillageClick(village)
+          // Click village ANSADE → ouvre le détail dans la sidebar.
+          // On reconstruit un objet Village compatible à partir des
+          // properties du feature (qui viennent de villages-scored.geojson).
+          const p = feature.properties || {}
+          const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
+          const village: Village = {
+            id: String(p.code_localite ?? ''),
+            name: (p.nom_fr as string) || '(sans nom)',
+            wilayaId: (p.wilayaId as string) || '',
+            center: coords,
+            population: Number(p.population_total) || 0,
+          }
+          onVillageClick(village)
         } else if (feature.layer && feature.layer.id === 'wilaya-fill') {
           const id = feature.properties.regionId as string | null
           if (id) {
@@ -513,19 +537,20 @@ export default function MapView({
         </Source>
       )}
 
-      {/* ---------- Villages (statut Critique/Risque/OK — couche actionnable) ---------- */}
-      {showVillages && (
-        <Source id="villages" type="geojson" data={villagesGeoJSON}>
+      {/* ---------- Villages ANSADE (statut Critique/Risque/OK — couche actionnable) ---------- */}
+      {showVillages && villagesEnriched && (
+        <Source id="villages" type="geojson" data={villagesEnriched}>
           {/* Halo blanc pour la lisibilité sur fond satellite */}
           <Layer
             id="village-halo"
             type="circle"
+            filter={villageFilter as never}
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
-                4, 7,
-                7, 9,
-                12, 14,
+                4, 5,
+                7, 7,
+                12, 11,
               ],
               'circle-color': '#ffffff',
               'circle-opacity': 0.85,
@@ -535,12 +560,13 @@ export default function MapView({
           <Layer
             id="village-markers"
             type="circle"
+            filter={villageFilter as never}
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
-                4, 5,
-                7, 7,
-                12, 11,
+                4, 3.5,
+                7, 5,
+                12, 9,
               ],
               'circle-color': ['get', 'color'],
               'circle-stroke-color': [
@@ -558,12 +584,13 @@ export default function MapView({
               'circle-opacity': 0.95,
             }}
           />
-          {/* Nom du village au-dessus, halo bleu nuit pour lisibilité */}
+          {/* Nom du village — visible seulement à fort zoom pour pas saturer */}
           <Layer
             id="village-label"
             type="symbol"
+            filter={villageFilter as never}
             layout={{
-              'text-field': ['get', 'name'],
+              'text-field': ['get', 'nom_fr'],
               'text-size': 11,
               'text-offset': [0, 1.2],
               'text-anchor': 'top',
@@ -576,7 +603,7 @@ export default function MapView({
               'text-halo-color': '#0c4a6e',
               'text-halo-width': 1.4,
             }}
-            minzoom={5}
+            minzoom={7}
           />
         </Source>
       )}

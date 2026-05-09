@@ -13,6 +13,9 @@ import {
 
 interface Props {
   selectedRegion: Region | null
+  /** Wilaya en mode drill-down (set quand l'utilisateur clique une wilaya) */
+  selectedWilaya: Region | null
+  onClearWilaya: () => void
   selectedVillage: Village | null
   selectedVillageEval: VillageEval | null
   showWaterPoints: boolean
@@ -28,6 +31,9 @@ interface Props {
   kindCounts: Record<string, number>
   computedScores: Record<string, ComputedScore>
   priorities: VillageEval[]
+  /** Toutes les évaluations village ANSADE (8447) — utilisé pour calculer
+   *  les stats par wilaya en mode drill-down */
+  villageEvals: VillageEval[]
   convoyTarget: Village | null
   onTargetConvoy: (v: Village) => void
   onClearConvoy: () => void
@@ -65,6 +71,8 @@ const KIND_ORDER = [
 
 export default function Sidebar({
   selectedRegion,
+  selectedWilaya,
+  onClearWilaya,
   selectedVillage,
   selectedVillageEval,
   showWaterPoints,
@@ -80,6 +88,7 @@ export default function Sidebar({
   kindCounts,
   computedScores,
   priorities,
+  villageEvals,
   convoyTarget,
   onTargetConvoy,
   onClearConvoy,
@@ -126,6 +135,15 @@ export default function Sidebar({
           </button>
         )}
       </header>
+
+      {/* Mode drill-down : indique qu'on regarde UNE wilaya */}
+      {selectedWilaya && (
+        <WilayaDrillCard
+          wilaya={selectedWilaya}
+          villageEvals={villageEvals}
+          onClear={onClearWilaya}
+        />
+      )}
 
       {topPriority ? (
         <RecommendationCard
@@ -583,6 +601,65 @@ function ToggleRow({
 
 function Divider() {
   return <div className="border-t border-white/10" />
+}
+
+/**
+ * Card affichée quand l'utilisateur a cliqué sur une wilaya pour
+ * "drill-down". Montre le contexte (nom wilaya + count par status) et
+ * un bouton pour revenir à la vue nationale (priorités seulement).
+ */
+function WilayaDrillCard({
+  wilaya,
+  villageEvals,
+  onClear,
+}: {
+  wilaya: Region
+  villageEvals: VillageEval[]
+  onClear: () => void
+}) {
+  const inWilaya = villageEvals.filter((v) => v.village.wilayaId === wilaya.id)
+  const counts = { critical: 0, risk: 0, ok: 0 }
+  for (const e of inWilaya) counts[e.status]++
+
+  return (
+    <section className="rounded-lg p-4 bg-cyan-500/15 border border-cyan-300/40">
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-100/80 font-medium">
+            Drill-down wilaya
+          </p>
+          <h2 className="text-lg font-bold leading-tight mt-0.5">{wilaya.name}</h2>
+        </div>
+        <button
+          onClick={onClear}
+          className="text-[10px] px-2 py-1 rounded bg-white/10 hover:bg-white/20 transition opacity-90 hover:opacity-100 shrink-0"
+          title="Revenir à la vue nationale"
+        >
+          ✕ Vue nationale
+        </button>
+      </div>
+
+      <div className="text-[11px] opacity-75 leading-snug mb-3">
+        {inWilaya.length.toLocaleString('fr-FR')} villages dans cette wilaya · vue détaillée
+        sur la carte
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 text-[11px]">
+        <div className="rounded bg-red-500/20 p-2 text-center">
+          <div className="text-base font-bold leading-none">{counts.critical}</div>
+          <div className="opacity-80 mt-1">Critique</div>
+        </div>
+        <div className="rounded bg-orange-500/20 p-2 text-center">
+          <div className="text-base font-bold leading-none">{counts.risk}</div>
+          <div className="opacity-80 mt-1">Risque</div>
+        </div>
+        <div className="rounded bg-green-500/20 p-2 text-center">
+          <div className="text-base font-bold leading-none">{counts.ok}</div>
+          <div className="opacity-80 mt-1">OK</div>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {

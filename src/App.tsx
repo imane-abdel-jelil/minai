@@ -1,14 +1,15 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import MapView from './components/MapView'
 import Sidebar from './components/Sidebar'
 import LandingPage from './components/LandingPage'
 import UnderstandingPage from './components/UnderstandingPage'
 import type { Region } from './data/mauritania-regions'
-import { MAURITANIA_VILLAGES, type Village } from './data/mauritania-villages'
+import type { Village } from './data/mauritania-villages'
+import { loadAnsadeVillages, topPrioritiesAnsade } from './lib/ansade-villages'
 import type { WilayaStats } from './lib/geo'
 import { useI18n } from './lib/i18n'
 import { computeAllScores } from './lib/score'
-import { evaluateAllVillages, topPriorities } from './lib/villages'
+import type { VillageEval } from './lib/villages'
 
 const ALL_KINDS = [
   'drinking_water',
@@ -30,6 +31,9 @@ export default function App() {
 
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null)
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null)
+  // Wilaya cliquée → drill-down : on affiche tous les villages de cette wilaya
+  // Si null, on affiche uniquement les villages prioritaires (status critical/risk).
+  const [selectedWilaya, setSelectedWilaya] = useState<Region | null>(null)
   const [showWaterPoints, setShowWaterPoints] = useState(true)
   const [showWilayas, setShowWilayas] = useState(true)
   const [showVillages, setShowVillages] = useState(true)
@@ -38,10 +42,29 @@ export default function App() {
   const [kindFilters, setKindFilters] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(ALL_KINDS.map((k) => [k, true]))
   )
+  // Villages ANSADE chargés en async — 8447 villages avec status pré-calculé
+  const [villageEvals, setVillageEvals] = useState<VillageEval[]>([])
+  const [villagesGeojson, setVillagesGeojson] = useState<GeoJSON.FeatureCollection | null>(null)
   // Convoi simulé : cible = un village (depuis Nouakchott)
   const [convoyTarget, setConvoyTarget] = useState<Village | null>(null)
   // Sidebar visible ? Sur mobile elle est masquée par défaut, sur desktop visible.
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Chargement des 8447 villages ANSADE (RGPH-5) au démarrage
+  useEffect(() => {
+    loadAnsadeVillages()
+      .then(({ villages, geojson }) => {
+        setVillageEvals(villages)
+        setVillagesGeojson(geojson)
+      })
+      .catch((e) => {
+        console.warn(
+          'ANSADE villages-scored.geojson introuvable. ' +
+            'Lance npm run fetch:ansade puis npm run compute:scores pour le générer.',
+          e,
+        )
+      })
+  }, [])
 
   const handleStatsReady = useCallback(
     (stats: Record<string, WilayaStats>) => setWilayaStats(stats),
@@ -74,14 +97,8 @@ export default function App() {
 
   const computedScores = useMemo(() => computeAllScores(wilayaStats), [wilayaStats])
 
-  // Évaluation village par village (statut + distance + priorité)
-  const villageEvals = useMemo(
-    () => evaluateAllVillages(MAURITANIA_VILLAGES, waterPoints),
-    [waterPoints]
-  )
-
-  // Top 3 villages les plus urgents (critical/risk seulement)
-  const priorities = useMemo(() => topPriorities(villageEvals, 3), [villageEvals])
+  // Top 3 villages les plus urgents — basé sur priority_score ANSADE pré-calculé
+  const priorities = useMemo(() => topPrioritiesAnsade(villageEvals, 3), [villageEvals])
 
   // Évaluation du village sélectionné (lookup dans la liste)
   const selectedVillageEval = useMemo(() => {
@@ -157,6 +174,11 @@ export default function App() {
       >
         <Sidebar
           selectedRegion={selectedRegion}
+          selectedWilaya={selectedWilaya}
+          onClearWilaya={() => {
+            setSelectedWilaya(null)
+            setSelectedRegion(null)
+          }}
           selectedVillage={selectedVillage}
           selectedVillageEval={selectedVillageEval}
           showWaterPoints={showWaterPoints}
@@ -172,6 +194,7 @@ export default function App() {
           kindCounts={kindCounts}
           computedScores={computedScores}
           priorities={priorities}
+          villageEvals={villageEvals}
           convoyTarget={convoyTarget}
           onTargetConvoy={(v) => {
             setConvoyTarget(v)
@@ -220,9 +243,14 @@ export default function App() {
         </button>
 
         <MapView
-          onRegionClick={setSelectedRegion}
+          onRegionClick={(r) => {
+            setSelectedRegion(r)
+            // Click wilaya = drill-down : zoom + show all its villages
+            setSelectedWilaya(r)
+          }}
           onVillageClick={setSelectedVillage}
           selectedVillage={selectedVillage}
+          selectedWilaya={selectedWilaya}
           showWaterPoints={showWaterPoints}
           showWilayas={showWilayas}
           showVillages={showVillages}
@@ -231,6 +259,7 @@ export default function App() {
           kindFilters={kindFilters}
           computedScores={computedScores}
           villageEvals={villageEvals}
+          villagesGeojson={villagesGeojson}
           convoyTarget={convoyTarget}
         />
       </main>
