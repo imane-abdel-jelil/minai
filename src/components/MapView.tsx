@@ -326,6 +326,37 @@ export default function MapView({
   // ou d'un village. L'utilisateur peut zoomer manuellement avec la
   // molette de la souris ou les boutons +/- de la NavigationControl.
 
+  // ─── Filtres Mapbox memoizés ────────────────────────────────────────
+  // Sans ça, le filter literal est recréé à chaque render et Mapbox
+  // pense que le filtre a changé → il refait le filtrage des 8447
+  // features → canvas momentanément vide → écran noir au clic d'un
+  // village non-prioritaire. La memoization garde la même référence
+  // tant que selectedWilaya ne change pas réellement.
+  const drillFilter = useMemo(
+    () =>
+      selectedWilaya
+        ? (['==', ['get', 'wilayaId'], selectedWilaya.id] as never)
+        : null,
+    [selectedWilaya],
+  )
+  const successFilter = useMemo(
+    () => ['==', ['get', 'is_success_story'], 1] as never,
+    [],
+  )
+  const topFilter = useMemo(
+    () => ['==', ['get', 'is_top_priority'], 1] as never,
+    [],
+  )
+  const priorityHaloFilter = useMemo(
+    () =>
+      [
+        'any',
+        ['==', ['get', 'is_top_priority'], 1],
+        ['==', ['get', 'is_success_story'], 1],
+      ] as never,
+    [],
+  )
+
   // Quand un convoi est tracé, on cadre la carte pour que origine + cible
   // soient toutes les deux visibles, avec un peu de marge.
   useEffect(() => {
@@ -641,11 +672,7 @@ export default function MapView({
           <Layer
             id="priority-halo"
             type="circle"
-            filter={[
-              'any',
-              ['==', ['get', 'is_top_priority'], 1],
-              ['==', ['get', 'is_success_story'], 1],
-            ]}
+            filter={priorityHaloFilter}
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
@@ -660,7 +687,7 @@ export default function MapView({
           <Layer
             id="village-success"
             type="circle"
-            filter={['==', ['get', 'is_success_story'], 1]}
+            filter={successFilter}
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
@@ -676,7 +703,7 @@ export default function MapView({
           <Layer
             id="village-top"
             type="circle"
-            filter={['==', ['get', 'is_top_priority'], 1]}
+            filter={topFilter}
             paint={{
               'circle-radius': [
                 'interpolate', ['linear'], ['zoom'],
@@ -702,7 +729,7 @@ export default function MapView({
               <Layer
                 id="village-drill-halo"
                 type="circle"
-                filter={['==', ['get', 'wilayaId'], selectedWilaya.id] as never}
+                filter={drillFilter ?? undefined}
                 paint={{
                   'circle-radius': [
                     'interpolate', ['linear'], ['zoom'],
@@ -715,7 +742,7 @@ export default function MapView({
               <Layer
                 id="village-markers"
                 type="circle"
-                filter={['==', ['get', 'wilayaId'], selectedWilaya.id] as never}
+                filter={drillFilter ?? undefined}
                 paint={{
                   'circle-radius': [
                     'interpolate', ['linear'], ['zoom'],
@@ -734,7 +761,7 @@ export default function MapView({
               <Layer
                 id="village-drill-label"
                 type="symbol"
-                filter={['==', ['get', 'wilayaId'], selectedWilaya.id] as never}
+                filter={drillFilter ?? undefined}
                 layout={{
                   'text-field': ['get', 'nom_fr'],
                   'text-size': 10,
