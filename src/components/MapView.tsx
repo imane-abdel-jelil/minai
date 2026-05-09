@@ -494,9 +494,9 @@ export default function MapView({
               'icon-size': [
                 'step',
                 ['get', 'point_count'],
-                0.22, 20,
-                0.32, 100,
-                0.42,
+                0.32, 20,
+                0.45, 100,
+                0.6,
               ],
               'icon-allow-overlap': true,
               'icon-ignore-placement': true,
@@ -507,9 +507,9 @@ export default function MapView({
               'text-size': [
                 'step',
                 ['get', 'point_count'],
-                8, 20,
-                10, 100,
-                12,
+                10, 20,
+                12, 100,
+                15,
               ],
               'text-anchor': 'center',
               'text-offset': [0, -1.0],
@@ -517,10 +517,10 @@ export default function MapView({
               'text-ignore-placement': true,
             }}
             paint={{
-              'icon-opacity': 0.8,
+              'icon-opacity': 1,
               'text-color': '#ffffff',
               'text-halo-color': '#0c4a6e',
-              'text-halo-width': 1.4,
+              'text-halo-width': 1.6,
             }}
           />
           {/* Points individuels — apparaissent dès le zoom 6 pour montrer
