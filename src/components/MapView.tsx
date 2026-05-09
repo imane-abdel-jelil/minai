@@ -14,6 +14,45 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 const CONVOY_ORIGIN: [number, number] = [-15.97, 18.08]
 const CONVOY_ORIGIN_NAME = 'Nouakchott'
 
+// ─── Paint/Layout objects en MODULE-LEVEL constants ─────────────────
+// Ces objets sont passés aux <Layer> de Mapbox. S'ils sont définis
+// inline dans le JSX, ils sont recréés à chaque render React → Mapbox
+// croit que paint/layout a changé → setPaintProperty appelé → traitement
+// lourd des features → canvas momentanément vide → 'écran noir'.
+// Définis hors composant = même référence pour toujours.
+const DRILL_HALO_PAINT = {
+  'circle-radius': [
+    'interpolate', ['linear'], ['zoom'],
+    5, 5, 8, 7, 12, 11,
+  ],
+  'circle-color': '#ffffff',
+  'circle-opacity': 0.85,
+} as never
+const DRILL_MARKERS_PAINT = {
+  'circle-radius': [
+    'interpolate', ['linear'], ['zoom'],
+    5, 3.5, 8, 5, 12, 9,
+  ],
+  'circle-color': ['get', 'color'],
+  'circle-stroke-color': ['get', 'color'],
+  'circle-stroke-width': 1,
+  'circle-opacity': 0.95,
+} as never
+const DRILL_LABEL_LAYOUT = {
+  'text-field': ['get', 'nom_fr'],
+  'text-size': 10,
+  'text-offset': [0, 1.1],
+  'text-anchor': 'top',
+  'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+  'text-allow-overlap': false,
+  'text-optional': true,
+} as never
+const DRILL_LABEL_PAINT = {
+  'text-color': '#ffffff',
+  'text-halo-color': '#0c4a6e',
+  'text-halo-width': 1.4,
+} as never
+
 interface Props {
   onRegionClick: (region: Region | null) => void
   /** Optionnel 2ème argument : VillageEval construit à partir des
@@ -723,52 +762,20 @@ function MapView({
                 id="village-drill-halo"
                 type="circle"
                 filter={drillFilter ?? undefined}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    5, 5, 8, 7, 12, 11,
-                  ],
-                  'circle-color': '#ffffff',
-                  'circle-opacity': 0.85,
-                }}
+                paint={DRILL_HALO_PAINT}
               />
               <Layer
                 id="village-markers"
                 type="circle"
                 filter={drillFilter ?? undefined}
-                paint={{
-                  'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    5, 3.5, 8, 5, 12, 9,
-                  ],
-                  'circle-color': ['get', 'color'],
-                  'circle-stroke-color': ['get', 'color'],
-                  'circle-stroke-width': 1,
-                  'circle-opacity': 0.95,
-                }}
+                paint={DRILL_MARKERS_PAINT}
               />
-              {/* Highlight retiré : la couche overlay avec filter Mapbox
-                  pouvait causer des erreurs silencieuses qui faisaient
-                  disparaître les tuiles satellite. La sidebar suffit
-                  pour confirmer la sélection à l'utilisateur. */}
               <Layer
                 id="village-drill-label"
                 type="symbol"
                 filter={drillFilter ?? undefined}
-                layout={{
-                  'text-field': ['get', 'nom_fr'],
-                  'text-size': 10,
-                  'text-offset': [0, 1.1],
-                  'text-anchor': 'top',
-                  'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-                  'text-allow-overlap': false,
-                  'text-optional': true,
-                }}
-                paint={{
-                  'text-color': '#ffffff',
-                  'text-halo-color': '#0c4a6e',
-                  'text-halo-width': 1.4,
-                }}
+                layout={DRILL_LABEL_LAYOUT}
+                paint={DRILL_LABEL_PAINT}
                 minzoom={7}
               />
             </>
