@@ -384,11 +384,6 @@ export default function MapView({
         registerDropletIcon(map, 'cluster-sm', '#06b6d4')
         registerDropletIcon(map, 'cluster-md', '#0ea5e9')
         registerDropletIcon(map, 'cluster-lg', '#0284c7')
-        // Surveille les erreurs Mapbox pour diagnostiquer les pertes de
-        // tuiles (network, token, rate-limit) — visibles dans la console.
-        map.on('error', (err) => {
-          console.warn('Mapbox error:', err?.error?.message ?? err)
-        })
       }}
       onClick={(e: MapLayerMouseEvent) => {
         const feature = e.features?.[0]
