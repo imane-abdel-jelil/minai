@@ -25,10 +25,22 @@ const ALL_KINDS = [
 
 type View = 'landing' | 'understanding' | 'map'
 
+// Lit le paramètre ?view= depuis l'URL pour que les liens vers la
+// carte ouverts dans un nouvel onglet démarrent directement sur la
+// carte, sans repasser par la landing.
+function getInitialView(): View {
+  if (typeof window === 'undefined') return 'landing'
+  const params = new URLSearchParams(window.location.search)
+  const v = params.get('view')
+  if (v === 'map' || v === 'understanding') return v
+  return 'landing'
+}
+
 export default function App() {
   const { t } = useI18n()
-  // Vue par défaut = landing page. L'utilisateur entre dans la carte via un CTA.
-  const [view, setView] = useState<View>('landing')
+  // Vue par défaut = landing page. Si l'URL contient ?view=map (lien
+  // ouvert dans un nouvel onglet), on démarre directement sur la carte.
+  const [view, setView] = useState<View>(getInitialView)
 
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null)
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null)
@@ -143,9 +155,15 @@ export default function App() {
     [handleVillageSelect],
   )
 
+  // Ouvre la carte dans un nouvel onglet : la landing reste accessible
+  // dans l'onglet d'origine et l'utilisateur peut fermer la carte pour
+  // revenir en arrière facilement. Le nouvel onglet lit ?view=map au
+  // chargement et démarre directement sur la carte.
   const enterMap = () => {
-    setView('map')
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+    if (typeof window !== 'undefined') {
+      const url = `${window.location.pathname}?view=map`
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
   }
   const goToUnderstanding = () => {
     setView('understanding')
