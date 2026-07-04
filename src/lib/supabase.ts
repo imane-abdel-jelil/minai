@@ -39,10 +39,13 @@ export const isSupabaseConfigured = isConfigured
 
 // ─── Types application ─────────────────────────────────────────────────
 
-/** Une opération de ravitaillement d'eau enregistrée par une ONG. */
+export type OrganizationType = 'ngo' | 'institution' | 'un_agency' | 'red_crescent'
+
+/** Une opération de ravitaillement d'eau enregistrée par une ONG ou institution. */
 export interface Supply {
   id: string
   organization: string
+  organization_type: OrganizationType
   village_code_localite: number | null
   village_name: string
   village_wilaya: string
@@ -57,6 +60,7 @@ export interface Supply {
 /** Payload pour créer un nouveau ravitaillement. */
 export interface SupplyInsert {
   organization: string
+  organization_type?: OrganizationType
   village_code_localite: number | null
   village_name: string
   village_wilaya: string

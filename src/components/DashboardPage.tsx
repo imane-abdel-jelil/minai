@@ -1,19 +1,23 @@
 /**
- * DashboardPage — tableau de bord post-login pour partenaires MINAI.
+ * DashboardPage — tableau de bord Water4All (Amina Moktar).
  *
- * Marque : Water4All (ONG humanitaire fictive, spécialisée eau au Sahel).
- * Persona : Amina Moktar, Coordinatrice logistique.
+ * Design inspiré des interfaces Apple : beaucoup de whitespace, typo
+ * système, cards subtiles avec bordures légères, hiérarchie visuelle
+ * claire, actions primaires évidentes, données lisibles au premier
+ * coup d'œil.
  *
- * Trois zones :
- *   1. Header (identité + rôle + logout)
- *   2. Métriques clés (3 tuiles)
- *   3. Deux colonnes : Derniers ravitaillements | Prochains villages en alerte
- *   4. CTA global : Ouvrir la carte MINAI
- *   5. Bouton flottant : Ajouter un ravitaillement (ouvre un modal)
+ * Sections :
+ *   1. Barre de nav épurée (logo + persona + logout)
+ *   2. Hero de bienvenue avec grande typo
+ *   3. Actions primaires (Ouvrir la carte + Nouveau ravitaillement)
+ *   4. Vue d'ensemble : 4 tuiles métriques
+ *   5. Activité inter-organisations : ravitaillements de toutes les
+ *      ONG et institutions, avec filtre "Toutes" vs "Water4All"
+ *   6. Villages en attente de ravitaillement (priorités ANSADE)
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { supabase, type Supply } from '../lib/supabase'
+import { supabase, type Supply, type OrganizationType } from '../lib/supabase'
 import type { VillageEval } from '../lib/villages'
 import { statusColor as villageStatusColor, statusLabel as villageStatusLabel } from '../lib/villages'
 import { MAURITANIA_REGIONS } from '../data/mauritania-regions'
@@ -26,31 +30,36 @@ interface Props {
   onSignOut: () => void
 }
 
-// ─── Constantes visuelles ────────────────────────────────────────────
+// ─── Labels & metadata ───────────────────────────────────────────────
 
-const SUPPLY_STATUS_LABELS: Record<Supply['status'], string> = {
-  delivered: 'Livré',
-  in_progress: 'En cours',
-  delayed: 'Reporté',
+const STATUS_META: Record<Supply['status'], { label: string; color: string; bg: string }> = {
+  delivered:   { label: 'Livré',    color: 'text-emerald-700', bg: 'bg-emerald-50' },
+  in_progress: { label: 'En cours', color: 'text-amber-700',   bg: 'bg-amber-50' },
+  delayed:     { label: 'Reporté',  color: 'text-red-700',     bg: 'bg-red-50' },
 }
 
-const SUPPLY_STATUS_COLORS: Record<Supply['status'], { bg: string; text: string; dot: string }> = {
-  delivered: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  in_progress: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
-  delayed: { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
+const ORG_TYPE_META: Record<OrganizationType, { label: string; color: string }> = {
+  ngo:          { label: 'ONG',              color: 'text-slate-600' },
+  un_agency:    { label: 'Agence ONU',       color: 'text-blue-700' },
+  red_crescent: { label: 'Croissant-Rouge',  color: 'text-red-700' },
+  institution:  { label: 'Institution',      color: 'text-slate-800' },
 }
 
 // ─── Composant principal ─────────────────────────────────────────────
+
+type OrgFilter = 'all' | 'mine'
 
 export default function DashboardPage({ user, villageEvals, onOpenMap, onSignOut }: Props) {
   const [supplies, setSupplies] = useState<Supply[]>([])
   const [loadingSupplies, setLoadingSupplies] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [orgFilter, setOrgFilter] = useState<OrgFilter>('all')
 
   const displayName =
     (user.user_metadata?.full_name as string | undefined) ||
     user.email ||
     'Partenaire'
+  const firstName = displayName.split(' ')[0]
   const role = 'Coordinatrice logistique'
   const organization =
     (user.user_metadata?.organization as string | undefined) || 'Water4All'
@@ -65,10 +74,8 @@ export default function DashboardPage({ user, villageEvals, onOpenMap, onSignOut
       .from('supplies')
       .select('*')
       .order('supply_date', { ascending: false })
-      .limit(5)
-    if (error) {
-      console.warn('Erreur chargement supplies :', error.message)
-    }
+      .limit(30)
+    if (error) console.warn('Erreur chargement supplies :', error.message)
     setSupplies((data as Supply[]) || [])
     setLoadingSupplies(false)
   }
@@ -78,67 +85,81 @@ export default function DashboardPage({ user, villageEvals, onOpenMap, onSignOut
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ─── Prochains villages en alerte (top 5 par priority_score) ──────
+  // ─── Filtrage par organisation ────────────────────────────────────
+  const filteredSupplies = useMemo(() => {
+    if (orgFilter === 'mine') {
+      return supplies.filter((s) => s.organization === organization)
+    }
+    return supplies
+  }, [supplies, orgFilter, organization])
+
+  // ─── Prochains villages en attente ────────────────────────────────
   const upcoming = useMemo(() => {
     return [...villageEvals]
       .filter((e) => e.status !== 'ok')
       .sort((a, b) => b.priorityScore - a.priorityScore)
-      .slice(0, 5)
+      .slice(0, 6)
   }, [villageEvals])
 
-  // ─── Métriques agrégées ────────────────────────────────────────────
+  // ─── Métriques ────────────────────────────────────────────────────
   const metrics = useMemo(() => {
-    const totalVillages = villageEvals.length
-    const suppliesThisMonth = supplies.filter((s) => {
-      const d = new Date(s.supply_date)
-      const now = new Date()
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-    }).length
-    const populationCovered = supplies.reduce((sum, s) => {
-      // Trouve le village dans villageEvals pour récupérer la population
+    const now = new Date()
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(now.getDate() - 30)
+
+    const recent = supplies.filter((s) => new Date(s.supply_date) >= thirtyDaysAgo)
+    const totalVolume = recent.reduce((sum, s) => sum + Number(s.quantity_m3), 0)
+    const uniqueOrgs = new Set(supplies.map((s) => s.organization)).size
+
+    const populationReached = recent.reduce((sum, s) => {
       const v = villageEvals.find(
         (ev) => ev.village.id === String(s.village_code_localite ?? ''),
       )
       return sum + (v?.village.population || 0)
     }, 0)
-    return { totalVillages, suppliesThisMonth, populationCovered }
-  }, [villageEvals, supplies])
+
+    return {
+      recentCount: recent.length,
+      totalVolume,
+      populationReached,
+      uniqueOrgs,
+    }
+  }, [supplies, villageEvals])
+
+  const mineCount = useMemo(
+    () => supplies.filter((s) => s.organization === organization).length,
+    [supplies, organization],
+  )
 
   return (
-    <div className="min-h-screen w-screen bg-slate-50">
-      {/* ═════════════ HEADER ═════════════ */}
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
+    <div className="min-h-screen w-screen bg-[#fbfbfd]" style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif' }}>
+      {/* ═════════════ NAV BAR ═════════════ */}
+      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-black/5">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           {/* Logo Water4All */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-md shadow-cyan-500/20">
-              <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-white" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-sm">
+              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 2.5c-4 5-7 8.5-7 12a7 7 0 0 0 14 0c0-3.5-3-7-7-12z" />
               </svg>
             </div>
-            <div>
-              <div className="text-slate-900 font-bold text-lg leading-none">{organization}</div>
-              <div className="text-slate-500 text-[11px] uppercase tracking-wider mt-0.5">
-                Portail partenaire MINAI
-              </div>
-            </div>
+            <span className="font-semibold text-[15px] tracking-tight text-[#1d1d1f]">
+              {organization}
+            </span>
           </div>
 
           {/* Persona + logout */}
           <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <div className="text-slate-900 font-semibold text-sm leading-none">
-                {displayName}
-              </div>
-              <div className="text-slate-500 text-xs mt-1">{role}</div>
+            <div className="hidden sm:flex flex-col items-end leading-tight">
+              <div className="text-[13px] font-medium text-[#1d1d1f]">{displayName}</div>
+              <div className="text-[11px] text-[#6e6e73]">{role}</div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 font-bold">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border border-black/5 flex items-center justify-center text-slate-700 font-semibold text-xs">
               {getInitials(displayName)}
             </div>
             <button
               onClick={onSignOut}
-              className="text-slate-500 hover:text-slate-900 text-sm font-medium transition"
-              title="Se déconnecter"
+              className="text-[13px] text-[#6e6e73] hover:text-[#1d1d1f] font-medium transition"
             >
               Déconnexion
             </button>
@@ -147,112 +168,143 @@ export default function DashboardPage({ user, villageEvals, onOpenMap, onSignOut
       </header>
 
       {/* ═════════════ CONTENU ═════════════ */}
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-        {/* Bienvenue + CTA carte */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <main className="max-w-6xl mx-auto px-6 py-10 space-y-10">
+        {/* ─── HERO WELCOME ─── */}
+        <section className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Bonjour {displayName.split(' ')[0]}.
+            <div className="text-[13px] text-[#6e6e73] font-medium mb-2">
+              {formatToday()}
+            </div>
+            <h1 className="text-[40px] sm:text-[44px] font-bold text-[#1d1d1f] tracking-tight leading-[1.05]">
+              Bonjour, {firstName}.
             </h1>
-            <p className="text-slate-600 text-sm mt-1">
-              Vue d'ensemble de vos opérations de ravitaillement en cours.
+            <p className="text-[17px] text-[#6e6e73] mt-2 max-w-lg">
+              Voici l'activité de vos partenaires et les villages prioritaires
+              en attente de ravitaillement.
             </p>
           </div>
-          <button
-            onClick={onOpenMap}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-3 rounded-xl shadow-lg shadow-slate-900/10 transition flex items-center gap-2 self-start md:self-auto"
-          >
-            <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 8l7-3 6 3 7-3v13l-7 3-6-3-7 3V8z" />
-              <path d="M9 5v15M15 8v15" />
-            </svg>
-            Ouvrir la carte MINAI
-          </button>
-        </div>
 
-        {/* Métriques */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Metric
-            label="Villages sous suivi"
-            value={metrics.totalVillages.toLocaleString('fr-FR')}
-            hint="dans la base ANSADE"
-            color="cyan"
-          />
-          <Metric
-            label="Ravitaillements ce mois"
-            value={metrics.suppliesThisMonth.toString()}
+          {/* Actions primaires */}
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-white border border-black/10 hover:bg-black/[0.03] text-[#1d1d1f] font-medium text-[14px] px-4 py-2.5 rounded-full transition flex items-center gap-1.5"
+            >
+              <span className="text-base leading-none">+</span>
+              Nouveau ravitaillement
+            </button>
+            <button
+              onClick={onOpenMap}
+              className="bg-[#1d1d1f] hover:bg-black text-white font-medium text-[14px] px-4 py-2.5 rounded-full transition flex items-center gap-2"
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 8l7-3 6 3 7-3v13l-7 3-6-3-7 3V8z" />
+                <path d="M9 5v15M15 8v15" />
+              </svg>
+              Ouvrir la cartographie
+            </button>
+          </div>
+        </section>
+
+        {/* ─── MÉTRIQUES ─── */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            label="Ravitaillements 30 j"
+            value={metrics.recentCount.toString()}
             hint="opérations enregistrées"
-            color="emerald"
           />
-          <Metric
-            label="Population couverte"
-            value={metrics.populationCovered.toLocaleString('fr-FR')}
-            hint="habitants desservis"
-            color="amber"
+          <MetricCard
+            label="Volume distribué"
+            value={metrics.totalVolume.toLocaleString('fr-FR')}
+            hint="m³ d'eau · 30 derniers jours"
           />
-        </div>
+          <MetricCard
+            label="Population desservie"
+            value={metrics.populationReached.toLocaleString('fr-FR')}
+            hint="habitants · 30 derniers jours"
+          />
+          <MetricCard
+            label="Partenaires actifs"
+            value={metrics.uniqueOrgs.toString()}
+            hint="ONG & institutions"
+          />
+        </section>
 
-        {/* Deux colonnes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* ─── Derniers ravitaillements ─── */}
-          <section className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div>
-                <h2 className="font-bold text-slate-900">Derniers ravitaillements</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  5 opérations les plus récentes
-                </p>
-              </div>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="text-xs font-semibold text-cyan-700 hover:text-cyan-900 bg-cyan-50 hover:bg-cyan-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
-              >
-                <span className="text-base leading-none">+</span> Ajouter un ravitaillement
-              </button>
-            </div>
-            <div className="divide-y divide-slate-100">
-              {loadingSupplies ? (
-                <div className="p-6 text-sm text-slate-500 text-center">
-                  Chargement…
-                </div>
-              ) : supplies.length === 0 ? (
-                <div className="p-6 text-sm text-slate-500 text-center">
-                  Aucun ravitaillement enregistré.
-                  <br />
-                  Utilise le bouton ci-dessus pour en créer un.
-                </div>
-              ) : (
-                supplies.map((s) => <SupplyRow key={s.id} supply={s} />)
-              )}
-            </div>
-          </section>
-
-          {/* ─── Prochains villages en alerte ─── */}
-          <section className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100">
-              <h2 className="font-bold text-slate-900">Prochains villages en alerte</h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Priorités absolues à ravitailler — trié par urgence
+        {/* ─── ACTIVITÉ RÉCENTE ─── */}
+        <section>
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-[22px] font-bold text-[#1d1d1f] tracking-tight">
+                Activité récente
+              </h2>
+              <p className="text-[13px] text-[#6e6e73] mt-0.5">
+                Ravitaillements enregistrés par les organisations partenaires
               </p>
             </div>
-            <div className="divide-y divide-slate-100">
-              {upcoming.length === 0 ? (
-                <div className="p-6 text-sm text-slate-500 text-center">
-                  Chargement des priorités ANSADE…
-                </div>
-              ) : (
-                upcoming.map((v) => (
-                  <UpcomingRow key={v.village.id} ev={v} onView={onOpenMap} />
-                ))
-              )}
+            {/* Filter tabs */}
+            <div className="flex items-center gap-1 bg-black/[0.04] p-1 rounded-full">
+              <FilterTab
+                active={orgFilter === 'all'}
+                onClick={() => setOrgFilter('all')}
+                label="Toutes"
+                count={supplies.length}
+              />
+              <FilterTab
+                active={orgFilter === 'mine'}
+                onClick={() => setOrgFilter('mine')}
+                label={organization}
+                count={mineCount}
+              />
             </div>
-          </section>
-        </div>
+          </div>
+
+          <div className="bg-white border border-black/5 rounded-2xl overflow-hidden divide-y divide-black/[0.06]">
+            {loadingSupplies ? (
+              <EmptyRow>Chargement de l'activité…</EmptyRow>
+            ) : filteredSupplies.length === 0 ? (
+              <EmptyRow>
+                {orgFilter === 'mine'
+                  ? `Aucun ravitaillement enregistré par ${organization}. Ajoutez-en un avec le bouton en haut à droite.`
+                  : 'Aucune activité récente.'}
+              </EmptyRow>
+            ) : (
+              filteredSupplies.slice(0, 10).map((s) => <SupplyRow key={s.id} supply={s} isMine={s.organization === organization} />)
+            )}
+          </div>
+        </section>
+
+        {/* ─── VILLAGES EN ATTENTE ─── */}
+        <section>
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-[22px] font-bold text-[#1d1d1f] tracking-tight">
+                Villages en attente
+              </h2>
+              <p className="text-[13px] text-[#6e6e73] mt-0.5">
+                Priorités absolues à ravitailler · triées par urgence
+              </p>
+            </div>
+            <button
+              onClick={onOpenMap}
+              className="text-[13px] text-[#0071e3] hover:text-[#0077ed] font-medium flex items-center gap-1"
+            >
+              Voir sur la carte
+              <span aria-hidden>→</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {upcoming.map((v) => (
+              <UpcomingCard key={v.village.id} ev={v} onView={onOpenMap} />
+            ))}
+          </div>
+        </section>
 
         {/* Footer */}
-        <p className="text-slate-400 text-xs text-center pt-4">
-          MINAI · Plateforme d'intelligence géospatiale · Données ANSADE RGPH-5 ·
-          UNICEF · Banque Mondiale
+        <p className="text-[12px] text-[#86868b] text-center pt-8 pb-4">
+          MINAI · Plateforme d'intelligence géospatiale
+          <br />
+          Données ANSADE RGPH-5 · UNICEF · Banque Mondiale
         </p>
       </main>
 
@@ -273,110 +325,179 @@ export default function DashboardPage({ user, villageEvals, onOpenMap, onSignOut
   )
 }
 
-// ─── Sous-composants ──────────────────────────────────────────────────
+// ─── Sous-composants ─────────────────────────────────────────────────
 
-function Metric({
+function MetricCard({ label, value, hint }: { label: string; value: string; hint: string }) {
+  return (
+    <div className="bg-white border border-black/5 rounded-2xl p-5 hover:shadow-md hover:shadow-black/[0.03] transition">
+      <div className="text-[11px] uppercase tracking-wider font-semibold text-[#6e6e73]">
+        {label}
+      </div>
+      <div className="text-[32px] font-bold text-[#1d1d1f] tracking-tight mt-1.5 leading-none">
+        {value}
+      </div>
+      <div className="text-[12px] text-[#86868b] mt-2">{hint}</div>
+    </div>
+  )
+}
+
+function FilterTab({
+  active,
+  onClick,
   label,
-  value,
-  hint,
-  color,
+  count,
 }: {
+  active: boolean
+  onClick: () => void
   label: string
-  value: string
-  hint: string
-  color: 'cyan' | 'emerald' | 'amber'
+  count: number
 }) {
-  const bg = {
-    cyan: 'from-cyan-500/10 to-cyan-500/0',
-    emerald: 'from-emerald-500/10 to-emerald-500/0',
-    amber: 'from-amber-500/10 to-amber-500/0',
-  }[color]
-  const accent = {
-    cyan: 'text-cyan-600',
-    emerald: 'text-emerald-600',
-    amber: 'text-amber-600',
-  }[color]
   return (
-    <div
-      className={`bg-white rounded-2xl border border-slate-200 p-5 relative overflow-hidden`}
+    <button
+      onClick={onClick}
+      className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium transition flex items-center gap-1.5 ${
+        active
+          ? 'bg-white text-[#1d1d1f] shadow-sm'
+          : 'text-[#6e6e73] hover:text-[#1d1d1f]'
+      }`}
     >
-      <div className={`absolute inset-0 bg-gradient-to-br ${bg} pointer-events-none`} />
-      <div className="relative">
-        <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-500">
-          {label}
-        </div>
-        <div className={`text-3xl font-bold ${accent} mt-1.5`}>{value}</div>
-        <div className="text-xs text-slate-500 mt-1">{hint}</div>
-      </div>
-    </div>
+      {label}
+      <span
+        className={`text-[11px] px-1.5 py-0.5 rounded-full ${
+          active ? 'bg-black/[0.06] text-[#1d1d1f]' : 'text-[#86868b]'
+        }`}
+      >
+        {count}
+      </span>
+    </button>
   )
 }
 
-function SupplyRow({ supply }: { supply: Supply }) {
-  const colors = SUPPLY_STATUS_COLORS[supply.status]
+function SupplyRow({ supply, isMine }: { supply: Supply; isMine: boolean }) {
+  const status = STATUS_META[supply.status]
+  const orgMeta = ORG_TYPE_META[supply.organization_type]
+
   return (
-    <div className="px-5 py-3 hover:bg-slate-50 transition">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="font-semibold text-sm text-slate-900 truncate">
+    <div className="px-5 py-4 hover:bg-black/[0.02] transition flex items-center gap-4">
+      {/* Statut dot */}
+      <div className={`w-2 h-2 rounded-full shrink-0 ${
+        supply.status === 'delivered' ? 'bg-emerald-500' :
+        supply.status === 'in_progress' ? 'bg-amber-500' : 'bg-red-500'
+      }`} />
+
+      {/* Village + wilaya */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-semibold text-[15px] text-[#1d1d1f]">
             {supply.village_name}
-          </div>
-          <div className="text-xs text-slate-500 mt-0.5">
-            {supply.village_wilaya} · {formatDate(supply.supply_date)} ·{' '}
-            {supply.quantity_m3.toLocaleString('fr-FR')} m³
-          </div>
+          </span>
+          <span className="text-[13px] text-[#6e6e73]">·</span>
+          <span className="text-[13px] text-[#6e6e73]">{supply.village_wilaya}</span>
+          {isMine && (
+            <span className="text-[10px] uppercase tracking-wider font-bold text-cyan-700 bg-cyan-50 px-1.5 py-0.5 rounded">
+              Vous
+            </span>
+          )}
         </div>
-        <span
-          className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded shrink-0 ${colors.bg} ${colors.text} inline-flex items-center gap-1.5`}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
-          {SUPPLY_STATUS_LABELS[supply.status]}
-        </span>
+        {supply.notes && (
+          <div className="text-[12px] text-[#86868b] mt-0.5 truncate">
+            {supply.notes}
+          </div>
+        )}
       </div>
-      {supply.notes && (
-        <div className="text-xs text-slate-500 mt-1.5 italic truncate">
-          {supply.notes}
+
+      {/* Organisation */}
+      <div className="hidden md:block text-right shrink-0 min-w-[160px]">
+        <div className={`text-[13px] font-medium ${orgMeta.color}`}>
+          {supply.organization}
         </div>
-      )}
+        <div className="text-[10px] uppercase tracking-wider text-[#86868b] mt-0.5">
+          {orgMeta.label}
+        </div>
+      </div>
+
+      {/* Quantité */}
+      <div className="hidden sm:block text-right shrink-0 min-w-[70px]">
+        <div className="text-[14px] font-semibold text-[#1d1d1f] tabular-nums">
+          {Number(supply.quantity_m3).toLocaleString('fr-FR')} m³
+        </div>
+      </div>
+
+      {/* Date */}
+      <div className="text-right shrink-0 min-w-[80px]">
+        <div className="text-[12px] text-[#6e6e73]">
+          {formatRelativeDate(supply.supply_date)}
+        </div>
+      </div>
+
+      {/* Statut badge (mobile fallback) */}
+      <div className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded shrink-0 ${status.bg} ${status.color} sm:hidden`}>
+        {status.label}
+      </div>
     </div>
   )
 }
 
-function UpcomingRow({ ev, onView }: { ev: VillageEval; onView: () => void }) {
+function UpcomingCard({ ev, onView }: { ev: VillageEval; onView: () => void }) {
   const statusColor = villageStatusColor(ev.status)
   const wilayaName =
     MAURITANIA_REGIONS.find((r) => r.id === ev.village.wilayaId)?.name ??
     ev.village.wilayaId
+
   return (
-    <div className="px-5 py-3 hover:bg-slate-50 transition group">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="font-semibold text-sm text-slate-900 truncate">
+    <button
+      onClick={onView}
+      className="text-left bg-white border border-black/5 rounded-2xl p-4 hover:shadow-md hover:shadow-black/[0.03] hover:border-black/10 transition group"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold text-[15px] text-[#1d1d1f] truncate">
             {ev.village.name}
           </div>
-          <div className="text-xs text-slate-500 mt-0.5">
-            {wilayaName} · {ev.village.population.toLocaleString('fr-FR')} hab. ·{' '}
-            {ev.distanceToWaterKm.toFixed(1)} km du point d'eau
+          <div className="text-[12px] text-[#6e6e73] mt-0.5">{wilayaName}</div>
+        </div>
+        <span
+          className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded shrink-0"
+          style={{
+            background: `${statusColor}22`,
+            color: statusColor,
+          }}
+        >
+          {villageStatusLabel(ev.status)}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-black/5">
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-[#86868b]">
+            Population
+          </div>
+          <div className="text-[14px] font-semibold text-[#1d1d1f] tabular-nums mt-0.5">
+            {ev.village.population.toLocaleString('fr-FR')}
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span
-            className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded"
-            style={{
-              background: `${statusColor}22`,
-              color: statusColor,
-            }}
-          >
-            {villageStatusLabel(ev.status)}
-          </span>
-          <button
-            onClick={onView}
-            className="text-[11px] font-semibold text-slate-500 hover:text-slate-900 opacity-0 group-hover:opacity-100 transition"
-          >
-            Planifier convoi →
-          </button>
+        <div>
+          <div className="text-[10px] uppercase tracking-wider text-[#86868b]">
+            Point d'eau
+          </div>
+          <div className="text-[14px] font-semibold text-[#1d1d1f] tabular-nums mt-0.5">
+            {ev.distanceToWaterKm.toFixed(1)} km
+          </div>
         </div>
       </div>
+
+      <div className="text-[12px] text-[#0071e3] font-medium mt-3 opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
+        Planifier un ravitaillement
+        <span aria-hidden>→</span>
+      </div>
+    </button>
+  )
+}
+
+function EmptyRow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-5 py-10 text-[13px] text-[#86868b] text-center">
+      {children}
     </div>
   )
 }
@@ -389,11 +510,20 @@ function getInitials(name: string): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
 }
 
-function formatDate(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+function formatToday(): string {
+  return new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
   })
+}
+
+function formatRelativeDate(iso: string): string {
+  const d = new Date(iso)
+  const diff = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24))
+  if (diff === 0) return "Aujourd'hui"
+  if (diff === 1) return 'Hier'
+  if (diff < 7) return `Il y a ${diff} j`
+  if (diff < 30) return `Il y a ${Math.floor(diff / 7)} sem`
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 }

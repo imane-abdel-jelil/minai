@@ -32,7 +32,7 @@ const IMG = {
 export default function LandingPage({ onEnter, onUnderstand }: Props) {
   return (
     <div className="bg-white text-[#1d1d1f] overflow-x-hidden font-sans antialiased">
-      <Nav onEnter={onEnter} onUnderstand={onUnderstand} onSignIn={onEnter} />
+      <Nav onSignIn={onEnter} onUnderstand={onUnderstand} />
       <Hero onEnter={onEnter} onUnderstand={onUnderstand} />
       <HeroImage />
       <ContextSection />
@@ -95,13 +95,11 @@ function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Nav({
-  onEnter,
-  onUnderstand,
   onSignIn,
+  onUnderstand,
 }: {
-  onEnter: () => void
-  onUnderstand: () => void
   onSignIn: () => void
+  onUnderstand: () => void
 }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
@@ -129,21 +127,12 @@ function Nav({
 
           <div className="hidden md:flex items-center gap-3">
             <LanguageSwitch />
-            {/* Bouton Se connecter — accès direct au portail partenaires */}
+            {/* Bouton unique : accès au portail partenaires */}
             <button
               onClick={onSignIn}
-              className="text-[13px] text-[#1d1d1f] px-3 py-1.5 rounded-full font-medium hover:bg-black/5 transition flex items-center gap-1.5"
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
-              </svg>
-              Se connecter
-            </button>
-            <button
-              onClick={onEnter}
               className="text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
             >
-              {t('Voir la cartographie →')}
+              Se connecter
             </button>
           </div>
 
@@ -183,15 +172,9 @@ function Nav({
               </div>
               <button
                 onClick={() => { close(); onSignIn() }}
-                className="mt-3 border border-[#1d1d1f]/20 text-[#1d1d1f] py-3 rounded-full font-medium hover:bg-black/5 transition"
+                className="mt-3 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
               >
                 Se connecter
-              </button>
-              <button
-                onClick={() => { close(); onEnter() }}
-                className="mt-2 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
-              >
-                {t('Voir la cartographie →')}
               </button>
             </div>
           </div>

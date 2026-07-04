@@ -185,17 +185,6 @@ export default function AuthPage({ onBackToLanding }: Props) {
                   ? 'Se connecter'
                   : 'Créer mon compte partenaire'}
             </button>
-
-            {mode === 'signin' && (
-              <div className="text-center pt-2">
-                <div className="text-[11px] text-gray-400 uppercase tracking-wider">
-                  Démo pour investisseurs
-                </div>
-                <div className="text-xs text-gray-500 mt-1 font-mono">
-                  demo@water4all.org · Pitch2026!
-                </div>
-              </div>
-            )}
           </form>
         </div>
 
