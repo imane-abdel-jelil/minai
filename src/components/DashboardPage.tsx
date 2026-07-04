@@ -22,6 +22,7 @@ import type { VillageEval } from '../lib/villages'
 import { statusColor as villageStatusColor, statusLabel as villageStatusLabel } from '../lib/villages'
 import { MAURITANIA_REGIONS } from '../data/mauritania-regions'
 import AddSupplyModal from './AddSupplyModal'
+import SuppliesMapCard from './SuppliesMapCard'
 
 interface Props {
   user: User
@@ -229,6 +230,13 @@ export default function DashboardPage({ user, villageEvals, onOpenMap, onSignOut
             hint="ONG & institutions"
           />
         </section>
+
+        {/* ─── CARTE INTERACTIVE DES RAVITAILLEMENTS ─── */}
+        <SuppliesMapCard
+          supplies={supplies}
+          villageEvals={villageEvals}
+          organization={organization}
+        />
 
         {/* ─── ACTIVITÉ RÉCENTE ─── */}
         <section>
