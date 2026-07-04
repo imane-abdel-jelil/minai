@@ -233,7 +233,7 @@ function Hero({ onEnter, onUnderstand }: { onEnter: () => void; onUnderstand: ()
               onClick={onEnter}
               className="bg-[#1d1d1f] text-white px-7 py-3 rounded-full font-medium hover:bg-black transition"
             >
-              {t('Voir la cartographie')}
+              Se connecter
             </button>
             <a
               href="#collaboration"
@@ -838,7 +838,7 @@ function CollaborationSection({ onEnter }: { onEnter: () => void }) {
                 onClick={onEnter}
                 className="bg-[#1d1d1f] text-white px-7 py-3 rounded-full font-medium hover:bg-black transition text-center"
               >
-                {t('Visualiser les zones prioritaires')}
+                Se connecter au portail
               </button>
               <a
                 href="mailto:imaneahmedou1@gmail.com?subject=Collaboration%20MINAI"

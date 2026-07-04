@@ -153,7 +153,7 @@ function Nav({
               onClick={onEnterMap}
               className="text-[13px] bg-[#1d1d1f] text-white px-4 py-1.5 rounded-full font-medium hover:bg-black transition"
             >
-              {t('Voir la cartographie →')}
+              Se connecter
             </button>
           </div>
 
@@ -193,7 +193,7 @@ function Nav({
                 onClick={() => { close(); onEnterMap() }}
                 className="mt-3 bg-[#1d1d1f] text-white py-3 rounded-full font-medium"
               >
-                {t('Voir la cartographie →')}
+                Se connecter
               </button>
             </div>
           </div>
@@ -479,7 +479,7 @@ function Beat6Decision({ onEnterMap }: { onEnterMap: () => void }) {
               onClick={onEnterMap}
               className="mt-8 bg-white text-[#1d1d1f] px-7 py-3 rounded-full font-medium hover:bg-white/90 transition inline-flex items-center gap-2"
             >
-              {t('Voir la cartographie')}
+              Se connecter
               <span aria-hidden>→</span>
             </button>
           </div>
