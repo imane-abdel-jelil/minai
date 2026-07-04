@@ -67,7 +67,7 @@ export function DonutChart({
         cy={cy}
         r={radius}
         fill="none"
-        stroke="rgba(255,255,255,0.05)"
+        stroke="rgba(15,23,42,0.06)"
         strokeWidth={thickness}
       />
       {arcs}
@@ -87,7 +87,7 @@ interface LineChartPoint {
 export function LineChart({
   points,
   height = 180,
-  color = '#10b981',
+  color = '#0ea5e9',
 }: {
   points: LineChartPoint[]
   height?: number
@@ -160,13 +160,13 @@ export function LineChart({
             x2={width - paddingRight}
             y1={t.y}
             y2={t.y}
-            stroke="rgba(255,255,255,0.04)"
+            stroke="rgba(15,23,42,0.06)"
             strokeDasharray="2 3"
           />
           <text
             x={paddingLeft - 8}
             y={t.y + 3}
-            fill="rgba(255,255,255,0.35)"
+            fill="rgba(15,23,42,0.4)"
             fontSize="10"
             textAnchor="end"
           >
@@ -181,7 +181,7 @@ export function LineChart({
           key={i}
           x={l.x}
           y={height - 8}
-          fill="rgba(255,255,255,0.4)"
+          fill="rgba(15,23,42,0.45)"
           fontSize="11"
           textAnchor="middle"
         >
@@ -240,21 +240,21 @@ export function TopVillagesList({
     <div className="space-y-3">
       {items.map((item, i) => (
         <div key={i} className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-300 text-[11px] font-bold flex items-center justify-center shrink-0 border border-emerald-500/20">
+          <div className="w-6 h-6 rounded-full bg-sky-100 text-sky-700 text-[11px] font-bold flex items-center justify-center shrink-0 border border-sky-200">
             {i + 1}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-white text-[13px] font-medium truncate">
+            <div className="text-slate-900 text-[13px] font-medium truncate">
               {item.name}
             </div>
-            <div className="mt-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div className="mt-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
+                className="h-full bg-gradient-to-r from-sky-500 to-sky-400 rounded-full"
                 style={{ width: `${(item.value / maxV) * 100}%` }}
               />
             </div>
           </div>
-          <div className="text-white/70 text-[13px] font-semibold tabular-nums shrink-0">
+          <div className="text-slate-700 text-[13px] font-semibold tabular-nums shrink-0">
             {item.value.toLocaleString('fr-FR')} {unit}
           </div>
         </div>

@@ -31,15 +31,17 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 // ─── Metadata visuelle ───────────────────────────────────────────────
 
 const STATUS_MAPBOX_COLOR: Record<Supply['status'], string> = {
-  delivered: '#10b981',    // emerald-500
+  delivered: '#0ea5e9',    // sky-500 (blue = livré)
   in_progress: '#f59e0b',  // amber-500
   delayed: '#ef4444',      // red-500
+  planned: '#8b5cf6',      // violet-500 (planifié)
 }
 
 const STATUS_META: Record<Supply['status'], { label: string; color: string }> = {
-  delivered:   { label: 'Livré',    color: '#10b981' },
+  delivered:   { label: 'Livré',    color: '#0ea5e9' },
   in_progress: { label: 'En cours', color: '#f59e0b' },
   delayed:     { label: 'Reporté',  color: '#ef4444' },
+  planned:     { label: 'Planifié', color: '#8b5cf6' },
 }
 
 type Filter = 'all' | Supply['status']
@@ -99,9 +101,10 @@ export default function SuppliesMapCard({ supplies, villageEvals, organization }
   const counts = useMemo(() => {
     return {
       all: supplies.length,
-      delivered: supplies.filter((s) => s.status === 'delivered').length,
+      delivered:   supplies.filter((s) => s.status === 'delivered').length,
+      planned:     supplies.filter((s) => s.status === 'planned').length,
       in_progress: supplies.filter((s) => s.status === 'in_progress').length,
-      delayed: supplies.filter((s) => s.status === 'delayed').length,
+      delayed:     supplies.filter((s) => s.status === 'delayed').length,
     }
   }, [supplies])
 
@@ -145,15 +148,15 @@ export default function SuppliesMapCard({ supplies, villageEvals, organization }
   }
 
   return (
-    <section className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden shadow-lg shadow-slate-900/20">
-      {/* Header sombre */}
-      <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-white/5 bg-gradient-to-b from-slate-900/60 to-slate-950">
+    <section className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      {/* Header clair */}
+      <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-100 bg-gradient-to-b from-sky-50/50 to-white">
         <div>
-          <h2 className="text-white font-semibold text-[16px] tracking-tight flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <h2 className="text-slate-900 font-semibold text-[16px] tracking-tight flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
             Carte des ravitaillements
           </h2>
-          <p className="text-white/50 text-[12px] mt-0.5">
+          <p className="text-slate-500 text-[12px] mt-0.5">
             Survolez un point pour voir le détail de l'opération
           </p>
         </div>
@@ -166,7 +169,7 @@ export default function SuppliesMapCard({ supplies, villageEvals, organization }
           ref={mapRef}
           mapboxAccessToken={MAPBOX_TOKEN}
           initialViewState={{ longitude: -10, latitude: 19.5, zoom: 4.7 }}
-          mapStyle="mapbox://styles/mapbox/dark-v11"
+          mapStyle="mapbox://styles/mapbox/light-v11"
           interactiveLayerIds={['supplies-dot']}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
@@ -242,8 +245,9 @@ export default function SuppliesMapCard({ supplies, villageEvals, organization }
         )}
 
         {/* Légende en bas-gauche */}
-        <div className="absolute bottom-4 left-4 flex items-center gap-3 bg-slate-900/70 backdrop-blur-md border border-white/10 rounded-full px-3.5 py-1.5 shadow-lg">
+        <div className="absolute bottom-4 left-4 flex items-center gap-3 bg-white/90 backdrop-blur-md border border-slate-200 rounded-full px-3.5 py-1.5 shadow-md">
           <LegendItem color={STATUS_META.delivered.color} label="Livré" />
+          <LegendItem color={STATUS_META.planned.color} label="Planifié" />
           <LegendItem color={STATUS_META.in_progress.color} label="En cours" />
           <LegendItem color={STATUS_META.delayed.color} label="Reporté" />
         </div>
@@ -259,12 +263,12 @@ function FilterBar({
   value,
   onChange,
 }: {
-  counts: { all: number; delivered: number; in_progress: number; delayed: number }
+  counts: { all: number; delivered: number; planned: number; in_progress: number; delayed: number }
   value: Filter
   onChange: (f: Filter) => void
 }) {
   return (
-    <div className="flex items-center gap-1 bg-white/5 border border-white/5 p-1 rounded-full">
+    <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 p-1 rounded-full">
       <FilterPill
         active={value === 'all'}
         onClick={() => onChange('all')}
@@ -277,6 +281,13 @@ function FilterBar({
         label="Livrés"
         count={counts.delivered}
         dotColor={STATUS_META.delivered.color}
+      />
+      <FilterPill
+        active={value === 'planned'}
+        onClick={() => onChange('planned')}
+        label="Planifiés"
+        count={counts.planned}
+        dotColor={STATUS_META.planned.color}
       />
       <FilterPill
         active={value === 'in_progress'}
@@ -312,15 +323,15 @@ function FilterPill({
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1 rounded-full text-[12px] font-medium transition flex items-center gap-1.5 ${
+      className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition flex items-center gap-1.5 ${
         active
-          ? 'bg-white text-slate-900'
-          : 'text-white/60 hover:text-white'
+          ? 'bg-white text-slate-900 shadow-sm'
+          : 'text-slate-500 hover:text-slate-900'
       }`}
     >
       {dotColor && <span className="w-1.5 h-1.5 rounded-full" style={{ background: dotColor }} />}
       {label}
-      <span className={`text-[10px] tabular-nums ${active ? 'text-slate-500' : 'text-white/40'}`}>
+      <span className={`text-[10px] tabular-nums ${active ? 'text-slate-400' : 'text-slate-400'}`}>
         {count}
       </span>
     </button>
@@ -331,7 +342,7 @@ function LegendItem({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
       <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-      <span className="text-white/70 text-[11px]">{label}</span>
+      <span className="text-slate-600 text-[11px]">{label}</span>
     </div>
   )
 }
@@ -340,13 +351,13 @@ function SupplyTooltip({ supply, organization }: { supply: Supply; organization:
   const status = STATUS_META[supply.status]
   const isMine = supply.organization === organization
   return (
-    <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl p-3.5 w-[240px]">
+    <div className="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-xl shadow-2xl p-3.5 w-[240px]">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-white font-semibold text-[14px] truncate">
+          <div className="text-slate-900 font-semibold text-[14px] truncate">
             {supply.village_name}
           </div>
-          <div className="text-white/50 text-[11px]">{supply.village_wilaya}</div>
+          <div className="text-slate-500 text-[11px]">{supply.village_wilaya}</div>
         </div>
         <span
           className="text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded shrink-0"
@@ -358,7 +369,7 @@ function SupplyTooltip({ supply, organization }: { supply: Supply; organization:
           {status.label}
         </span>
       </div>
-      <div className="mt-2.5 pt-2.5 border-t border-white/5 space-y-1">
+      <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1">
         <TooltipRow label="Quantité" value={`${Number(supply.quantity_m3).toLocaleString('fr-FR')} m³`} />
         <TooltipRow label="Date" value={formatDate(supply.supply_date)} />
         <TooltipRow
@@ -368,7 +379,7 @@ function SupplyTooltip({ supply, organization }: { supply: Supply; organization:
         />
       </div>
       {supply.notes && (
-        <div className="mt-2.5 pt-2.5 border-t border-white/5 text-[11px] text-white/60 italic">
+        <div className="mt-2.5 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 italic">
           {supply.notes}
         </div>
       )}
@@ -387,10 +398,10 @@ function TooltipRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-white/40 text-[11px] uppercase tracking-wider">{label}</span>
+      <span className="text-slate-400 text-[11px] uppercase tracking-wider">{label}</span>
       <span
         className={`text-[12px] font-medium tabular-nums ${
-          highlight ? 'text-cyan-300' : 'text-white'
+          highlight ? 'text-sky-600' : 'text-slate-900'
         }`}
       >
         {value}

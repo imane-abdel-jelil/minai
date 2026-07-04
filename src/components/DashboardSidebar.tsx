@@ -1,11 +1,7 @@
 /**
  * DashboardSidebar — barre latérale de navigation du dashboard MINAI.
  *
- * Design dark futuriste :
- *   - Logo MINAI + baseline "AI for Water Access"
- *   - Liens de navigation avec icônes (Dashboard actif surligné)
- *   - Card "Impact global" au bas avec 3 KPIs agrégés toutes orgs
- *   - Bouton "Voir le rapport complet →"
+ * Palette blanc + bleu ciel (sky-500). Design institutionnel épuré.
  */
 
 export type NavKey =
@@ -27,8 +23,6 @@ interface Props {
     villagesCovered: number
   }
 }
-
-// ─── Icônes SVG (stroke, cohérentes avec Lucide) ──────────────────────
 
 const Icons: Record<NavKey, React.ReactElement> = {
   dashboard: (
@@ -87,17 +81,17 @@ const NAV_ITEMS: { key: NavKey; label: string }[] = [
 
 export default function DashboardSidebar({ active, onNavigate, globalImpact }: Props) {
   return (
-    <aside className="hidden md:flex flex-col w-[240px] shrink-0 bg-[#0b1116] border-r border-white/5 h-screen sticky top-0">
+    <aside className="hidden md:flex flex-col w-[240px] shrink-0 bg-white border-r border-slate-200 h-screen sticky top-0">
       {/* ── Logo ── */}
-      <div className="px-5 py-6 flex items-center gap-3 border-b border-white/5">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+      <div className="px-5 py-6 flex items-center gap-3 border-b border-slate-100">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shadow-md shadow-sky-500/20">
           <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6 text-white" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2.5c-4 5-7 8.5-7 12a7 7 0 0 0 14 0c0-3.5-3-7-7-12z" />
           </svg>
         </div>
         <div>
-          <div className="text-white font-bold text-[18px] leading-none tracking-tight">MINAI</div>
-          <div className="text-white/40 text-[10px] mt-1 tracking-wide">AI for Water Access</div>
+          <div className="text-slate-900 font-bold text-[18px] leading-none tracking-tight">MINAI</div>
+          <div className="text-slate-400 text-[10px] mt-1 tracking-wide">AI for Water Access</div>
         </div>
       </div>
 
@@ -115,10 +109,10 @@ export default function DashboardSidebar({ active, onNavigate, globalImpact }: P
       </nav>
 
       {/* ── Impact global ── */}
-      <div className="p-4 border-t border-white/5">
-        <div className="bg-gradient-to-br from-[#0f1a15] to-[#0b1116] border border-emerald-500/10 rounded-xl p-4">
-          <div className="text-white/80 text-[13px] font-semibold">Impact global</div>
-          <div className="text-white/40 text-[10px] uppercase tracking-wider mb-3">
+      <div className="p-4 border-t border-slate-100">
+        <div className="bg-gradient-to-br from-sky-50 to-white border border-sky-200 rounded-xl p-4">
+          <div className="text-slate-900 text-[13px] font-semibold">Impact global</div>
+          <div className="text-slate-400 text-[10px] uppercase tracking-wider mb-3">
             toutes organisations
           </div>
           <div className="space-y-2.5">
@@ -128,7 +122,7 @@ export default function DashboardSidebar({ active, onNavigate, globalImpact }: P
           </div>
           <button
             onClick={() => onNavigate('reports')}
-            className="mt-4 w-full bg-white/5 hover:bg-white/10 text-white/80 text-[11px] font-medium py-2 rounded-lg transition flex items-center justify-center gap-1"
+            className="mt-4 w-full bg-white hover:bg-sky-50 border border-sky-200 text-sky-700 text-[11px] font-medium py-2 rounded-lg transition flex items-center justify-center gap-1"
           >
             Voir le rapport complet
             <span aria-hidden>→</span>
@@ -138,8 +132,6 @@ export default function DashboardSidebar({ active, onNavigate, globalImpact }: P
     </aside>
   )
 }
-
-// ─── Sous-composants ─────────────────────────────────────────────────
 
 function NavButton({
   active,
@@ -157,11 +149,11 @@ function NavButton({
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium transition ${
         active
-          ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shadow-sm'
-          : 'text-white/60 hover:text-white hover:bg-white/5 border border-transparent'
+          ? 'bg-sky-50 text-sky-700 border border-sky-200'
+          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
       }`}
     >
-      <span className={`w-4 h-4 shrink-0 ${active ? 'text-emerald-300' : ''}`}>{icon}</span>
+      <span className={`w-4 h-4 shrink-0 ${active ? 'text-sky-600' : ''}`}>{icon}</span>
       <span>{label}</span>
     </button>
   )
@@ -170,8 +162,8 @@ function NavButton({
 function ImpactRow({ value, label }: { value: string; label: string }) {
   return (
     <div>
-      <div className="text-emerald-400 text-[18px] font-bold leading-none tabular-nums">{value}</div>
-      <div className="text-white/40 text-[10px] mt-1">{label}</div>
+      <div className="text-sky-700 text-[18px] font-bold leading-none tabular-nums">{value}</div>
+      <div className="text-slate-500 text-[10px] mt-1">{label}</div>
     </div>
   )
 }

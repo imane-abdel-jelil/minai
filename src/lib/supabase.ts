@@ -51,7 +51,7 @@ export interface Supply {
   village_wilaya: string
   quantity_m3: number
   supply_date: string // ISO date
-  status: 'delivered' | 'in_progress' | 'delayed'
+  status: 'delivered' | 'in_progress' | 'delayed' | 'planned'
   notes: string | null
   created_by: string | null
   created_at: string
@@ -66,7 +66,7 @@ export interface SupplyInsert {
   village_wilaya: string
   quantity_m3: number
   supply_date: string
-  status: 'delivered' | 'in_progress' | 'delayed'
+  status: 'delivered' | 'in_progress' | 'delayed' | 'planned'
   notes?: string | null
 }
 

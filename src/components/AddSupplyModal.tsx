@@ -219,19 +219,19 @@ export default function AddSupplyModal({
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Statut
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['delivered', 'in_progress', 'delayed'] as const).map((s) => (
+            <div className="grid grid-cols-4 gap-2">
+              {(['delivered', 'planned', 'in_progress', 'delayed'] as const).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setStatus(s)}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition ${
+                  className={`px-2 py-2 rounded-lg text-[11px] font-semibold border transition ${
                     status === s
                       ? 'bg-slate-900 text-white border-slate-900'
                       : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
                   }`}
                 >
-                  {s === 'delivered' ? 'Livré' : s === 'in_progress' ? 'En cours' : 'Reporté'}
+                  {s === 'delivered' ? 'Livré' : s === 'planned' ? 'Planifié' : s === 'in_progress' ? 'En cours' : 'Reporté'}
                 </button>
               ))}
             </div>
