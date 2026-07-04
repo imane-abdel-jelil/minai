@@ -4,6 +4,8 @@ import Sidebar from './components/Sidebar'
 import LandingPage from './components/LandingPage'
 import UnderstandingPage from './components/UnderstandingPage'
 import VillageInfoOverlay from './components/VillageInfoOverlay'
+import AuthPage from './components/AuthPage'
+import DashboardPage from './components/DashboardPage'
 import type { Region } from './data/mauritania-regions'
 import type { Village } from './data/mauritania-villages'
 import { loadAnsadeVillages, topPrioritiesAnsade } from './lib/ansade-villages'
@@ -11,6 +13,7 @@ import type { WilayaStats } from './lib/geo'
 import { useI18n } from './lib/i18n'
 import { computeAllScores } from './lib/score'
 import type { VillageEval } from './lib/villages'
+import { useAuth } from './hooks/useAuth'
 
 const ALL_KINDS = [
   'drinking_water',
@@ -23,21 +26,21 @@ const ALL_KINDS = [
   'other',
 ] as const
 
-type View = 'landing' | 'understanding' | 'map'
+type View = 'landing' | 'understanding' | 'auth' | 'dashboard' | 'map'
 
-// Lit le paramètre ?view= depuis l'URL pour que les liens vers la
-// carte ouverts dans un nouvel onglet démarrent directement sur la
-// carte, sans repasser par la landing.
+// Lit le paramètre ?view= depuis l'URL pour que les liens ouverts
+// dans un nouvel onglet démarrent directement sur la bonne vue.
 function getInitialView(): View {
   if (typeof window === 'undefined') return 'landing'
   const params = new URLSearchParams(window.location.search)
   const v = params.get('view')
-  if (v === 'map' || v === 'understanding') return v
+  if (v === 'map' || v === 'understanding' || v === 'dashboard' || v === 'auth') return v
   return 'landing'
 }
 
 export default function App() {
   const { t } = useI18n()
+  const { user, loading: authLoading, signOut } = useAuth()
   // Vue par défaut = landing page. Si l'URL contient ?view=map (lien
   // ouvert dans un nouvel onglet), on démarre directement sur la carte.
   const [view, setView] = useState<View>(getInitialView)
@@ -155,16 +158,26 @@ export default function App() {
     [handleVillageSelect],
   )
 
-  // Ouvre la carte dans un nouvel onglet : la landing reste accessible
-  // dans l'onglet d'origine et l'utilisateur peut fermer la carte pour
-  // revenir en arrière facilement. Le nouvel onglet lit ?view=map au
-  // chargement et démarre directement sur la carte.
+  // "Voir la carte" depuis la landing : ouvre l'écran de connexion
+  // dans un nouvel onglet. Après login → dashboard → puis carte.
+  // Comme ça la landing reste accessible dans l'onglet d'origine.
   const enterMap = () => {
     if (typeof window !== 'undefined') {
-      const url = `${window.location.pathname}?view=map`
+      // Si déjà connecté, on saute directement au dashboard.
+      const target = user ? 'dashboard' : 'auth'
+      const url = `${window.location.pathname}?view=${target}`
       window.open(url, '_blank', 'noopener,noreferrer')
     }
   }
+  // Ouverture directe de la carte depuis le dashboard (même onglet).
+  const openMapFromDashboard = useCallback(() => {
+    setView('map')
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+  }, [])
+  const handleSignOut = useCallback(async () => {
+    await signOut()
+    setView('auth')
+  }, [signOut])
   const goToUnderstanding = () => {
     setView('understanding')
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
@@ -212,6 +225,32 @@ export default function App() {
         onBack={goToLanding}
         onEnterMap={enterMap}
         onJumpToSection={goToLandingSection}
+      />
+    )
+  }
+
+  // ─── Auth wall ─────────────────────────────────────────────────
+  // Les vues 'auth', 'dashboard' et 'map' nécessitent d'être connecté.
+  // Tant que le check session est en cours on montre un spinner rapide.
+  if (authLoading) {
+    return (
+      <div className="min-h-screen w-screen bg-slate-900 flex items-center justify-center text-white">
+        <div className="text-sm opacity-60">Chargement…</div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <AuthPage onBackToLanding={goToLanding} />
+  }
+
+  if (view === 'auth' || view === 'dashboard') {
+    return (
+      <DashboardPage
+        user={user}
+        villageEvals={villageEvals}
+        onOpenMap={openMapFromDashboard}
+        onSignOut={handleSignOut}
       />
     )
   }
@@ -272,13 +311,13 @@ export default function App() {
       )}
 
       <main className="flex-1 relative bg-amber-900">
-        {/* Bouton retour landing — coin haut-gauche */}
+        {/* Bouton retour dashboard — coin haut-gauche */}
         <button
-          onClick={() => setView('landing')}
+          onClick={() => setView('dashboard')}
           className="absolute top-4 left-4 z-20 bg-slate-900/80 backdrop-blur-md text-white text-xs font-medium px-3.5 py-2 rounded-full border border-white/15 hover:bg-slate-900 hover:border-white/30 transition shadow-lg"
-          title={t("Retour à la page d'accueil")}
+          title="Retour au tableau de bord"
         >
-          {t('← MINAI')}
+          ← Tableau de bord
         </button>
 
         {/* Bouton hamburger mobile pour ouvrir la sidebar — coin haut-droit */}
