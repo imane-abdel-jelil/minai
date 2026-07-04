@@ -11,7 +11,8 @@
     "fetch:wilayas": "node scripts/fetch-wilayas.mjs",
     "fetch:wpdx": "node scripts/fetch-wpdx.mjs",
     "fetch:ansade": "node scripts/fetch-ansade.mjs",
-    "compute:scores": "node scripts/compute-village-scores.mjs"
+    "compute:scores": "node scripts/compute-village-scores.mjs",
+    "import:geodata": "node scripts/import-geodata-to-supabase.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
