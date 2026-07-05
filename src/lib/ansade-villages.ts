@@ -20,6 +20,11 @@ import type { Village } from '../data/mauritania-villages'
 import { supabase } from './supabase'
 import { statusColor, statusLabel, type VillageEval, type VillageStatus } from './villages'
 
+// Flag qui contrôle la source des données géo. Par défaut = false
+// (fichiers statiques), défini dans .env sur VITE_USE_SUPABASE_GEODATA.
+const USE_SUPABASE_GEODATA =
+  import.meta.env.VITE_USE_SUPABASE_GEODATA === 'true'
+
 // ─── Mapping wilaya ANSADE → wilayaId MINAI ───────────────────────────────
 
 function normName(s: string): string {
@@ -190,8 +195,11 @@ export async function loadAnsadeVillages(): Promise<{
   villages: VillageEval[]
   geojson: GeoJSON.FeatureCollection
 }> {
-  // ─── Path 1 : Supabase (source primaire) ─────────────────────────
-  if (supabase) {
+  // ─── Path 1 : Supabase (uniquement si le flag est activé) ────────
+  // Sans ce garde-fou, le loader tentait Supabase même quand le flag
+  // était false — ce qui pouvait renvoyer un scoring différent (OSM
+  // inclus) ou un format inattendu qui cassait le parsing des dots.
+  if (USE_SUPABASE_GEODATA && supabase) {
     try {
       const { data, error } = await supabase
         .from('villages_geojson')
