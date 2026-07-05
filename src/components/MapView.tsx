@@ -3,6 +3,11 @@ import Map, { Source, Layer, Popup, NavigationControl, ScaleControl, type MapLay
 import { MAURITANIA_REGIONS, type Region } from '../data/mauritania-regions'
 import type { Village } from '../data/mauritania-villages'
 import { findWilayaId } from '../lib/ansade-villages'
+import {
+  loadWaterPointsFromSupabase,
+  loadWilayasFromSupabase,
+  USE_SUPABASE_GEODATA,
+} from '../lib/geodata-supabase'
 import { countPointsByWilaya, type WilayaStats } from '../lib/geo'
 import type { ComputedScore } from '../lib/score'
 import type { VillageEval } from '../lib/villages'
@@ -236,28 +241,65 @@ function MapView({
       .catch((e) => console.warn('Pas de fichier priorités :', e))
   }, [])
 
-  // Charger les points d'eau réels depuis public/data/water-points.geojson
+  // Points d'eau : source primaire = Supabase (vue water_points_geojson,
+  // filtrée sur source='OSM' pour matcher le comportement historique),
+  // fallback fichier statique water-points.geojson.
   useEffect(() => {
-    fetch('/data/water-points.geojson')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
+    async function loadWaterPoints() {
+      if (USE_SUPABASE_GEODATA) {
+        try {
+          const data = await loadWaterPointsFromSupabase(['OSM'])
+          if (data.features.length > 0) {
+            setWaterPoints(data)
+            onWaterPointsReady?.(data)
+            return
+          }
+          console.warn('[water_points] Supabase vide, fallback fichier statique.')
+        } catch (e) {
+          console.warn('[water_points] Erreur Supabase, fallback fichier statique :', e)
+        }
+      }
+      try {
+        const r = await fetch('/data/water-points.geojson')
+        if (!r.ok) return
+        const data = await r.json()
         if (data) {
           setWaterPoints(data)
           onWaterPointsReady?.(data)
         }
-      })
-      .catch((e) => console.warn('Pas de données points d’eau :', e))
+      } catch (e) {
+        console.warn("Pas de données points d'eau :", e)
+      }
+    }
+    loadWaterPoints()
   }, [onWaterPointsReady])
 
-  // Charger les polygones bruts des wilayas — l'enrichissement (score/couleur live)
-  // est fait dans un useMemo en aval pour réagir aux changements de scores.
+  // Wilayas : source primaire = Supabase (vue wilayas_geojson), fallback
+  // fichier statique wilayas.geojson.
   useEffect(() => {
-    fetch('/data/wilayas.geojson')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
+    async function loadWilayas() {
+      if (USE_SUPABASE_GEODATA) {
+        try {
+          const data = await loadWilayasFromSupabase()
+          if (data.features.length > 0) {
+            setWilayasGeo(data)
+            return
+          }
+          console.warn('[wilayas] Supabase vide, fallback fichier statique.')
+        } catch (e) {
+          console.warn('[wilayas] Erreur Supabase, fallback fichier statique :', e)
+        }
+      }
+      try {
+        const r = await fetch('/data/wilayas.geojson')
+        if (!r.ok) return
+        const data = await r.json()
         if (data && data.features) setWilayasGeo(data)
-      })
-      .catch((e) => console.warn('Pas de polygones wilayas :', e))
+      } catch (e) {
+        console.warn('Pas de polygones wilayas :', e)
+      }
+    }
+    loadWilayas()
   }, [])
 
   // Wilayas enrichies = polygones bruts + score live + couleur dérivée + regionId.
