@@ -212,7 +212,7 @@ export default function DashboardPage({ user, villageEvals, onOpenMap, onSignOut
       <div className="flex min-h-screen w-screen bg-[#f8fafc]" style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif' }}>
         <DashboardSidebar active="reports" onNavigate={handleNav} globalImpact={globalImpact} />
         <div className="flex-1 min-w-0 overflow-x-hidden">
-          <ReportsPage />
+          <ReportsPage user={user} />
         </div>
       </div>
     )

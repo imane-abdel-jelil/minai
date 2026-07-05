@@ -11,6 +11,8 @@
  * brièvement les tuiles satellite. L'overlay HTML pur n'a aucune
  * interaction avec Mapbox — affichage 100% stable.
  */
+import { useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { MAURITANIA_REGIONS } from '../data/mauritania-regions'
 import type { Village } from '../data/mauritania-villages'
 import {
@@ -19,14 +21,26 @@ import {
   statusLabel,
   type VillageEval,
 } from '../lib/villages'
+import SignalIssueModal from './SignalIssueModal'
 
 interface Props {
   village: Village | null
   ev: VillageEval | null
   onClose: () => void
+  /** Utilisateur connecté (permet le bouton 'Signaler une erreur'). */
+  user?: User | null
+  organization?: string
 }
 
-export default function VillageInfoOverlay({ village, ev, onClose }: Props) {
+export default function VillageInfoOverlay({
+  village,
+  ev,
+  onClose,
+  user,
+  organization,
+}: Props) {
+  const [showSignal, setShowSignal] = useState(false)
+
   if (!village || !ev) return null
 
   const wilayaName =
@@ -94,7 +108,42 @@ export default function VillageInfoOverlay({ village, ev, onClose }: Props) {
         >
           Intervention {recommendedDelay(ev.status)}
         </div>
+
+        {/* Bouton signaler une erreur — disponible seulement si connecté */}
+        {user && (
+          <button
+            onClick={() => setShowSignal(true)}
+            className="w-full flex items-center justify-center gap-2 text-[11px] font-medium text-slate-600 hover:text-sky-700 border border-slate-200 hover:border-sky-300 hover:bg-sky-50 rounded-lg py-2 transition"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="w-3.5 h-3.5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            </svg>
+            Signaler une erreur sur ce village
+          </button>
+        )}
       </div>
+
+      {/* Modal Signaler une erreur */}
+      {showSignal && user && (
+        <SignalIssueModal
+          village={village}
+          villageEval={ev}
+          user={user}
+          organization={organization || 'Water4All'}
+          onClose={() => setShowSignal(false)}
+          onCreated={() => {
+            setShowSignal(false)
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -1,23 +1,20 @@
 /**
  * ReportsPage — page 'Rapports & export' du dashboard MINAI.
  *
- * Contient un rapport type fictif détaillé d'un ravitaillement conjoint
- * pour illustrer ce qu'un rapport MINAI peut contenir :
- *   - Résumé exécutif
- *   - Contexte et zone d'intervention
- *   - Méthodologie et logistique
- *   - Résultats chiffrés + population impactée
- *   - Coordination inter-organisations
- *   - Témoignage de terrain
- *   - Recommandations pour prochaines interventions
- *   - Bloc téléchargement (fictif)
- *
- * Sert de démonstration pédagogique aux investisseurs et partenaires
- * institutionnels lors d'un pitch : voici à quoi ressemble un rapport
- * MINAI généré à partir d'un ravitaillement enregistré sur la plateforme.
+ * Deux sections :
+ *   1. Inbox des corrections proposées par les partenaires
+ *      (Chantier 2 · crowdsourcing) — vue admin avec approuver/rejeter
+ *   2. Rapport-type fictif détaillé d'un ravitaillement conjoint
+ *      (démo pédagogique pitch)
  */
+import type { User } from '@supabase/supabase-js'
+import VillageUpdatesInbox from './VillageUpdatesInbox'
 
-export default function ReportsPage() {
+interface Props {
+  user?: User | null
+}
+
+export default function ReportsPage({ user }: Props = {}) {
   return (
     <div className="max-w-[1100px] mx-auto px-6 lg:px-8 py-6 space-y-6">
       {/* ── Header ── */}
@@ -45,6 +42,9 @@ export default function ReportsPage() {
           </button>
         </div>
       </header>
+
+      {/* ── Chantier 2 · Corrections crowdsourcées à valider ── */}
+      {user && <VillageUpdatesInbox user={user} />}
 
       {/* ── Autres rapports disponibles (aperçu latéral) ── */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-3">

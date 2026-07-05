@@ -70,6 +70,58 @@ export interface SupplyInsert {
   notes?: string | null
 }
 
+// ─── Types Chantier 2 · village_updates ─────────────────────────────
+
+export type VillageUpdateField =
+  | 'name_fr'
+  | 'name_ar'
+  | 'population_total'
+  | 'distance_to_water_km'
+  | 'reseau_aep'
+  | 'coordinates'
+  | 'moughataa'
+  | 'commune'
+  | 'other'
+
+export type VillageUpdateStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'implemented'
+
+/** Un signalement de correction envoyé par un partenaire. */
+export interface VillageUpdate {
+  id: string
+  village_code_localite: number
+  village_name: string
+  village_wilaya: string | null
+  field_name: VillageUpdateField
+  current_value: string | null
+  proposed_value: string
+  reason: string | null
+  submitted_by: string
+  submitted_by_organization: string | null
+  submitted_at: string
+  status: VillageUpdateStatus
+  reviewed_by: string | null
+  review_notes: string | null
+  reviewed_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+/** Payload pour créer un nouveau signalement. */
+export interface VillageUpdateInsert {
+  village_code_localite: number
+  village_name: string
+  village_wilaya?: string | null
+  field_name: VillageUpdateField
+  current_value?: string | null
+  proposed_value: string
+  reason?: string | null
+  submitted_by_organization?: string | null
+}
+
 // ─── Types DB héritées (schema.sql legacy — non utilisées activement) ──
 
 export interface DbRegion {

@@ -357,6 +357,11 @@ export default function App() {
           village={selectedVillage}
           ev={selectedVillageEval}
           onClose={handleCloseOverlay}
+          user={user}
+          organization={
+            (user?.user_metadata?.organization as string | undefined) ||
+            'Water4All'
+          }
         />
       </main>
     </div>
