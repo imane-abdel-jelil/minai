@@ -29,20 +29,20 @@ const CONVOY_ORIGIN_NAME = 'Nouakchott'
 const DRILL_HALO_PAINT = {
   'circle-radius': [
     'interpolate', ['linear'], ['zoom'],
-    5, 5, 8, 7, 12, 11,
+    5, 6, 6, 7, 8, 9, 12, 14,
   ],
   'circle-color': '#ffffff',
-  'circle-opacity': 0.85,
+  'circle-opacity': 0.9,
 } as never
 const DRILL_MARKERS_PAINT = {
   'circle-radius': [
     'interpolate', ['linear'], ['zoom'],
-    5, 3.5, 8, 5, 12, 9,
+    5, 4, 6, 5, 8, 6.5, 12, 11,
   ],
   'circle-color': ['get', 'color'],
   'circle-stroke-color': ['get', 'color'],
   'circle-stroke-width': 1,
-  'circle-opacity': 0.95,
+  'circle-opacity': 0.98,
 } as never
 const DRILL_LABEL_LAYOUT = {
   'text-field': ['get', 'nom_fr'],
@@ -66,15 +66,15 @@ const DRILL_LABEL_PAINT = {
 const ALL_VILLAGES_PAINT = {
   'circle-radius': [
     'interpolate', ['linear'], ['zoom'],
-    4, 1.8,
-    6, 2.5,
-    9, 4,
-    12, 6,
+    4, 2.5,
+    6, 3.5,
+    9, 5.5,
+    12, 8,
   ],
   'circle-color': ['get', 'color'],
-  'circle-opacity': 0.7,
-  'circle-stroke-width': 0.5,
-  'circle-stroke-color': 'rgba(255,255,255,0.6)',
+  'circle-opacity': 0.85,
+  'circle-stroke-width': 0.8,
+  'circle-stroke-color': 'rgba(255,255,255,0.8)',
 } as never
 
 interface Props {
@@ -422,11 +422,18 @@ function MapView({
     }
   }, [convoyTarget])
 
-  // easeTo désactivé : tout mouvement de caméra force Mapbox à
-  // recharger des tuiles, ce qui peut faire apparaître le fond du body
-  // pendant la transition. La carte reste statique au clic d'une wilaya
-  // ou d'un village. L'utilisateur peut zoomer manuellement avec la
-  // molette de la souris ou les boutons +/- de la NavigationControl.
+  // Quand une wilaya est cliquée, on zoome dessus pour bien voir tous
+  // ses villages ANSADE (à zoom 5.1 par défaut ils sont invisibles).
+  // easeTo est plus léger que flyTo et évite les glitches de tuiles.
+  useEffect(() => {
+    if (!selectedWilaya || !mapRef.current) return
+    const map = mapRef.current
+    map.easeTo({
+      center: selectedWilaya.center,
+      zoom: 6.8,
+      duration: 900,
+    })
+  }, [selectedWilaya])
 
   // ─── Filtres Mapbox memoizés ────────────────────────────────────────
   // Sans ça, le filter literal est recréé à chaque render et Mapbox

@@ -36,7 +36,11 @@ function normName(s: string): string {
  *  features du fichier priorities côté client). */
 export function findWilayaId(ansadeWilaya: string | undefined | null): string | null {
   if (!ansadeWilaya) return null
-  const target = normName(ansadeWilaya)
+  let target = normName(ansadeWilaya)
+  // Corrections OCR : ANSADE écrit certains noms avec un 'l' minuscule
+  // qui ressemble à un 'i' → typo systématique dans les données brutes.
+  //   'lnchiri' → 'inchiri' (i minuscule → i majuscule normalisé)
+  target = target.replace(/^lnchiri$/, 'inchiri')
   if (target.includes('nouakchott')) return 'NKC'
   const exact = MAURITANIA_REGIONS.find((r) => normName(r.name) === target)
   if (exact) return exact.id
