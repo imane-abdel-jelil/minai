@@ -59,6 +59,24 @@ const DRILL_LABEL_PAINT = {
   'text-halo-width': 1.4,
 } as never
 
+// Petits dots pour TOUS les 8447 villages ANSADE en vue nationale.
+// Couleur par statut (rouge=critical, orange=risk, vert=ok). Taille
+// discrète pour ne pas concurrencer les gros pins TOP-30 et success
+// qui se superposent par-dessus.
+const ALL_VILLAGES_PAINT = {
+  'circle-radius': [
+    'interpolate', ['linear'], ['zoom'],
+    4, 1.8,
+    6, 2.5,
+    9, 4,
+    12, 6,
+  ],
+  'circle-color': ['get', 'color'],
+  'circle-opacity': 0.7,
+  'circle-stroke-width': 0.5,
+  'circle-stroke-color': 'rgba(255,255,255,0.6)',
+} as never
+
 interface Props {
   onRegionClick: (region: Region | null) => void
   /** Optionnel 2ème argument : VillageEval construit à partir des
@@ -501,7 +519,9 @@ function MapView({
       interactiveLayerIds={[
         // Pins TOP-30 (rouges) + success (verts) en vue nationale,
         // dots drill-down sinon.
-        ...(showVillages && !selectedWilaya ? ['village-top', 'village-success'] : []),
+        ...(showVillages && !selectedWilaya
+          ? ['village-top', 'village-success', 'village-all-dots']
+          : []),
         ...(showVillages && selectedWilaya ? ['village-markers'] : []),
         ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
@@ -526,7 +546,8 @@ function MapView({
         if (feature.layer && (
           feature.layer.id === 'village-markers' ||
           feature.layer.id === 'village-top' ||
-          feature.layer.id === 'village-success'
+          feature.layer.id === 'village-success' ||
+          feature.layer.id === 'village-all-dots'
         )) {
           // Click village ANSADE (pin TOP-30, success, ou dot drill-down)
           // → ouvre le détail dans la sidebar. On reconstruit un objet
@@ -752,10 +773,58 @@ function MapView({
         </Source>
       )}
 
+      {/* ───── Source villages ANSADE complet (8447 features) ─────
+           Placé AVANT le source priorities pour que les gros pins TOP-30
+           et success rendus par-dessus recouvrent bien les petits dots. */}
+      {showVillages && villagesEnriched && (
+        <Source id="villages" type="geojson" data={villagesEnriched}>
+          {/* En vue nationale : tous les 8447 villages en petits dots
+              colorés par statut (rouge critical, orange risk, vert ok).
+              Cliquables individuellement pour ouvrir le panneau détails. */}
+          {!selectedWilaya && (
+            <Layer
+              id="village-all-dots"
+              source="villages"
+              type="circle"
+              paint={ALL_VILLAGES_PAINT}
+            />
+          )}
+          {/* En drill-down : villages de la wilaya sélectionnée uniquement,
+              avec halo blanc, dot coloré et label lisible dès zoom 7. */}
+          {selectedWilaya && (
+            <>
+              <Layer
+                id="village-drill-halo"
+                source="villages"
+                type="circle"
+                filter={drillFilter ?? undefined}
+                paint={DRILL_HALO_PAINT}
+              />
+              <Layer
+                id="village-markers"
+                source="villages"
+                type="circle"
+                filter={drillFilter ?? undefined}
+                paint={DRILL_MARKERS_PAINT}
+              />
+              <Layer
+                id="village-drill-label"
+                source="villages"
+                type="symbol"
+                filter={drillFilter ?? undefined}
+                layout={DRILL_LABEL_LAYOUT}
+                paint={DRILL_LABEL_PAINT}
+                minzoom={7}
+              />
+            </>
+          )}
+        </Source>
+      )}
+
       {/* ───── Villages prioritaires (30 rouges) + success (24 verts) ─────
-           Petits points discrets sans labels, sans rings — pour ne pas
-           concurrencer visuellement les clusters d'eau bleus. L'utilisateur
-           clique pour ouvrir le détail dans la sidebar. */}
+           Rendus APRÈS le source villages pour être stackés au-dessus
+           des petits dots. Les pins TOP-30 et success restent
+           visuellement dominants et cliquables au premier plan. */}
       {showVillages && !selectedWilaya && priorities && (
         <Source id="priorities" type="geojson" data={priorities}>
           {/* Halo blanc commun (sous TOUS les pins) — fait ressortir le
@@ -809,42 +878,6 @@ function MapView({
               'circle-opacity': 1,
             }}
           />
-        </Source>
-      )}
-
-      {/* ───── Villages drill-down (TOUS les villages d'une wilaya) ─────
-           Source qui charge le gros fichier (8 Mo) — utilisé seulement
-           quand une wilaya est sélectionnée. Lazy-load par défaut. */}
-      {showVillages && villagesEnriched && (
-        <Source id="villages" type="geojson" data={villagesEnriched}>
-          {/* Dots drill-down : tous les villages d'une wilaya */}
-          {selectedWilaya && (
-            <>
-              <Layer
-                id="village-drill-halo"
-                source="villages"
-                type="circle"
-                filter={drillFilter ?? undefined}
-                paint={DRILL_HALO_PAINT}
-              />
-              <Layer
-                id="village-markers"
-                source="villages"
-                type="circle"
-                filter={drillFilter ?? undefined}
-                paint={DRILL_MARKERS_PAINT}
-              />
-              <Layer
-                id="village-drill-label"
-                source="villages"
-                type="symbol"
-                filter={drillFilter ?? undefined}
-                layout={DRILL_LABEL_LAYOUT}
-                paint={DRILL_LABEL_PAINT}
-                minzoom={7}
-              />
-            </>
-          )}
         </Source>
       )}
 
