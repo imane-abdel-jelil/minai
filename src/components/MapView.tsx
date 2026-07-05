@@ -59,23 +59,6 @@ const DRILL_LABEL_PAINT = {
   'text-halo-width': 1.4,
 } as never
 
-// Petits dots pour TOUS les 8447 villages ANSADE en vue nationale.
-// Couleur par statut (rouge=critical, orange=risk, vert=ok). Taille
-// discrète pour ne pas concurrencer les gros pins TOP-30 et success
-// qui se superposent par-dessus.
-const ALL_VILLAGES_PAINT = {
-  'circle-radius': [
-    'interpolate', ['linear'], ['zoom'],
-    4, 2.5,
-    6, 3.5,
-    9, 5.5,
-    12, 8,
-  ],
-  'circle-color': ['get', 'color'],
-  'circle-opacity': 0.85,
-  'circle-stroke-width': 0.8,
-  'circle-stroke-color': 'rgba(255,255,255,0.8)',
-} as never
 
 interface Props {
   onRegionClick: (region: Region | null) => void
@@ -526,9 +509,7 @@ function MapView({
       interactiveLayerIds={[
         // Pins TOP-30 (rouges) + success (verts) en vue nationale,
         // dots drill-down sinon.
-        ...(showVillages && !selectedWilaya
-          ? ['village-top', 'village-success', 'village-all-dots']
-          : []),
+        ...(showVillages && !selectedWilaya ? ['village-top', 'village-success'] : []),
         ...(showVillages && selectedWilaya ? ['village-markers'] : []),
         ...(showWilayas && enrichedWilayas ? ['wilaya-fill'] : []),
         ...(showWaterPoints && filteredWaterPoints ? ['water-unclustered'] : []),
@@ -553,8 +534,7 @@ function MapView({
         if (feature.layer && (
           feature.layer.id === 'village-markers' ||
           feature.layer.id === 'village-top' ||
-          feature.layer.id === 'village-success' ||
-          feature.layer.id === 'village-all-dots'
+          feature.layer.id === 'village-success'
         )) {
           // Click village ANSADE (pin TOP-30, success, ou dot drill-down)
           // → ouvre le détail dans la sidebar. On reconstruit un objet
@@ -780,51 +760,37 @@ function MapView({
         </Source>
       )}
 
-      {/* ───── Source villages ANSADE complet (8447 features) ─────
-           Placé AVANT le source priorities pour que les gros pins TOP-30
-           et success rendus par-dessus recouvrent bien les petits dots. */}
-      {showVillages && villagesEnriched && (
+      {/* ───── Source villages ANSADE (uniquement drill-down) ─────
+           En vue nationale : rien affiché (seulement les 30+24 pins
+           prioritaires du source `priorities` en dessous). En drill-down
+           (wilaya cliquée) : tous les villages de cette wilaya en dots
+           colorés avec halo + label. Design pensé pour ne pas noyer
+           l'utilisateur sous 8447 points en vue nationale. */}
+      {showVillages && villagesEnriched && selectedWilaya && (
         <Source id="villages" type="geojson" data={villagesEnriched}>
-          {/* En vue nationale : tous les 8447 villages en petits dots
-              colorés par statut (rouge critical, orange risk, vert ok).
-              Cliquables individuellement pour ouvrir le panneau détails. */}
-          {!selectedWilaya && (
-            <Layer
-              id="village-all-dots"
-              source="villages"
-              type="circle"
-              paint={ALL_VILLAGES_PAINT}
-            />
-          )}
-          {/* En drill-down : villages de la wilaya sélectionnée uniquement,
-              avec halo blanc, dot coloré et label lisible dès zoom 7. */}
-          {selectedWilaya && (
-            <>
-              <Layer
-                id="village-drill-halo"
-                source="villages"
-                type="circle"
-                filter={drillFilter ?? undefined}
-                paint={DRILL_HALO_PAINT}
-              />
-              <Layer
-                id="village-markers"
-                source="villages"
-                type="circle"
-                filter={drillFilter ?? undefined}
-                paint={DRILL_MARKERS_PAINT}
-              />
-              <Layer
-                id="village-drill-label"
-                source="villages"
-                type="symbol"
-                filter={drillFilter ?? undefined}
-                layout={DRILL_LABEL_LAYOUT}
-                paint={DRILL_LABEL_PAINT}
-                minzoom={7}
-              />
-            </>
-          )}
+          <Layer
+            id="village-drill-halo"
+            source="villages"
+            type="circle"
+            filter={drillFilter ?? undefined}
+            paint={DRILL_HALO_PAINT}
+          />
+          <Layer
+            id="village-markers"
+            source="villages"
+            type="circle"
+            filter={drillFilter ?? undefined}
+            paint={DRILL_MARKERS_PAINT}
+          />
+          <Layer
+            id="village-drill-label"
+            source="villages"
+            type="symbol"
+            filter={drillFilter ?? undefined}
+            layout={DRILL_LABEL_LAYOUT}
+            paint={DRILL_LABEL_PAINT}
+            minzoom={7}
+          />
         </Source>
       )}
 
