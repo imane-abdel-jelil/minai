@@ -279,6 +279,17 @@ function UpdateRow({
             </div>
           )}
 
+          {/* Erreur d'auto-apply éventuelle (review_notes) */}
+          {update.review_notes && update.review_notes.includes('AUTO-APPLY ÉCHOUÉ') && (
+            <div className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded mt-2 px-2 py-1.5">
+              <span className="font-semibold">Auto-application impossible :</span>{' '}
+              <span className="font-mono">
+                {update.review_notes.split('AUTO-APPLY ÉCHOUÉ')[1]?.split(']')[1]?.trim() ||
+                  update.review_notes}
+              </span>
+            </div>
+          )}
+
           {/* Meta */}
           <div className="text-[11px] text-slate-500 mt-2.5">
             Proposé par{' '}
@@ -289,6 +300,14 @@ function UpdateRow({
             {update.reviewed_at && (
               <>
                 {' '}· revu {formatRelativeDate(update.reviewed_at)}
+              </>
+            )}
+            {update.implemented_at && (
+              <>
+                {' '}·{' '}
+                <span className="text-sky-700 font-medium">
+                  appliqué automatiquement {formatRelativeDate(update.implemented_at)}
+                </span>
               </>
             )}
           </div>

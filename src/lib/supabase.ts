@@ -106,6 +106,10 @@ export interface VillageUpdate {
   reviewed_by: string | null
   review_notes: string | null
   reviewed_at: string | null
+  /** Timestamp de l'application automatique à la table villages
+   *  (set par le trigger apply_village_update). Null tant que la
+   *  correction n'a pas été implémentée. */
+  implemented_at: string | null
   created_at: string
   updated_at: string
 }
