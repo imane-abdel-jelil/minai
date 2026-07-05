@@ -4,6 +4,7 @@ import { MAURITANIA_REGIONS, type Region } from '../data/mauritania-regions'
 import type { Village } from '../data/mauritania-villages'
 import { findWilayaId } from '../lib/ansade-villages'
 import {
+  loadPrioritiesFromSupabase,
   loadWaterPointsFromSupabase,
   loadWilayasFromSupabase,
   USE_SUPABASE_GEODATA,
@@ -215,14 +216,27 @@ function MapView({
   // réseau lent. → garantit que les pins s'affichent TOUT DE SUITE.
   const [priorities, setPriorities] = useState<GeoJSON.FeatureCollection | null>(null)
 
+  // Priorités : source primaire = Supabase (54 rows via or filter),
+  // fallback fichier statique villages-priorities.geojson.
   useEffect(() => {
-    fetch('/data/villages-priorities.geojson')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: GeoJSON.FeatureCollection | null) => {
+    async function loadPriorities() {
+      if (USE_SUPABASE_GEODATA) {
+        try {
+          const data = await loadPrioritiesFromSupabase()
+          if (data.features.length > 0) {
+            setPriorities(data)
+            return
+          }
+          console.warn('[priorities] Supabase vide, fallback fichier statique.')
+        } catch (e) {
+          console.warn('[priorities] Erreur Supabase, fallback fichier statique :', e)
+        }
+      }
+      try {
+        const r = await fetch('/data/villages-priorities.geojson')
+        if (!r.ok) return
+        const data = (await r.json()) as GeoJSON.FeatureCollection | null
         if (!data) return
-        // Enrichit chaque feature avec wilayaId — sinon le clic sur un
-        // pin construit un village avec wilayaId='' qui empêche
-        // l'affichage correct du panneau dans la sidebar.
         const enriched: GeoJSON.FeatureCollection = {
           ...data,
           features: data.features.map((f) => {
@@ -237,8 +251,11 @@ function MapView({
           }),
         }
         setPriorities(enriched)
-      })
-      .catch((e) => console.warn('Pas de fichier priorités :', e))
+      } catch (e) {
+        console.warn('Pas de fichier priorités :', e)
+      }
+    }
+    loadPriorities()
   }, [])
 
   // Points d'eau : source primaire = Supabase (vue water_points_geojson,

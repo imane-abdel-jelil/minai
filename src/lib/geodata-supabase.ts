@@ -338,6 +338,66 @@ export async function loadWaterPointsFromSupabase(
   return { type: 'FeatureCollection', features }
 }
 
+// ─── Priorities (fichier léger, 54 pins TOP-30 + success stories) ──
+
+/**
+ * Charge uniquement les 54 villages prioritaires (TOP-30 critiques +
+ * 24 success stories) depuis Supabase. Équivalent Supabase du fichier
+ * public/data/villages-priorities.geojson.
+ *
+ * Format de sortie : FeatureCollection avec propriétés enrichies
+ * (wilayaId, nom_fr, is_top_priority, is_success_story) — compatible
+ * avec les couches Mapbox `priority-halo`, `village-top`, `village-success`.
+ */
+export async function loadPrioritiesFromSupabase(): Promise<GeoJSON.FeatureCollection> {
+  if (!supabase) throw new Error('Supabase non configuré')
+
+  const { data, error } = await supabase
+    .from('villages_geojson')
+    .select(VILLAGE_COLUMNS)
+    .or('is_top_priority.eq.true,is_success_story.eq.true')
+    .limit(200) // 30 + 24 = 54 en pratique, marge large
+
+  if (error) throw new Error(`Erreur lecture priorities : ${error.message}`)
+
+  const features: GeoJSON.Feature[] = []
+  for (const row of (data ?? []) as unknown as VillageRow[]) {
+    const geom = parseGeom(row.geom)
+    if (!geom || geom.type !== 'Point') continue
+
+    const wilayaId = row.wilaya_id ?? resolveWilayaId(row.wilaya) ?? ''
+    const status = (row.status ?? 'ok') as VillageStatus
+
+    features.push({
+      type: 'Feature',
+      geometry: geom,
+      properties: {
+        code_localite: row.code_localite,
+        nom_fr: row.name_fr,
+        nom_ar: row.name_ar,
+        wilaya: row.wilaya,
+        wilayaId,
+        moughataa: row.moughataa,
+        commune: row.commune,
+        population_total: row.population_total,
+        reseau_aep: row.reseau_aep ? 'Oui' : 'Non',
+        distance_to_water_km: row.distance_to_water_km,
+        nearest_water_lng: row.nearest_water_lng,
+        nearest_water_lat: row.nearest_water_lat,
+        nearest_water_type: row.nearest_water_type,
+        status,
+        priority_score: row.priority_score,
+        is_top_priority: row.is_top_priority ? 1 : 0,
+        is_success_story: row.is_success_story ? 1 : 0,
+        color: statusColor(status),
+        statusLabel: statusLabel(status),
+      },
+    })
+  }
+
+  return { type: 'FeatureCollection', features }
+}
+
 // ─── Wilayas ─────────────────────────────────────────────────────────
 
 const WILAYA_COLUMNS = ['id', 'name', 'shape_name', 'population', 'capital', 'geom'].join(',')
