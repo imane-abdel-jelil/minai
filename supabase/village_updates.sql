@@ -39,7 +39,10 @@ create table public.village_updates (
   reason                    text,
 
   -- Métadonnées d'audit
-  submitted_by              uuid references auth.users(id) not null,
+  -- submitted_by est nullable pour permettre des seeds démo non
+  -- attribués à un vrai user. Les insertions réelles depuis l'UI sont
+  -- garanties d'avoir un submitted_by = auth.uid() via la policy RLS.
+  submitted_by              uuid references auth.users(id),
   submitted_by_organization text,
   submitted_at              timestamptz not null default now(),
 
